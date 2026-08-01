@@ -1,0 +1,65 @@
+---
+/** RISK GAUGE Model 1 — functional delight island, second instrument from the same bench
+ *  as TINKER-SCOPE (shares its chrome CSS deliberately — same toolkit, different job).
+ *  Job: turn two knobs (Likelihood, Impact), read a real computed risk score/rating/action.
+ *  Score = Likelihood x Impact — the standard 5x5 risk-matrix heuristic used in real
+ *  risk registers, simplified for a two-knob instrument, not a fabricated framework.
+ *  Progressive: static gauge frame without JS; respects prefers-reduced-motion.
+ */
+---
+
+<div class="scope-sticky" id="riskGaugeFloat">
+  <div class="scope-body">
+    <div class="scope-brand">
+      <span class="scope-brand-name">RISK GAUGE</span>
+      <span class="scope-brand-model">Model 1 &nbsp;&bull;&nbsp; 5&times;5 matrix</span>
+    </div>
+
+    <div class="scope-crt-housing">
+      <div class="scope-crt-bezel">
+        <div class="scope-crt-inner">
+          <canvas id="riskGaugeCanvas" width="340" height="340" aria-label="Risk score gauge"
+          ></canvas>
+        </div>
+      </div>
+      <div class="scope-crt-screws" aria-hidden="true">
+        <div class="scope-crt-screw tl"></div>
+        <div class="scope-crt-screw tr"></div>
+        <div class="scope-crt-screw bl"></div>
+        <div class="scope-crt-screw br"></div>
+      </div>
+    </div>
+
+    <div class="scope-panel">
+      <div class="gauge-readout-strip">
+        <div class="gauge-readout-item">
+          <span class="gauge-readout-label">Score</span>
+          <span class="gauge-readout-val" id="gaugeScore">1/25</span>
+        </div>
+        <div class="gauge-readout-item">
+          <span class="gauge-readout-label">Rating</span>
+          <span class="gauge-readout-val gauge-band-low" id="gaugeRating">LOW</span>
+        </div>
+        <div class="gauge-readout-item">
+          <span class="gauge-readout-label">Recommend</span>
+          <span class="gauge-readout-val" id="gaugeAction">Accept</span>
+        </div>
+      </div>
+      <div class="scope-knobs gauge-knobs">
+        <div class="knob" data-knob="likelihood" title="Drag up/down — likelihood, 1–5">
+          <div class="knob-circle" id="knobLikelihood"></div>
+          <div class="knob-label">Likely</div>
+        </div>
+        <div class="knob" data-knob="impact" title="Drag up/down — impact, 1–5">
+          <div class="knob-circle" id="knobImpact"></div>
+          <div class="knob-label">Impact</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initRiskGauge } from '../scripts/risk-gauge';
+  initRiskGauge();
+</script>

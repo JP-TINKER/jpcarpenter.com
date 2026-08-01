@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entries = (await getCollection('projects')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<BaseLayout title="Projects" description="Personal builds unrelated to work — physical and hobby-tech.">
+  <article class="page-main">
+    <h1>Projects</h1>
+    <p>
+      Things built for their own sake, not for work — physical builds and hobby-tech, mixed
+      freely. No evidence-of-competency framing here; that's what Labs is for.
+    </p>
+    {entries.length === 0 && <p>Nothing here yet — check back soon.</p>}
+  </article>
+
+  {
+    entries.length > 0 && (
+      <ul class="bench-list bench-list--projects">
+        {entries.map((entry) => (
+          <li>
+            <a href={`/projects/${entry.id}`}>
+              <span class="bench-list-stamp">{entry.data.date.toISOString().slice(0, 10)}</span>
+              <span class="bench-list-title">
+                {entry.data.title}
+                <span class="bench-list-summary">{entry.data.summary}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>

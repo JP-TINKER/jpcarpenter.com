@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entries = (await getCollection('labs')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<BaseLayout title="Labs" description="Evidence-backed projects from the bench.">
+  <article class="page-main">
+    <h1>Labs</h1>
+    <p>
+      Sparse by design. Entries land here when there is real evidence — not a card grid of
+      placeholders.
+    </p>
+    {entries.length === 0 && <p>More soon.</p>}
+  </article>
+
+  {
+    entries.length > 0 && (
+      <ul class="bench-list bench-list--labs">
+        {entries.map((entry) => (
+          <li>
+            <a href={`/labs/${entry.id}`}>
+              <span class="bench-list-stamp">{entry.data.date.toISOString().slice(0, 10)}</span>
+              <span class="bench-list-title">
+                {entry.data.title}
+                <span class="bench-list-summary">{entry.data.summary}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>

@@ -1,0 +1,112 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionRule from '../components/SectionRule.astro';
+import ExposureGauge from '../components/ExposureGauge.astro';
+import FingerprintTrace from '../components/FingerprintTrace.astro';
+
+// Easy to tweak: the one-line identity claim under the headline.
+const heroIdentity = 'Security and Compliance Analyst. Read what you sign.';
+
+const labsEntries = (await getCollection('labs'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const writingEntries = (await getCollection('writing', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 2);
+
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+<BaseLayout>
+  <section class="site-hero">
+    <div class="site-hero-wood" aria-hidden="true"></div>
+    <div class="site-hero-inner">
+      <div class="site-hero-content">
+        <div class="site-hero-eyebrow">Transmitting from the bench</div>
+        <h1>JP Carpenter<br /><em>I Tinker</em></h1>
+        <p class="site-hero-description">{heroIdentity}</p>
+        <p class="site-hero-exposure" id="heroExposureLine">
+          This page reads a handful of signals your browser already sends automatically —
+          no clicks needed. See the live reading on the right.
+        </p>
+        <div class="site-hero-cta">
+          <a class="btn-primary" href="/labs">See the Labs</a>
+          <a class="btn-quiet" href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>
+        </div>
+      </div>
+      <ExposureGauge />
+    </div>
+  </section>
+
+  <SectionRule label="From the bench" />
+
+  <ul class="bench-list bench-list--labs">
+    {
+      labsEntries.map((entry) => (
+        <li>
+          <a href={`/labs/${entry.id}`}>
+            <span class="bench-list-stamp">{isoDate(entry.data.date)}</span>
+            <span class="bench-list-title">
+              {entry.data.title}
+              <span class="bench-list-summary">{entry.data.summary}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <SectionRule label="How this page can already tell you apart" />
+
+  <FingerprintTrace />
+
+  <a href="/writing" class="homepage-section-link">
+    <SectionRule label="Writing" />
+  </a>
+
+  {
+    writingEntries.length === 0 ? (
+      <p class="homepage-empty-note">
+        Nothing published yet — check <a href="/writing">/writing</a>.
+      </p>
+    ) : (
+      <ul class="bench-list bench-list--writing">
+        {writingEntries.map((entry) => (
+          <li>
+            <a href={`/writing/${entry.id}`}>
+              <span class="bench-list-stamp">{isoDate(entry.data.date)}</span>
+              <span class="bench-list-title">
+                {entry.data.title}
+                <span class="bench-list-summary">{entry.data.description}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .homepage-section-link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .homepage-section-link:hover {
+    opacity: 0.75;
+  }
+
+  .homepage-empty-note {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+    color: var(--ink-muted);
+  }
+
+  .homepage-empty-note a {
+    color: var(--accent-soft);
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+import '@fontsource/space-grotesk/700.css';
+import '@fontsource/space-mono/400.css';
+import '@fontsource/space-mono/700.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'JP Carpenter',
+  description = 'I Tinker — security, self-hosting, and work from the bench.',
+} = Astro.props;
+
+const pathname = Astro.url.pathname;
+
+// Real build timestamp, baked in at static build time — not decoration, an honest
+// provenance signal (this page was generated on this date, not "live forever" theater).
+const buildDate = new Date().toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title === 'JP Carpenter' ? title : `${title} · JP Carpenter`}</title>
+  </head>
+  <body>
+    <nav class="site-nav" aria-label="Primary">
+      <div class="site-nav-inner">
+        <a class="site-nav-logo" href="/">JP Carpenter</a>
+        <ul class="site-nav-links">
+          <li>
+            <a href="/" aria-current={pathname === '/' ? 'page' : undefined}>Home</a>
+          </li>
+          <li>
+            <a href="/labs" aria-current={pathname.startsWith('/labs') ? 'page' : undefined}
+              >Labs</a
+            >
+          </li>
+          <li>
+            <a
+              href="/projects"
+              aria-current={pathname.startsWith('/projects') ? 'page' : undefined}>Projects</a
+            >
+          </li>
+          <li>
+            <a href="/writing" aria-current={pathname.startsWith('/writing') ? 'page' : undefined}
+              >Writing</a
+            >
+          </li>
+          <li>
+            <a href="/about" aria-current={pathname.startsWith('/about') ? 'page' : undefined}
+              >About</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>JP Carpenter — I Tinker</div>
+        <div>Built {buildDate}</div>
+        <div>
+          <a href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+  @import '../styles/scope.css';
+</style>

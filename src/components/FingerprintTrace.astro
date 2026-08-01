@@ -1,0 +1,87 @@
+---
+/** FINGERPRINT TRACE Model 1 — a real fingerprinting demo run against the visitor
+ *  reading it, not a toy. Canvas/WebGL/Audio probes execute in this browser only;
+ *  the composite result is stored in localStorage (this origin only) so a repeat
+ *  visit can be recognized without a cookie. Nothing here is ever transmitted, and
+ *  the "Forget me" button clears the one thing that gets stored.
+ *  Progressive: without JS, the log stays as static explanatory text; the glossary
+ *  below is static either way.
+ */
+
+const trackers = [
+  {
+    name: 'Third-party cookies',
+    what: 'A small file set by a domain other than the one you\u2019re visiting \u2014 often an ad or analytics network embedded on the page.',
+    why: 'Lets that network recognize you across every site that embeds it, building a browsing history you never agreed to hand over in one place.',
+  },
+  {
+    name: 'Tracking pixels',
+    what: 'An invisible 1\u00d71 image (or similar) that loads from a tracker\u2019s server the moment a page or email opens.',
+    why: 'The request itself \u2014 your IP, timing, device \u2014 is the data. You never see it fire.',
+  },
+  {
+    name: 'Canvas / WebGL / audio fingerprinting',
+    what: 'Rendering text or audio and reading back the exact pixel or waveform output, which varies subtly by GPU, font stack, and OS \u2014 you just saw this above.',
+    why: 'Survives cleared cookies and private browsing. There\u2019s no icon for it and, until now, nothing telling you it happened.',
+  },
+  {
+    name: 'Real-time bidding leakage',
+    what: 'The instant an ad slot loads, your browsing context is broadcast to dozens or hundreds of ad exchanges bidding to show you something.',
+    why: 'Every bidder \u2014 win or lose \u2014 received a copy of that context. There is no way to know how many companies briefly held it.',
+  },
+  {
+    name: 'Session replay scripts',
+    what: 'Analytics tooling that records mouse movement, scrolling, and sometimes keystrokes on a page, then replays your session like a video.',
+    why: 'Often catches form fields, including ones marked \u201cprivate,\u201d depending on how carelessly it was configured.',
+  },
+];
+---
+
+<div class="trace-instrument">
+  <div class="trace-body">
+    <div class="trace-brand">
+      <span class="trace-brand-name">FINGERPRINT TRACE</span>
+      <span class="trace-brand-model">Model 1 &nbsp;&bull;&nbsp; runs once, on load, on you</span>
+    </div>
+
+    <div class="trace-log" id="traceLog" aria-live="polite" role="status">
+      <div class="trace-line">
+        &gt; Enable JavaScript to run this scan — it only reads this browser and stays in it.
+      </div>
+    </div>
+
+    <div class="trace-controls">
+      <button class="trace-forget-btn" id="traceForgetBtn" type="button">
+        Forget me (clear the one thing this stored)
+      </button>
+      <p class="trace-disclosure">
+        Only one thing is ever stored: a short id, under the key <code>bench-fingerprint-demo</code>,
+        in this browser&rsquo;s local storage, for this site only. Nothing is sent to a server —
+        there isn&rsquo;t one to send it to.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="tracker-glossary">
+  <p class="tracker-glossary-intro">
+    None of these ran on this page — the scan above is real, they aren&rsquo;t. This is what the
+    equivalent looks like on a page that doesn&rsquo;t tell you.
+  </p>
+  <dl class="tracker-glossary-list">
+    {
+      trackers.map((t) => (
+        <div class="tracker-glossary-item">
+          <dt>{t.name}</dt>
+          <dd class="tracker-glossary-what">{t.what}</dd>
+          <dd class="tracker-glossary-why">{t.why}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<script>
+  import { initFingerprintTrace } from '../scripts/fingerprint-trace';
+  initFingerprintTrace();
+</script>

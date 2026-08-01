@@ -1,0 +1,56 @@
+---
+/** EXPOSURE GAUGE Model 1 — the hero's one dominant instrument. Third instrument on the
+ *  same chrome as TINKER-SCOPE and RISK GAUGE, but no knobs: it reads real, already-
+ *  passive browser/device signals on load and reports how identifying they are, with
+ *  zero clicks. Nothing computed here is sent anywhere — it runs in this browser and
+ *  stays in this browser.
+ *  Progressive: static gauge frame without JS; respects prefers-reduced-motion.
+ */
+---
+
+<div class="scope-sticky" id="exposureGaugeFloat">
+  <div class="scope-body">
+    <div class="scope-brand">
+      <span class="scope-brand-name">EXPOSURE GAUGE</span>
+      <span class="scope-brand-model">Model 1 &nbsp;&bull;&nbsp; reads automatically</span>
+    </div>
+
+    <div class="scope-crt-housing">
+      <div class="scope-crt-bezel">
+        <div class="scope-crt-inner">
+          <canvas id="exposureCanvas" width="340" height="340" aria-label="Passive exposure gauge"
+          ></canvas>
+        </div>
+      </div>
+      <div class="scope-crt-screws" aria-hidden="true">
+        <div class="scope-crt-screw tl"></div>
+        <div class="scope-crt-screw tr"></div>
+        <div class="scope-crt-screw bl"></div>
+        <div class="scope-crt-screw br"></div>
+      </div>
+    </div>
+
+    <div class="scope-panel">
+      <div class="gauge-readout-strip">
+        <div class="gauge-readout-item">
+          <span class="gauge-readout-label">Signals</span>
+          <span class="gauge-readout-val" id="gaugeScore2">0/8</span>
+        </div>
+        <div class="gauge-readout-item">
+          <span class="gauge-readout-label">Reading</span>
+          <span class="gauge-readout-val gauge-band-low" id="gaugeRating2">LOW</span>
+        </div>
+        <div class="gauge-readout-item">
+          <span class="gauge-readout-label">Note</span>
+          <span class="gauge-readout-val" id="gaugeAction2">—</span>
+        </div>
+      </div>
+      <p class="gauge-detected" id="exposureDetected">Reading what this page can already see&hellip;</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initExposureGauge } from '../scripts/exposure-gauge';
+  initExposureGauge();
+</script>

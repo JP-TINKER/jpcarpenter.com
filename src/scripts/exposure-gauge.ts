@@ -1,0 +1,196 @@
+/** EXPOSURE GAUGE Model 1 — passive instrument, no knobs, no interaction.
+ *  Job: read the real signals any site already receives automatically on page load
+ *  (User-Agent, timezone, language, screen geometry, CPU cores, cookies, DNT/GPC) and
+ *  show how much that combination already reveals — computed once, on load, with
+ *  zero clicks. Nothing here is sent anywhere; it's read and rendered in this browser
+ *  and never leaves it.
+ */
+
+import { getBasicSignals, parseUserAgent } from './browser-signals';
+
+export function initExposureGauge(): void {
+  const canvas = document.getElementById('exposureCanvas') as HTMLCanvasElement | null;
+  const detectedLine = document.getElementById('exposureDetected');
+  const heroLine = document.getElementById('heroExposureLine');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const CX = W / 2;
+  const CY = H / 2;
+  const R = W / 2 - 4;
+
+  const startAngle = (135 * Math.PI) / 180;
+  const sweepAngle = (270 * Math.PI) / 180;
+
+  const { signals, privacyCredits } = getBasicSignals();
+  const rawScore = signals.filter((s) => s.present).length - privacyCredits * 1.5;
+  const maxScore = signals.length;
+  const score = Math.max(0, Math.min(maxScore, rawScore));
+  const targetFraction = score / maxScore;
+
+  let rating: string;
+  let note: string;
+  let band: 'low' | 'medium' | 'high' | 'critical';
+  const pct = targetFraction;
+  if (pct <= 0.3) {
+    rating = 'LOW';
+    note = 'Already fairly quiet';
+    band = 'low';
+  } else if (pct <= 0.6) {
+    rating = 'TYPICAL';
+    note = 'Ordinary for most browsers';
+    band = 'medium';
+  } else if (pct <= 0.85) {
+    rating = 'NOTABLE';
+    note = 'A fairly specific combination';
+    band = 'high';
+  } else {
+    rating = 'DISTINCTIVE';
+    note = 'A highly specific combination';
+    band = 'critical';
+  }
+
+  const { browser, os } = parseUserAgent(navigator.userAgent);
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const lang = navigator.languages?.[0] ?? navigator.language ?? 'unknown locale';
+  const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency}-core` : 'unknown-core';
+
+  const detectedText = `${browser} on ${os} · ${lang} · ${tz} · ${cores} · ${screen.width}\u00d7${screen.height}`;
+
+  const scoreEl = document.getElementById('gaugeScore2');
+  const ratingEl = document.getElementById('gaugeRating2');
+  const noteEl = document.getElementById('gaugeAction2');
+  if (scoreEl) scoreEl.textContent = `${Math.round(score)}/${maxScore}`;
+  if (ratingEl) {
+    ratingEl.textContent = rating;
+    ratingEl.className = `gauge-readout-val gauge-band-${band}`;
+  }
+  if (noteEl) noteEl.textContent = note;
+  if (detectedLine) detectedLine.textContent = `Detected: ${detectedText}`;
+  if (heroLine) {
+    heroLine.textContent = `This page can already see: ${browser} on ${os}, ${tz.split('/').pop()?.replace('_', ' ')}, ${cores} — ${Math.round(score)}/${maxScore} signals, zero clicks.`;
+  }
+
+  let needleFraction = reduceMotion ? targetFraction : 0;
+  let raf = 0;
+
+  const bandColors = ['#5aaa60', '#c8be50', '#dc8c3c', '#d24646'];
+
+  function drawFrame(animate: boolean) {
+    ctx!.clearRect(0, 0, W, H);
+
+    if (animate) {
+      needleFraction += (targetFraction - needleFraction) * 0.08;
+    } else {
+      needleFraction = targetFraction;
+    }
+
+    ctx!.save();
+    ctx!.beginPath();
+    ctx!.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx!.clip();
+
+    ctx!.fillStyle = '#030b04';
+    ctx!.fillRect(0, 0, W, H);
+
+    ctx!.strokeStyle = 'rgba(0,80,20,0.22)';
+    ctx!.lineWidth = 0.5;
+    const gridStep = R / 3.5;
+    for (let gx = CX - R; gx <= CX + R; gx += gridStep) {
+      ctx!.beginPath();
+      ctx!.moveTo(gx, 0);
+      ctx!.lineTo(gx, H);
+      ctx!.stroke();
+    }
+    for (let gy = CY - R; gy <= CY + R; gy += gridStep) {
+      ctx!.beginPath();
+      ctx!.moveTo(0, gy);
+      ctx!.lineTo(W, gy);
+      ctx!.stroke();
+    }
+
+    for (let i = 0; i < 4; i++) {
+      const a0 = startAngle + (sweepAngle / 4) * i;
+      const a1 = startAngle + (sweepAngle / 4) * (i + 1);
+      ctx!.beginPath();
+      ctx!.arc(CX, CY, R * 0.8, a0, a1);
+      ctx!.strokeStyle = bandColors[i];
+      ctx!.globalAlpha = 0.8;
+      ctx!.lineWidth = R * 0.14;
+      ctx!.stroke();
+      ctx!.globalAlpha = 1;
+    }
+
+    ctx!.font = '9px "Space Mono", monospace';
+    ctx!.fillStyle = 'rgba(200,196,182,0.55)';
+    ctx!.textAlign = 'center';
+    ctx!.textBaseline = 'middle';
+    const labelR = R * 0.92;
+    ctx!.fillText('QUIET', CX + Math.cos(startAngle) * labelR, CY + Math.sin(startAngle) * labelR);
+    ctx!.fillText(
+      'LOUD',
+      CX + Math.cos(startAngle + sweepAngle) * labelR,
+      CY + Math.sin(startAngle + sweepAngle) * labelR,
+    );
+
+    const angle = startAngle + needleFraction * sweepAngle;
+    const needleLen = R * 0.62;
+    const nx = CX + Math.cos(angle) * needleLen;
+    const ny = CY + Math.sin(angle) * needleLen;
+
+    ctx!.beginPath();
+    ctx!.moveTo(CX, CY);
+    ctx!.lineTo(nx, ny);
+    ctx!.strokeStyle = 'rgba(90,200,100,0.35)';
+    ctx!.lineWidth = 9;
+    ctx!.lineCap = 'round';
+    ctx!.stroke();
+
+    ctx!.beginPath();
+    ctx!.moveTo(CX, CY);
+    ctx!.lineTo(nx, ny);
+    ctx!.strokeStyle = '#8fe89a';
+    ctx!.lineWidth = 2.5;
+    ctx!.lineCap = 'round';
+    ctx!.stroke();
+
+    ctx!.beginPath();
+    ctx!.arc(CX, CY, 5, 0, Math.PI * 2);
+    ctx!.fillStyle = '#8fe89a';
+    ctx!.fill();
+
+    const vignette = ctx!.createRadialGradient(CX, CY, R * 0.6, CX, CY, R);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx!.fillStyle = vignette;
+    ctx!.beginPath();
+    ctx!.arc(CX, CY, R, 0, Math.PI * 2);
+    ctx!.fill();
+
+    ctx!.restore();
+  }
+
+  function loop() {
+    drawFrame(true);
+    if (Math.abs(needleFraction - targetFraction) > 0.001) {
+      raf = requestAnimationFrame(loop);
+    }
+  }
+
+  if (reduceMotion) {
+    drawFrame(false);
+    return;
+  }
+
+  loop();
+
+  document.addEventListener('astro:before-swap', () => {
+    cancelAnimationFrame(raf);
+  });
+}

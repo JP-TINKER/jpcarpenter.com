@@ -1,0 +1,77 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TinkerScope from '../../components/TinkerScope.astro';
+import RiskGauge from '../../components/RiskGauge.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('labs');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const dateLabel = entry.data.date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+// Real word count from the entry body, not a placeholder estimate.
+const wordCount = entry.body?.trim().split(/\s+/).filter(Boolean).length ?? 0;
+const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.summary}>
+  <article class="page-main lab-detail">
+    <div class="lab-detail-meta">
+      <time>{dateLabel}</time>
+      <span>{readingMinutes} min read</span>
+      {
+        entry.data.tags && entry.data.tags.length > 0 && (
+          <ul class="lab-detail-tags">
+            {entry.data.tags.map((tag: string) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+    <h1>{entry.data.title}</h1>
+
+    {
+      entry.id === 'tinker-scope' && (
+        <div class="lab-instrument">
+          <TinkerScope />
+          <p class="lab-instrument-caption">
+            What it does: canvas rendering + real-time input handling, driven by hand-rolled
+            pointer and scroll listeners. The knobs and scroll-coupling aren't tied to anything
+            else on the site — this widget is the project.
+          </p>
+        </div>
+      )
+    }
+
+    {
+      entry.id === 'risk-gauge' && (
+        <div class="lab-instrument">
+          <RiskGauge />
+          <p class="lab-instrument-caption">
+            Turn the knobs. The needle and the readout below it are both driven by the same
+            computed score — Likelihood &times; Impact — not two things pretending to agree.
+          </p>
+        </div>
+      )
+    }
+
+    <div class="lab-detail-body">
+      <Content />
+    </div>
+
+    <p><a class="btn-quiet" href="/labs">&larr; Back to Labs</a></p>
+  </article>
+</BaseLayout>
