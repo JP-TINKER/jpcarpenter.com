@@ -1,7 +1,11 @@
 ---
 title: "Risk Gauge"
 summary: "An analog risk-matrix instrument — turn Likelihood and Impact, read a real computed score, rating, and recommended action."
+finding: "The needle and the written rating are driven by one computation, so the picture and the words can never disagree — which is the failure mode of most risk matrices in the wild."
+stamp: "Instrument"
+discipline: grc
 date: 2026-08-01
+order: 60
 tags: ["canvas", "javascript", "grc"]
 ---
 

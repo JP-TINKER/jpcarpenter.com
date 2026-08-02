@@ -1,7 +1,11 @@
 ---
 title: "TINKER-SCOPE"
 summary: "A hand-built oscilloscope rendered on HTML Canvas — no charting libraries, no dependencies."
+finding: "Built with no charting library and no dependencies. The knobs drive real parameters and scroll position drives frequency; nothing on the face is a decorative fake."
+stamp: "Instrument"
+discipline: instruments
 date: 2026-08-01
+order: 70
 tags: ["canvas", "javascript", "ui"]
 ---
 

@@ -1,7 +1,11 @@
 ---
 title: "Android TV Box Security Assessment"
 summary: "Isolated FOSS lab in progress: testing whether an unofficial Android TV stick behaves like a residential proxy or ad-fraud bot."
+finding: "Designed but not yet run — the capture procedure is written and the isolation network is planned, and the results log is still blank. Listed here rather than held back so the record matches reality."
+stamp: "Not yet run"
+state: open
 date: 2026-08-01
+order: 10
 tags: ["iot", "network-forensics", "in-progress"]
 ---
 

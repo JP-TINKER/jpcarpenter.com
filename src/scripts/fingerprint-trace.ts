@@ -195,7 +195,7 @@ function buildLines(
 }
 
 function renderLog(container: HTMLElement, lines: string[], reduceMotion: boolean): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   if (reduceMotion) {
     lines.forEach((text) => {

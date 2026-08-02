@@ -1,37 +1,58 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import MarginNote from '../../components/MarginNote.astro';
+import EvidenceEntry from '../../components/EvidenceEntry.astro';
 
 const entries = (await getCollection('writing', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
+
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+const pad = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
-<BaseLayout title="Writing" description="Posts from the bench, when there are any.">
-  <article class="page-main">
-    <h1>Writing</h1>
-    {
-      entries.length === 0 && (
-        <p>Nothing published yet — check back soon.</p>
-      )
-    }
-  </article>
+<BaseLayout title="Writing" description="Sparse, specific pieces — published only when there is a claim worth defending.">
+  <section class="band sheet">
+    <MarginNote
+      index="03"
+      stamp={entries.length === 0 ? 'Empty' : 'Published'}
+      state={entries.length === 0 ? 'open' : undefined}
+    />
+    <div>
+      <h1 class="band-heading">Writing</h1>
+      <p class="band-lede">
+        {
+          entries.length === 0
+            ? 'Nothing published yet. When something goes up it will be because I have a specific claim worth defending — a section carrying four stale posts says less than an empty one.'
+            : 'Specific claims, published when there is one worth defending.'
+        }
+      </p>
+    </div>
+  </section>
 
   {
     entries.length > 0 && (
-      <ul class="bench-list bench-list--writing">
-        {entries.map((entry) => (
-          <li>
-            <a href={`/writing/${entry.id}`}>
-              <span class="bench-list-stamp">{entry.data.date.toISOString().slice(0, 10)}</span>
-              <span class="bench-list-title">
-                {entry.data.title}
-                <span class="bench-list-summary">{entry.data.description}</span>
-              </span>
-            </a>
-          </li>
+      <ul class="entries sheet-full">
+        {entries.map((entry, i) => (
+          <EvidenceEntry
+            href={`/writing/${entry.id}`}
+            index={pad(i)}
+            title={entry.data.title}
+            finding={entry.data.description}
+            stamp="Published"
+            date={isoDate(entry.data.date)}
+          />
         ))}
       </ul>
     )
   }
 </BaseLayout>
+
+<style>
+  .sheet-full {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 var(--pad) 5rem;
+  }
+</style>

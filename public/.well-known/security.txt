@@ -1,0 +1,7 @@
+Contact: mailto:joe@jpcarpenter.com
+Expires: 2027-07-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://jpcarpenter.com/.well-known/security.txt
+
+# This is a static site: no accounts, no database, no server-side code.
+# Reports about the site itself, its headers, or its DNS are welcome.

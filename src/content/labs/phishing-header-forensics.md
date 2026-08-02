@@ -1,7 +1,12 @@
 ---
 title: "Phishing Header Forensics"
 summary: "Tracing a spoofed login-alert phishing email through SPF/DKIM/DMARC header forensics and IOC enrichment."
+finding: "The sending domain had no email authentication posture at all — SPF, DKIM, and DMARC each failed, and the origin traced to a Poland-based hosting ISP rather than any mail provider it claimed to be."
+stamp: "Evidence attached"
+state: verified
+discipline: security
 date: 2026-08-01
+order: 10
 tags: ["phishing", "email-forensics", "grc"]
 ---
 
@@ -30,8 +35,8 @@ sender, just an unauthenticated one, relayed through a chain of Microsoft-hosted
 before it landed.
 
 <figure>
-  <img src="/labs/phishing-header-analysis.png" alt="MXToolbox header analysis showing failed SPF, DKIM, and DMARC checks, plus the relay hop chain" />
-  <figcaption>MXToolbox header analysis — authentication failures and relay path.</figcaption>
+  <img src="/labs/phishing-header-analysis.png" alt="MXToolbox delivery information showing failed SPF, DKIM, and DMARC checks" />
+  <figcaption>MXToolbox delivery information — SPF, DKIM, and DMARC all failed.</figcaption>
 </figure>
 
 ## IP reputation and enrichment

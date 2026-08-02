@@ -1,0 +1,28 @@
+---
+/** The margin note — the site's structural primitive.
+ *
+ *  Every section and every entry carries one: an index, a status stamp, and an optional
+ *  line of context. It exists because the honest state of a piece of work (verified,
+ *  in progress, designed but never run) is the most useful thing a reviewer can know
+ *  about it, and the least commonly disclosed.
+ */
+
+interface Props {
+  index?: string;
+  stamp?: string;
+  /** 'verified' = evidence attached · 'open' = unfinished, drawn dashed · default = neutral */
+  state?: 'verified' | 'open';
+  discipline?: string;
+  note?: string;
+}
+
+const { index, stamp, state, discipline, note } = Astro.props;
+---
+
+<div class="margin-note">
+  {index && <span class="margin-note-index">{index}</span>}
+  {stamp && <span class="margin-note-stamp" data-state={state}>{stamp}</span>}
+  {discipline && <span class="margin-note-discipline">{discipline}</span>}
+  {note && <span class="margin-note-body">{note}</span>}
+  <slot />
+</div>

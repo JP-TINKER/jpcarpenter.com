@@ -1,51 +1,183 @@
 ---
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import MarginNote from '../components/MarginNote.astro';
+
+// Headshot slot: reserved, not required. Drop a file at public/about/headshot.{webp,jpg,jpeg,png}
+// and rebuild — it appears framed below, plain, no code change needed. Absent, this renders
+// nothing; there is no broken-image state either way. See src/content/README.md and the root
+// README's "Adding content" section for the convention.
+const headshotExts = ['webp', 'jpg', 'jpeg', 'png'];
+const headshotExt = headshotExts.find((ext) =>
+  existsSync(fileURLToPath(new URL(`../../public/about/headshot.${ext}`, import.meta.url))),
+);
+const headshotSrc = headshotExt ? `/about/headshot.${headshotExt}` : null;
 ---
 
-<BaseLayout title="About" description="Who Joe is, what he builds, how to reach him.">
-  <article class="page-main">
-    <h1>About</h1>
-    <p>
-      JP Carpenter — security and compliance analyst, GRC-facing. This site is rebuilt
-      static-first from the old Ghost bench: less surface area, same instrument, honest
-      materials.
-    </p>
+<BaseLayout
+  title="About"
+  description="Security and compliance analyst — PCI DSS, SOC 2, ISO 27001, and the gap between what a control says and what the system does."
+>
+  <div itemscope itemtype="https://schema.org/Person">
+    <!-- Microdata, not JSON-LD: the site's CSP forbids inline <script> without a hash, so
+         entity facts for Google/AI crawlers live as itemprop attributes on real HTML
+         instead of a script block. Values mirror the visible text, not invented ones. -->
+    <meta itemprop="name" content="Joe Carpenter" />
+    <meta itemprop="alternateName" content="JP Carpenter" />
+    <meta itemprop="jobTitle" content="Security and Compliance Analyst" />
+    <meta itemprop="email" content="joe@jpcarpenter.com" />
+    <meta itemprop="url" content="https://jpcarpenter.com/about" />
+  <section class="band sheet">
+    <MarginNote index="04" stamp="About" note="Origin · work · conviction" />
+    <div>
+      <h1 class="band-heading">About</h1>
+      {
+        headshotSrc && (
+          <figure class="about-photo">
+            <img src={headshotSrc} alt="Joe Carpenter" width="220" height="220" loading="eager" />
+          </figure>
+        )
+      }
+      <p class="band-lede">
+        I close the gap between what an organization says it controls and what the systems
+        actually do — policies, assessments, and certifications that have to survive an auditor.
+      </p>
+    </div>
+  </section>
 
-    <h2>Path</h2>
-    <p>
-      I spent 13 years running technology and day-to-day operations for a school in Taiwan —
-      network uptime, documentation discipline, and a full remote-learning deployment during
-      COVID with zero outside IT support, for 150+ students and 8 staff across 12 classrooms.
-      Before that, I worked as a case manager on HIPAA-regulated patient records, so
-      compliance obligations aren't theoretical to me — I've been the person accountable for
-      them.
-    </p>
-    <p>
-      In 2025 I started building a self-directed cybersecurity portfolio: real phishing header
-      forensics and IOC enrichment, a home Active Directory and Wireshark lab, VLAN
-      segmentation exercises, and the certifications below. See the write-ups in <a href="/labs"
-        >Labs</a
-      >. On paper it's a career change; in practice it's the same habits — methodical
-      documentation, audit-ready records, and taking accountability for systems seriously —
-      pointed at a new domain.
-    </p>
+  <section class="band sheet">
+    <MarginNote stamp="Before" note="HIPAA · education" />
+    <div class="prose">
+      <h2>Where the habit started</h2>
+      <p>
+        I started as a case manager working with HIPAA-regulated patient records. That is where
+        compliance stopped being a checklist — I was accountable when the documentation did not
+        match what actually happened.
+      </p>
+      <p>
+        Then thirteen years as an educator in Taiwan. That job was teaching and school life, not
+        IT. I did some informal tech work and helped during the COVID remote stretch, but I was
+        not running the network. What carried forward was institutional discipline: records,
+        process, and being answerable when something was wrong.
+      </p>
+    </div>
+  </section>
 
-    <h2>Certifications</h2>
-    <p>
-      CompTIA Security+ (DoD 8570/8140 compliant) &middot; Network+ &middot; A+ &middot; CSIS
-      (Secure Infrastructure Specialist) &middot; CIOS (IT Operations Specialist).
-    </p>
-    <p>
-      In progress, labeled honestly as such: BTL1 (Blue Team Level 1) and AWS Cloud
-      Practitioner.
-    </p>
-    <p>Bachelor of Arts, History and Chinese Language — West Virginia University, 2012.</p>
+  <section class="band sheet">
+    <MarginNote stamp="Now" note="briskData · since Feb 2026" state="verified" />
+    <div class="prose">
+      <h2>What I actually do</h2>
+      <p>
+        I currently work with briskData, as a contractor, under the title Compliance Manager.
+        Recent work includes leading a PCI DSS certification effort, migrating the compliance
+        program from Vanta to Scrut, and driving SOC 2 and ISO 27001 toward certification — with
+        ISO 42001 also in scope. Alongside the frameworks: security policy writing, and the
+        security training used in onboarding.
+      </p>
+      <p>
+        The write-ups in <a href="/labs">Labs</a> are how I keep the technical side sharp.
+        Unfinished work is labeled that way in the margin rather than dressed up as done.
+      </p>
+    </div>
+  </section>
 
-    <h2>Reach</h2>
-    <p>
-      Reach me at <a href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>. Prefer plain
-      email; no forms that punish humans. Code and lab notes:
-      <a href="https://github.com/joepcarpenter" rel="me">github.com/joepcarpenter</a>.
-    </p>
-  </article>
+  <section class="band sheet">
+    <MarginNote stamp="Conviction" state="verified" />
+    <div class="prose">
+      <h2>What I think the job actually is</h2>
+      <p>
+        Most compliance failures are not failures of knowledge. Everyone involved could recite
+        the requirement. The failure is that nobody read closely enough to notice the document
+        and the system had stopped agreeing with each other.
+      </p>
+      <p>
+        A vendor answering "yes, encrypted at rest" has told you a sentence, not a control. A
+        policy that nobody onboards against is a filing, not a program. The work is closing that
+        gap, out loud, in writing somebody else can check. That is the whole reason the phrase
+        on the front page is <em>read what you sign</em>.
+      </p>
+    </div>
+  </section>
+
+  <section class="band sheet">
+    <MarginNote stamp="How" note="What that means in practice" />
+    <div class="prose">
+      <h2>How I show up</h2>
+      <p>
+        I read the control, the vendor answer, and the configuration until they agree — or I
+        write down where they don't. I am useful on teams that want a second reader on compliance
+        and security work: someone who will own the evidence trail, not paper over the gap.
+      </p>
+    </div>
+  </section>
+
+  <section class="band sheet">
+    <MarginNote stamp="Credentials" note="After the work, not before" />
+    <div class="prose">
+      <h2>Certifications</h2>
+      <p>
+        CompTIA Security+ (DoD 8570/8140 compliant), Network+, A+, CSIS (Secure Infrastructure
+        Specialist), and CIOS (IT Operations Specialist).
+      </p>
+      <p>
+        In progress, and labeled that way until they are not: BTL1 (Blue Team Level 1) and AWS
+        Cloud Practitioner.
+      </p>
+      <p>Bachelor of Arts, History and Chinese Language — United States.</p>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="sheet closing-inner">
+      <MarginNote stamp="Open" state="open" note="Plain email · no form" />
+      <div>
+        <h2>Reach me</h2>
+        <p>
+          Plain email is best: <a href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>. No
+          contact form, because forms punish humans and catch bots anyway. Code and lab notes
+          live at <a href="https://github.com/joepcarpenter" rel="me" itemprop="sameAs">github.com/joepcarpenter</a>.
+        </p>
+        <div class="desk-actions">
+          <a class="btn-primary" href="/labs">Read the evidence</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
 </BaseLayout>
+
+<style>
+  /* Plain frame, no circle, no glow ring — same hairline treatment as the Labs evidence
+     figures (global.css .lab-detail-body figure), not a portrait-hero look. */
+  .about-photo {
+    border: 1px solid var(--rule);
+    max-width: 12rem;
+    margin: 0 0 1.75rem;
+  }
+
+  .about-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .prose {
+    max-width: 38rem;
+  }
+
+  .prose h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .prose p {
+    color: var(--ink-body);
+    margin-bottom: 1rem;
+  }
+
+  .prose em {
+    font-style: normal;
+    color: var(--accent-soft);
+  }
+</style>

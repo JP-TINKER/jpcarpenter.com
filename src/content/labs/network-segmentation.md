@@ -1,7 +1,12 @@
 ---
 title: "Network Segmentation Lab: VLANs and Router-on-a-Stick"
 summary: "Building a small LAN from scratch, then segmenting it into VLANs and proving inter-VLAN routing with TTL analysis, not just a successful ping."
+finding: "A successful ping proves reachability, not segmentation. The decremented TTL is what actually confirmed traffic was crossing the router between VLANs instead of staying flat."
+stamp: "Evidence attached"
+state: verified
+discipline: networking
 date: 2026-08-01
+order: 20
 tags: ["networking", "vlan", "packet-tracer"]
 ---
 

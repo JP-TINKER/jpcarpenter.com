@@ -1,0 +1,27 @@
+# JP Carpenter
+
+> Security and compliance analyst. Read what you sign.
+
+Joe Carpenter (JP Carpenter) works in governance, risk, and compliance — closing the
+gap between what a control says and what a system actually does. Currently a contractor
+under the title Compliance Manager. This site is the honest, static record of that work:
+what's verified, what's in progress, and what's designed but not yet run, each labeled
+as such rather than presented uniformly.
+
+## Primary pages
+
+- [About](https://jpcarpenter.com/about): Background, current work (PCI DSS, SOC 2, ISO 27001,
+  ISO 42001), certifications, and the operating conviction behind the work.
+- [Labs](https://jpcarpenter.com/labs): Evidence-backed technical write-ups (phishing header
+  forensics, network segmentation, browser fingerprinting) with findings and limits stated
+  plainly.
+- [Projects](https://jpcarpenter.com/projects): Personal builds unrelated to professional work —
+  no evidence claim attached.
+- [Writing](https://jpcarpenter.com/writing): Published pieces, kept sparse on purpose.
+
+## Notes for automated readers
+
+- This is a static site with no forms, no tracking scripts, and no server-side code.
+- Every claim on this site is meant to be checkable — if a piece of work is unfinished,
+  the page says so rather than implying completion.
+- Contact: joe@jpcarpenter.com

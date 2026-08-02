@@ -1,4 +1,6 @@
 ---
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/500.css';
 import '@fontsource/space-grotesk/700.css';
 import '@fontsource/space-mono/400.css';
 import '@fontsource/space-mono/700.css';
@@ -6,14 +8,32 @@ import '@fontsource/space-mono/700.css';
 interface Props {
   title?: string;
   description?: string;
+  /** Long-form pages opt into the margin reading marker. */
+  marker?: boolean;
 }
 
 const {
   title = 'JP Carpenter',
-  description = 'I Tinker — security, self-hosting, and work from the bench.',
+  description = 'Security and compliance analyst. Read what you sign.',
+  marker = false,
 } = Astro.props;
 
 const pathname = Astro.url.pathname;
+const pageTitle = title === 'JP Carpenter' ? title : `${title} · JP Carpenter`;
+// Astro.site is set from astro.config.mjs; canonicalURL always resolves to an absolute,
+// trailing-slash-free URL so it matches the sitemap and doesn't fight `trailingSlash: 'never'`.
+const canonicalURL = new URL(pathname, Astro.site);
+
+const nav = [
+  { href: '/', label: 'Home' },
+  { href: '/labs', label: 'Labs' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/writing', label: 'Writing' },
+  { href: '/about', label: 'About' },
+];
+
+const isCurrent = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
 
 // Real build timestamp, baked in at static build time — not decoration, an honest
 // provenance signal (this page was generated on this date, not "live forever" theater).
@@ -30,41 +50,47 @@ const buildDate = new Date().toLocaleDateString('en-US', {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title === 'JP Carpenter' ? title : `${title} · JP Carpenter`}</title>
+    <title>{pageTitle}</title>
+
+    <!-- Open Graph + Twitter Card: plain meta tags only, no script — so a link pasted into
+         LinkedIn, Slack, or an email preview shows a real title/description instead of a
+         blank or guessed one. No og:image yet; see HANDOFF (no fabricated stock image). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JP Carpenter" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
   </head>
   <body>
     <nav class="site-nav" aria-label="Primary">
       <div class="site-nav-inner">
         <a class="site-nav-logo" href="/">JP Carpenter</a>
         <ul class="site-nav-links">
-          <li>
-            <a href="/" aria-current={pathname === '/' ? 'page' : undefined}>Home</a>
-          </li>
-          <li>
-            <a href="/labs" aria-current={pathname.startsWith('/labs') ? 'page' : undefined}
-              >Labs</a
-            >
-          </li>
-          <li>
-            <a
-              href="/projects"
-              aria-current={pathname.startsWith('/projects') ? 'page' : undefined}>Projects</a
-            >
-          </li>
-          <li>
-            <a href="/writing" aria-current={pathname.startsWith('/writing') ? 'page' : undefined}
-              >Writing</a
-            >
-          </li>
-          <li>
-            <a href="/about" aria-current={pathname.startsWith('/about') ? 'page' : undefined}
-              >About</a
-            >
-          </li>
+          {
+            nav.map((item) => (
+              <li>
+                <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
     </nav>
+
+    {
+      marker && (
+        <div class="read-marker" aria-hidden="true">
+          <span class="read-marker-fill" id="readMarkerFill" />
+        </div>
+      )
+    }
 
     <main>
       <slot />
@@ -79,6 +105,11 @@ const buildDate = new Date().toLocaleDateString('en-US', {
         </div>
       </div>
     </footer>
+
+    <script>
+      import { initReadMarker } from '../scripts/read-marker';
+      initReadMarker();
+    </script>
   </body>
 </html>
 

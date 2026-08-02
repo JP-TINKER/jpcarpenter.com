@@ -1,37 +1,95 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import MarginNote from '../../components/MarginNote.astro';
+import EvidenceEntry from '../../components/EvidenceEntry.astro';
+import { LAB_DISCIPLINES, LAB_DISCIPLINE_META } from '../../lib/lab-disciplines';
 
 const entries = (await getCollection('labs')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+  (a, b) => a.data.order - b.data.order || b.data.date.valueOf() - a.data.date.valueOf(),
 );
+const indexedEntries = entries.map((entry, index) => ({ entry, index }));
+const groups = LAB_DISCIPLINES.map((discipline) => ({
+  discipline,
+  ...LAB_DISCIPLINE_META[discipline],
+  entries: indexedEntries.filter(({ entry }) => entry.data.discipline === discipline),
+})).filter((group) => group.entries.length > 0);
+
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+const pad = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
-<BaseLayout title="Labs" description="Evidence-backed projects from the bench.">
-  <article class="page-main">
-    <h1>Labs</h1>
-    <p>
-      Sparse by design. Entries land here when there is real evidence — not a card grid of
-      placeholders.
-    </p>
-    {entries.length === 0 && <p>More soon.</p>}
-  </article>
+<BaseLayout title="Labs" description="Security work with the evidence attached.">
+  <section class="band sheet">
+    <MarginNote index="01" stamp="Labs" note="Four plain-language domains" />
+    <div>
+      <h1 class="band-heading">Labs</h1>
+      <p class="band-lede">
+        Work is split by what it actually proves: governance, networking, security, or
+        instrument craft. Each entry still carries the notes, artifacts, limits, and honest
+        status needed to check the claim.
+      </p>
+    </div>
+  </section>
+
+  {entries.length === 0 && (
+    <section class="band sheet">
+      <MarginNote />
+      <p class="band-lede">Nothing published here yet.</p>
+    </section>
+  )}
 
   {
-    entries.length > 0 && (
-      <ul class="bench-list bench-list--labs">
-        {entries.map((entry) => (
-          <li>
-            <a href={`/labs/${entry.id}`}>
-              <span class="bench-list-stamp">{entry.data.date.toISOString().slice(0, 10)}</span>
-              <span class="bench-list-title">
-                {entry.data.title}
-                <span class="bench-list-summary">{entry.data.summary}</span>
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    )
+    groups.map((group) => (
+      <section class="lab-domain">
+        <div class="sheet domain-heading">
+          <MarginNote stamp={group.label} note={`${group.entries.length} logged`} />
+          <div>
+            <h2>{group.label}</h2>
+            <p>{group.description}</p>
+          </div>
+        </div>
+        <ul class="entries sheet-full">
+          {group.entries.map(({ entry, index }) => (
+            <EvidenceEntry
+              href={`/labs/${entry.id}`}
+              index={pad(index)}
+              title={entry.data.title}
+              finding={entry.data.finding ?? entry.data.summary}
+              stamp={entry.data.stamp ?? 'Logged'}
+              state={entry.data.state}
+              discipline={group.label}
+              date={isoDate(entry.data.date)}
+            />
+          ))}
+        </ul>
+      </section>
+    ))
   }
 </BaseLayout>
+
+<style>
+  .sheet-full {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 var(--pad);
+  }
+
+  .lab-domain {
+    padding-top: clamp(2.75rem, 6vw, 4.5rem);
+  }
+
+  .lab-domain:last-child {
+    padding-bottom: 5rem;
+  }
+
+  .domain-heading h2 {
+    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+    margin-bottom: 0.45rem;
+  }
+
+  .domain-heading p {
+    color: var(--ink-muted);
+    max-width: 38rem;
+  }
+</style>

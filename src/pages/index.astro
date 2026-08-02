@@ -1,112 +1,133 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SectionRule from '../components/SectionRule.astro';
-import ExposureGauge from '../components/ExposureGauge.astro';
-import FingerprintTrace from '../components/FingerprintTrace.astro';
-
-// Easy to tweak: the one-line identity claim under the headline.
-const heroIdentity = 'Security and Compliance Analyst. Read what you sign.';
+import MarginNote from '../components/MarginNote.astro';
+import EvidenceEntry from '../components/EvidenceEntry.astro';
+import { LAB_DISCIPLINE_META } from '../lib/lab-disciplines';
 
 const labsEntries = (await getCollection('labs'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .sort((a, b) => a.data.order - b.data.order || b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 
-const writingEntries = (await getCollection('writing', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 2);
+const writingEntries = (await getCollection('writing', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
 
 const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+const pad = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
-<BaseLayout>
-  <section class="site-hero">
-    <div class="site-hero-wood" aria-hidden="true"></div>
-    <div class="site-hero-inner">
-      <div class="site-hero-content">
-        <div class="site-hero-eyebrow">Transmitting from the bench</div>
-        <h1>JP Carpenter<br /><em>I Tinker</em></h1>
-        <p class="site-hero-description">{heroIdentity}</p>
-        <p class="site-hero-exposure" id="heroExposureLine">
-          This page reads a handful of signals your browser already sends automatically —
-          no clicks needed. See the live reading on the right.
+<BaseLayout description="Security and compliance analyst. Read what you sign.">
+  <section class="desk">
+    <div class="desk-surface" aria-hidden="true"></div>
+    <div class="desk-lamp" aria-hidden="true"></div>
+    <div class="desk-shadow" aria-hidden="true"></div>
+    <div class="sheet desk-inner">
+      <MarginNote>
+        <span class="desk-eyebrow">Transmitting<br />from the bench</span>
+      </MarginNote>
+      <div>
+        <h1 class="desk-brand">JP Carpenter</h1>
+        <p class="desk-claim">Read what you sign.</p>
+        <p class="desk-support">
+          Security and compliance analyst. I read the policies, vendor answers, and
+          configurations other people skim — and write down what they actually commit you to.
         </p>
-        <div class="site-hero-cta">
-          <a class="btn-primary" href="/labs">See the Labs</a>
-          <a class="btn-quiet" href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>
+        <div class="desk-actions">
+          <a class="btn-primary" href="/labs">Read the evidence</a>
+          <a class="btn-quiet" href="/about">How I got here</a>
         </div>
       </div>
-      <ExposureGauge />
     </div>
   </section>
 
-  <SectionRule label="From the bench" />
+  <section class="band sheet">
+    <MarginNote index="01" stamp="Labs" />
+    <div>
+      <h2 class="band-heading">Work with the evidence attached</h2>
+      <p class="band-lede">
+        Each entry links to the notes, the artifacts, and — where it matters — the limits of
+        what the work actually proves.
+      </p>
+    </div>
+  </section>
 
-  <ul class="bench-list bench-list--labs">
+  <ul class="entries sheet-full">
     {
-      labsEntries.map((entry) => (
-        <li>
-          <a href={`/labs/${entry.id}`}>
-            <span class="bench-list-stamp">{isoDate(entry.data.date)}</span>
-            <span class="bench-list-title">
-              {entry.data.title}
-              <span class="bench-list-summary">{entry.data.summary}</span>
-            </span>
-          </a>
-        </li>
+      labsEntries.map((entry, i) => (
+        <EvidenceEntry
+          href={`/labs/${entry.id}`}
+          index={pad(i)}
+          title={entry.data.title}
+          finding={entry.data.finding ?? entry.data.summary}
+          stamp={entry.data.stamp ?? 'Logged'}
+          state={entry.data.state}
+          discipline={LAB_DISCIPLINE_META[entry.data.discipline].label}
+          date={isoDate(entry.data.date)}
+        />
       ))
     }
   </ul>
 
-  <SectionRule label="How this page can already tell you apart" />
-
-  <FingerprintTrace />
-
-  <a href="/writing" class="homepage-section-link">
-    <SectionRule label="Writing" />
-  </a>
+  <section class="band sheet">
+    <MarginNote index="02" stamp="Empty" state="open" />
+    <div>
+      <h2 class="band-heading">Writing</h2>
+      {
+        writingEntries.length === 0 ? (
+          <p class="band-lede">
+            Nothing here yet. When something goes up it will be because I have a specific claim
+            worth defending — a section with four stale posts is worse than an empty one.
+          </p>
+        ) : (
+          <p class="band-lede">Published thinking, kept sparse on purpose.</p>
+        )
+      }
+    </div>
+  </section>
 
   {
-    writingEntries.length === 0 ? (
-      <p class="homepage-empty-note">
-        Nothing published yet — check <a href="/writing">/writing</a>.
-      </p>
-    ) : (
-      <ul class="bench-list bench-list--writing">
-        {writingEntries.map((entry) => (
-          <li>
-            <a href={`/writing/${entry.id}`}>
-              <span class="bench-list-stamp">{isoDate(entry.data.date)}</span>
-              <span class="bench-list-title">
-                {entry.data.title}
-                <span class="bench-list-summary">{entry.data.description}</span>
-              </span>
-            </a>
-          </li>
+    writingEntries.length > 0 && (
+      <ul class="entries sheet-full">
+        {writingEntries.slice(0, 3).map((entry, i) => (
+          <EvidenceEntry
+            href={`/writing/${entry.id}`}
+            index={pad(i)}
+            title={entry.data.title}
+            finding={entry.data.description}
+            stamp="Published"
+            date={isoDate(entry.data.date)}
+          />
         ))}
       </ul>
     )
   }
+
+  <section class="closing">
+    <div class="sheet closing-inner">
+      <MarginNote index="03" stamp="Open" state="open" note="Plain email · no form" />
+      <div>
+        <h2>Want a second reader on something?</h2>
+        <p>
+          Send me what you're looking at — a policy, a vendor questionnaire, a control you're
+          not sure is doing anything — and I'll tell you what I'd check first. No form, no
+          funnel, and no obligation on either side.
+        </p>
+        <div class="desk-actions">
+          <a class="btn-primary" href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>
+          <a class="btn-quiet" href="/projects">Personal builds</a>
+        </div>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
-  .homepage-section-link {
-    display: block;
-    text-decoration: none;
-  }
-
-  .homepage-section-link:hover {
-    opacity: 0.75;
-  }
-
-  .homepage-empty-note {
+  /* The rows keep the sheet's rail alignment but let their hover state bleed to the
+     page edge, so the row reads as one continuous line rather than a boxed item. */
+  .sheet-full {
     max-width: var(--max);
     margin: 0 auto;
-    padding: 0 1.5rem 4rem;
-    color: var(--ink-muted);
-  }
-
-  .homepage-empty-note a {
-    color: var(--accent-soft);
+    padding: 0 var(--pad);
   }
 </style>

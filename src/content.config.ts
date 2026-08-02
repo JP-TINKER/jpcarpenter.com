@@ -2,19 +2,44 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
+/** Fields shared by the two evidence collections.
+ *
+ *  `finding` is what the work established, in one line — distinct from `summary`, which
+ *  says what the work is. Listings lead with the finding because that is what a reviewer
+ *  is actually scanning for.
+ *
+ *  `stamp` and `state` drive the margin note. They are how an entry declares its honest
+ *  status: evidence attached, instrument, or designed-but-never-run. Nothing is allowed
+ *  to look finished when it isn't.
+ */
+const evidenceFields = {
+  title: z.string(),
+  summary: z.string(),
+  finding: z.string().optional(),
+  stamp: z.string().optional(),
+  state: z.enum(['verified', 'open']).optional(),
+  date: z.date(),
+  /** Editorial position in listings; lower sorts first. Ties fall back to date. */
+  order: z.number().optional().default(50),
+  tags: z.array(z.string()).optional(),
+};
+
+// Every collection folder carries the same two entry docs at its root (00-INDEX.md,
+// 01-README.md — PDRA/Bench filing convention), which must never be picked up as content
+// entries themselves. Keep this exclusion identical across all three collections.
+const entryDocs = ['!00-INDEX.md', '!01-README.md'];
+
 const labs = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/labs' }),
+  loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/labs' }),
   schema: z.object({
-    title: z.string(),
-    summary: z.string(),
-    date: z.date(),
-    tags: z.array(z.string()).optional(),
+    ...evidenceFields,
+    /** Broad visitor-facing evidence domain; unlike tags, this is required and scannable. */
+    discipline: z.enum(['grc', 'networking', 'security', 'instruments']),
   }),
 });
 
 const writing = defineCollection({
-  // AUTHORING.md documents the frontmatter shape for real posts — it is not a post itself.
-  loader: glob({ pattern: ['**/*.{md,mdx}', '!AUTHORING.md'], base: './src/content/writing' }),
+  loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/writing' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -28,14 +53,9 @@ const writing = defineCollection({
 
 const projects = defineCollection({
   // Personal builds unrelated to work — physical/craft or hobby-tech. No professional-evidence
-  // framing (that's Labs' job). AUTHORING.md documents frontmatter; it is not an entry itself.
-  loader: glob({ pattern: ['**/*.{md,mdx}', '!AUTHORING.md'], base: './src/content/projects' }),
-  schema: z.object({
-    title: z.string(),
-    summary: z.string(),
-    date: z.date(),
-    tags: z.array(z.string()).optional(),
-  }),
+  // framing (that's Labs' job).
+  loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/projects' }),
+  schema: z.object(evidenceFields),
 });
 
 export const collections = { labs, writing, projects };

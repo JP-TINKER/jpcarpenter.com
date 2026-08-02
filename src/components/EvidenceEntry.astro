@@ -1,0 +1,37 @@
+---
+/** One row of evidence. Rows rather than cards: a card grid gives every item the same
+ *  weight, so nothing leads. A numbered list lets the strongest piece go first and
+ *  still lets a reader scan the whole set in one pass.
+ */
+import MarginNote from './MarginNote.astro';
+
+interface Props {
+  href: string;
+  index: string;
+  title: string;
+  /** What the work established — not a description of what it is. */
+  finding: string;
+  stamp: string;
+  state?: 'verified' | 'open';
+  discipline?: string;
+  date: string;
+}
+
+const { href, index, title, finding, stamp, state, discipline, date } = Astro.props;
+---
+
+<li class="entry">
+  <a class="entry-link" href={href}>
+    <MarginNote
+      index={index}
+      stamp={stamp}
+      state={state}
+      discipline={discipline}
+      note={date}
+    />
+    <div>
+      <h3 class="entry-title">{title}</h3>
+      <p class="entry-finding">{finding}</p>
+    </div>
+  </a>
+</li>

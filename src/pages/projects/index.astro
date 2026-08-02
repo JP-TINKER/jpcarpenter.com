@@ -1,37 +1,62 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import MarginNote from '../../components/MarginNote.astro';
+import EvidenceEntry from '../../components/EvidenceEntry.astro';
 
 const entries = (await getCollection('projects')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+  (a, b) => a.data.order - b.data.order || b.data.date.valueOf() - a.data.date.valueOf(),
 );
+
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+const pad = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
-<BaseLayout title="Projects" description="Personal builds unrelated to work — physical and hobby-tech.">
-  <article class="page-main">
-    <h1>Projects</h1>
-    <p>
-      Things built for their own sake, not for work — physical builds and hobby-tech, mixed
-      freely. No evidence-of-competency framing here; that's what Labs is for.
-    </p>
-    {entries.length === 0 && <p>Nothing here yet — check back soon.</p>}
-  </article>
+<BaseLayout
+  title="Projects"
+  description="Personal builds unrelated to work — physical and hobby-tech."
+>
+  <section class="band sheet">
+    <MarginNote index="02" stamp="Personal" note="Not a work claim" />
+    <div>
+      <h1 class="band-heading">Projects</h1>
+      <p class="band-lede">
+        Things built for their own sake — physical builds and hobby-tech, mixed freely. Nothing
+        here is offered as professional evidence; that is what Labs is for.
+      </p>
+    </div>
+  </section>
+
+  {entries.length === 0 && (
+    <section class="band sheet">
+      <MarginNote />
+      <p class="band-lede">Nothing here yet.</p>
+    </section>
+  )}
 
   {
     entries.length > 0 && (
-      <ul class="bench-list bench-list--projects">
-        {entries.map((entry) => (
-          <li>
-            <a href={`/projects/${entry.id}`}>
-              <span class="bench-list-stamp">{entry.data.date.toISOString().slice(0, 10)}</span>
-              <span class="bench-list-title">
-                {entry.data.title}
-                <span class="bench-list-summary">{entry.data.summary}</span>
-              </span>
-            </a>
-          </li>
+      <ul class="entries sheet-full">
+        {entries.map((entry, i) => (
+          <EvidenceEntry
+            href={`/projects/${entry.id}`}
+            index={pad(i)}
+            title={entry.data.title}
+            finding={entry.data.finding ?? entry.data.summary}
+            stamp={entry.data.stamp ?? 'Build'}
+            state={entry.data.state}
+            date={isoDate(entry.data.date)}
+          />
         ))}
       </ul>
     )
   }
 </BaseLayout>
+
+<style>
+  .sheet-full {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 var(--pad) 5rem;
+  }
+</style>
