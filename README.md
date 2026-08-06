@@ -27,31 +27,26 @@ Open the printed localhost URL. Build for deploy: `npm run build` → `dist/`.
 
 ## Adding content (no Bench session needed)
 
-Every article, lab writeup, or project entry is a Markdown file — edit, preview, commit,
-push. No CMS, no admin login. Start at [`src/content/README.md`](src/content/README.md);
-each collection (`labs/`, `writing/`, `projects/`) has its own `01-README.md` with the
-full field list, a copy-paste template in `src/content/_templates/`, and a pre-publish
-guardrails checklist (images, CSP, redaction) so ordinary edits can't weaken the site's
-security posture.
+**Start here:** [`EDIT.md`](EDIT.md) — four commands to add a post and put it live.
 
-### The whole publish path
+Every article, lab, or project is a Markdown file. No CMS, no admin login.
 
 ```bash
-# 1. Edit a markdown file in src/content/{labs,writing,projects}/
-# 2. Preview locally
-npm run dev
-# 3. Build (must exit 0)
-npm run build
-# 4. Verify before pushing
-node ../../Tools/Bench/scripts/headers-verify.mjs dist
-node ../../Tools/Bench/scripts/responsive-audit.mjs dist out
-node ../../Tools/Bench/scripts/probe-paths.mjs dist
-# 5. Commit and push
-git add -A && git commit -m "Add <entry>" && git push
+npm run new -- writing "Your title here"   # creates a draft under src/content/writing/
+npm run dev                                # preview locally
+# set draft: false in the file when ready
+npm run build && npm run deploy            # build + upload to Njalla
 ```
 
-No CMS, no database, no admin login. If `npm run build` exits 0 and the three verify
-scripts exit 0, the site is safe to push.
+Field docs and guardrails (images, CSP, redaction) live in each collection’s
+`01-README.md` under [`src/content/`](src/content/README.md). Optional deeper verify
+before deploy:
+
+```bash
+node ~/Desktop/Tools/Bench/scripts/headers-verify.mjs dist
+node ~/Desktop/Tools/Bench/scripts/responsive-audit.mjs dist out
+node ~/Desktop/Tools/Bench/scripts/probe-paths.mjs dist
+```
 
 ## Headshot
 
@@ -61,7 +56,21 @@ automatically, framed plainly (no circular crop, no glow ring), matching the res
 site's evidence-figure treatment. No file there, nothing renders — no broken-image state
 either way. Use a real photo, not stock.
 
-## Deploy (Cloudflare Pages)
+## Deploy (live host: Njalla)
+
+Production is nginx on Njalla (`/var/www/jpcarpenter.com`). After a clean build:
+
+```bash
+npm run build && npm run deploy
+```
+
+`npm run deploy` confirms, then `tar | ssh` uploads `dist/` and fixes
+`root:www-data` / 755·644 perms (remote has no rsync). Needs working SSH to
+`root@80.78.27.111`. Details: [`EDIT.md`](EDIT.md).
+
+## Deploy (Cloudflare Pages — deferred)
+
+Cloudflare Pages remains a valid later option if you want to drop the VPS.
 
 1. Connect the repository in Cloudflare dashboard → Workers & Pages → Create → Pages →
    Connect to Git → pick the repo above. Build command `npm run build`, output directory

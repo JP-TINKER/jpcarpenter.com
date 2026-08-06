@@ -1,0 +1,16 @@
+# Keep npm dependencies current without manual nagging.
+# PRs still need Joe (or Bench) to review + build before merge/deploy.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    ignore:
+      # Major Astro bumps need an explicit Bench pass (CSP / build invariants).
+      - dependency-name: astro
+        update-types: ["version-update:semver-major"]
