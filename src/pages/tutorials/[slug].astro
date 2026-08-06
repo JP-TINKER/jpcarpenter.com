@@ -1,0 +1,63 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LAB_DISCIPLINE_META } from '../../lib/lab-disciplines';
+
+export async function getStaticPaths() {
+  // Drafts get no route — they're hidden until ready.
+  const entries = await getCollection('tutorials', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+// Frontmatter dates parse as midnight UTC; formatting in local time would print the
+// previous day west of Greenwich. A tutorial's date is a record, so it renders as written.
+const dateLabel = entry.data.date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
+// Real word count from the entry body, not a placeholder estimate.
+const wordCount = entry.body?.trim().split(/\s+/).filter(Boolean).length ?? 0;
+const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.summary} marker>
+  <article class="page-main lab-detail">
+    <div class="lab-detail-meta">
+      {
+        entry.data.stamp && (
+          <span class="margin-note-stamp" data-state={entry.data.state}>
+            {entry.data.stamp}
+          </span>
+        )
+      }
+      <span>{LAB_DISCIPLINE_META[entry.data.discipline].label}</span>
+      <time>{dateLabel}</time>
+      <span>{readingMinutes} min read</span>
+      {
+        entry.data.tags && entry.data.tags.length > 0 && (
+          <ul class="lab-detail-tags">
+            {entry.data.tags.map((tag: string) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+    <h1>{entry.data.title}</h1>
+
+    <div class="lab-detail-body">
+      <Content />
+    </div>
+
+    <p><a class="btn-quiet" href="/tutorials">&larr; Back to Tutorials</a></p>
+  </article>
+</BaseLayout>

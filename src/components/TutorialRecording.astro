@@ -1,0 +1,23 @@
+---
+/** A terminal recording rendered as an animated SVG inside the framed lab-instrument
+ *  figure. Animated SVG via <img> is the CSP-clean default: no script, no worker, no
+ *  Trusted Types policy (see public/tutorials/README.md for the interactive-player
+ *  opt-in). Reuses the lab-instrument styling so no new CSS is added.
+ *
+ *  `alt` is required for the recording — a terminal recording is still an image, and the
+ *  motion is lost to a screen reader or to prefers-reduced-motion (which the SVG should
+ *  respect internally; svg-term-cli's output does).
+ */
+interface Props {
+  src: string;
+  caption: string;
+  alt?: string;
+}
+
+const { src, caption, alt = 'Terminal recording of the steps in this tutorial.' } = Astro.props;
+---
+
+<div class="lab-instrument">
+  <img src={src} alt={alt} loading="lazy" decoding="async" />
+  <p class="lab-instrument-caption">{caption}</p>
+</div>

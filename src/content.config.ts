@@ -58,4 +58,21 @@ const projects = defineCollection({
   schema: z.object(evidenceFields),
 });
 
-export const collections = { labs, writing, projects };
+// Tutorials teach. Where Labs prove and Writing argues, a Tutorial walks a reader through
+// doing the thing — paired with a terminal recording (animated SVG by default; the
+// interactive asciinema player is opt-in and requires a CSP review, see
+// public/tutorials/README.md). Reuses the Labs discipline split so a reviewer finds GRC,
+// networking, security, and instrument lessons in the same plain-language buckets.
+const tutorials = defineCollection({
+  loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/tutorials' }),
+  schema: z.object({
+    ...evidenceFields,
+    discipline: z.enum(['grc', 'networking', 'security', 'instruments']),
+    draft: z.boolean().optional().default(false),
+    /** Path under /public to the rendered animated SVG, e.g. /tutorials/my-slug/demo.svg.
+     *  Optional — a tutorial can be prose-only. Referenced in the body, not auto-injected. */
+    recording: z.string().optional(),
+  }),
+});
+
+export const collections = { labs, writing, projects, tutorials };
