@@ -8,15 +8,23 @@ is published as "designed, not yet run" rather than dressed up as complete).
 
 ## Add an entry
 
-1. Copy `../_templates/projects-entry.md` into this folder and rename it to your slug:
-   ```
-   cp ../_templates/projects-entry.md my-build.md
-   ```
-   The filename becomes the URL — `my-build.md` → `/projects/my-build`.
-2. Fill in the frontmatter (table below) and write the body in Markdown.
-3. If there are photos, see "Adding a photo" below before you touch `public/`.
-4. Preview: from the repository root, run `npm run dev` and open the printed URL.
-5. `npm run build` — must exit 0 — then commit and push.
+**Preferred** — from the repository root:
+
+```bash
+npm run new -- project "My build"
+```
+
+Cheat sheet: [`EDIT.md`](../../../EDIT.md).
+
+Manual fallback: copy `../_templates/projects-entry.md` here and rename it to your slug.
+The filename becomes the URL — `my-build.md` → `/projects/my-build`.
+
+Then:
+
+1. Fill in the frontmatter (table below) and write the body in Markdown.
+2. If there are photos, see "Adding a photo" below before you touch `public/`.
+3. Preview: `npm run dev` and open the printed URL.
+4. Ship: `npm run build && npm run deploy`.
 
 ## Edit an existing entry
 

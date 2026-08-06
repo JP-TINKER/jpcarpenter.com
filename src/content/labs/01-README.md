@@ -8,21 +8,49 @@ lab is designed but not yet run, it says so — see `android-tv-box-security-ass
 
 ## Add an entry
 
-1. Copy `../_templates/labs-entry.md` into this folder and rename it to your slug:
-   ```
-   cp ../_templates/labs-entry.md my-new-lab.md
-   ```
-   The filename becomes the URL — `my-new-lab.md` → `/labs/my-new-lab`.
-2. Fill in the frontmatter (table below) and write the body in Markdown.
-3. If there are screenshots, see "Adding a screenshot" below before you touch `public/`.
-4. Preview: from the repository root, run `npm run dev` and open the printed URL.
-5. `npm run build` — must exit 0 — then commit and push.
+**Preferred** — from the repository root:
+
+```bash
+npm run new -- lab "My new lab" --discipline security
+```
+
+`discipline` must be one of: `grc` | `networking` | `security` | `instruments`.
+Cheat sheet: [`EDIT.md`](../../../EDIT.md).
+
+Manual fallback: copy `../_templates/labs-entry.md` here and rename it to your slug.
+The filename becomes the URL — `my-new-lab.md` → `/labs/my-new-lab`.
+
+Then:
+
+1. Fill in the frontmatter (table below) and write the body in Markdown.
+2. If there are screenshots, see "Adding a screenshot" below before you touch `public/`.
+3. Preview: `npm run dev` and open the printed URL.
+4. Ship: `npm run build && npm run deploy`.
 
 ## Edit an existing entry
 
 Open the `.md` file, change it, save, rebuild. If new evidence changes an entry's honest
 status (e.g. a "designed, not yet run" lab actually gets run), update `stamp` and `state`
 to match — that update *is* the point of the stamp.
+
+## Expand-to-learn (running theme)
+
+Educational Labs should skim first. Use the shared expand stack instead of long prose walls:
+
+```html
+<div class="expand-stack">
+  <details class="expand-item">
+    <summary class="expand-term">Short label</summary>
+    <div class="expand-body">
+      <p>Depth goes here. Keep each open panel to a few short paragraphs.</p>
+    </div>
+  </details>
+</div>
+```
+
+Lead with 2–3 sentences and the instrument(s). Put teaching, entropy tables, defenses,
+sources, and "why this is here" behind expand rows. Same pattern as the tracker glossary
+on `/labs/browser-exposure` (classes live in `global.css`).
 
 ## Frontmatter fields
 

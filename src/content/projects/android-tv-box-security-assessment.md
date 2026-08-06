@@ -1,45 +1,67 @@
 ---
 title: "Android TV Box Security Assessment"
-summary: "Isolated FOSS lab in progress: testing whether an unofficial Android TV stick behaves like a residential proxy or ad-fraud bot."
-finding: "Designed but not yet run — the capture procedure is written and the isolation network is planned, and the results log is still blank. Listed here rather than held back so the record matches reality."
+summary: "An isolated lab built to test one hedged claim from brand-new research: that cheap Android TV boxes run as residential proxies while a display is attached, and switch to ad fraud when it isn't."
+finding: "Designed, not yet run. The published claim it tests is four days old and explicitly hedged, so the useful contribution is an instrumented hardware test rather than another traffic capture. Listed before results exist so the record matches reality."
 stamp: "Not yet run"
 state: open
-date: 2026-08-01
+date: 2026-08-03
 order: 10
 tags: ["iot", "network-forensics", "in-progress"]
 ---
 
-Public security research (Bitsight TRACE, Krebs on Security, Synthient) has documented a
-pattern in cheap unofficial Android TV streaming sticks: some quietly resell home bandwidth
-as a residential proxy while the TV is on, then shift to automated ad-fraud browsing while
-it's off. This project is my attempt to reproduce that observation myself, using only free and
-open-source tools, against a device I own.
+On July 30, 2026, Bitsight TRACE published research on Fuyao, an ad-fraud operation running on
+unofficial Android TV boxes. One detail stood out. The researchers concluded that infected boxes
+run as residential proxies when an HDMI display is attached, and switch to automated ad-fraud
+browsing when it isn't.
 
-## Status: lab designed, not yet run
+Their wording is careful, and worth quoting exactly: `CheckSelf()` "mostly translates to run proxy
+when the HDMI cable is on, run ad-fraud when the HDMI cable is off." Krebs on Security restated it
+as "usually." That conclusion came from reading decompiled code and correlating it with
+proxy-network data, not from testing hardware. Bitsight had telemetry from roughly 38,000 devices
+and no way to unplug a single one of them.
 
-To be direct about where this stands: the isolation network, tooling list, and phased test
-plan are fully designed — an outbound-isolated VLAN/gateway, a `tcpdump` / `tshark` / `nmap`
-/ `adb` toolchain, an HDMI-on vs. HDMI-off A/B capture plan, and a 0–5 scoring rubric. What
-hasn't happened yet is the actual capture run. I'm not publishing results that don't exist —
-this entry gets updated with real findings once there's a completed capture, or it says
-plainly that the device came back clean.
+I have one box and a cable. That's the whole reason this lab is worth running.
 
-## The plan
+## Status: designed, not yet run
 
-1. Isolate the stick on its own VLAN/gateway with no route to the trusted LAN.
-2. Inventory it — check for an open, unauthenticated ADB port (a real and common finding on
-   this class of device), dump installed packages, and look for phone-model identity
-   spoofing on TV hardware.
-3. Capture idle baseline traffic, then two more captures with the HDMI connection toggled on
-   and off.
-4. Compare upload/download ratios and TLS SNI diversity across the on/off windows — an
-   upload-heavy, long-tunnel pattern during "TV on" plus diverse short-session browsing
-   during "TV off" would match the published proxy/ad-fraud pattern.
-5. Score the result 0–5 against a fixed rubric, and publish sanitized artifacts (redacted SNI
-   lists, port scan results, and screenshots) rather than raw packet captures.
+The protocol is written and the isolation network is planned. No capture has happened yet, so
+there are no results to report, and I'm not going to publish results that don't exist. This entry
+gets updated when there's a completed run, including if the answer is that the device came back
+clean.
+
+## What it tests
+
+The experiment manipulates one variable, display state, and measures what the box does. The part
+that takes the work is proving the control actually worked.
+
+1. **Four arms, not two.** Display attached and powered on; attached with the display off; cable
+   unplugged; and cable connected to an EDID emulator, which tells the box a display is present
+   when nobody is watching. That last arm is the one that separates "the box detects a display"
+   from "someone is actually using it."
+2. **Verify the control.** Read the HDMI hotplug state and the wake state off the device itself,
+   on a timeline that lines up with the packet capture. If the box simply went to sleep when the
+   cable came out, the traffic drop means nothing, and without this check there's no way to tell
+   the difference.
+3. **Run it long enough to mean something.** Bitsight observed proxy activity on one in six boxes
+   in a 24-hour window. A 90-minute capture would return nothing on a fully infected device, so
+   the run is seven days with a rotating schedule, and the minimum observation time is fixed in
+   advance rather than decided once the numbers are in.
+4. **Include a control device.** A certified streaming device on the same segment, same tooling,
+   same duration. Without it, no measurement from the suspect box has anything to be compared to.
+5. **Publish the artifacts, not just the story.** The most reusable signal here needs no
+   indicator list at all: an outbound connection to a literal IP address with no DNS lookup
+   preceding it. Consumer devices almost never do that, and it survives infrastructure changes
+   that break every published domain and hash.
 
 ## Why it's here before it's finished
 
-Half of doing security work honestly is showing the scoping and hypothesis before you know
-the answer, not just the clean write-up after. If this comes back a boring, well-behaved
-device, that's a real (if unexciting) negative result, and it gets published as one.
+Showing the scoping and the hypothesis before knowing the answer is most of what doing this
+honestly looks like. The prediction is on the record and dated, which means it can be wrong in
+public.
+
+Three outcomes are all worth publishing. The behavior tracks display state, which is independent
+hardware support for a code-derived inference. It doesn't, which puts a bound on a claim already
+circulating as settled fact. Or the box is quiet, which is a characterized negative and a method
+other people can run against their own hardware.
+
+The last one is the least exciting and the most likely, and it still counts.

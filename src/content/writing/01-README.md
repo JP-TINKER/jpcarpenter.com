@@ -7,15 +7,24 @@ published yet" state says more than four stale posts would.
 
 ## Add a post
 
-1. Copy `../_templates/writing-post.md` into this folder and rename it to your slug:
-   ```
-   cp ../_templates/writing-post.md read-what-you-sign.md
-   ```
-   The filename becomes the URL — `read-what-you-sign.md` → `/writing/read-what-you-sign`.
-2. Fill in the frontmatter (table below) and write the body in Markdown.
-3. Preview: from the repository root, run `npm run dev` and open the printed URL.
-4. When it's ready: delete `draft: true` (or set it `false`), then `npm run build` — must
-   exit 0 — and commit + push.
+**Preferred** — from the repository root:
+
+```bash
+npm run new -- writing "Read what you sign"
+```
+
+That creates this folder’s `<slug>.md` with today’s date and `draft: true`. Full cheat sheet:
+[`EDIT.md`](../../../EDIT.md).
+
+Manual fallback: copy `../_templates/writing-post.md` here and rename it to your slug.
+The filename becomes the URL — `read-what-you-sign.md` → `/writing/read-what-you-sign`.
+
+Then:
+
+1. Fill in the frontmatter (table below) and write the body in Markdown.
+2. Preview: `npm run dev` and open the printed URL.
+3. When ready: set `draft: false` (or delete the draft line), then
+   `npm run build && npm run deploy`.
 
 ## Edit an existing post
 

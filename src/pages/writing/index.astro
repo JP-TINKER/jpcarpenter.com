@@ -12,7 +12,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 const pad = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
-<BaseLayout title="Writing" description="Sparse, specific pieces — published only when there is a claim worth defending.">
+<BaseLayout title="Writing" description="Sparse, specific pieces published only when there is a claim worth defending.">
   <section class="band sheet">
     <MarginNote
       index="03"
@@ -24,7 +24,7 @@ const pad = (n: number) => String(n + 1).padStart(2, '0');
       <p class="band-lede">
         {
           entries.length === 0
-            ? 'Nothing published yet. When something goes up it will be because I have a specific claim worth defending — a section carrying four stale posts says less than an empty one.'
+            ? 'Nothing published yet. When something goes up it will be because I have a specific claim worth defending. A section carrying four stale posts says less than an empty one.'
             : 'Specific claims, published when there is one worth defending.'
         }
       </p>
