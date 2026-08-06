@@ -20,6 +20,6 @@ export const LAB_DISCIPLINE_META: Record<
   },
   instruments: {
     label: 'Instruments',
-    description: 'Working demonstrations of craft, kept separate from professional security claims.',
+    description: 'Working craft demonstrations with real input, output, and stated limits.',
   },
 };

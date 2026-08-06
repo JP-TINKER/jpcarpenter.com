@@ -432,8 +432,8 @@
   color: var(--accent-soft);
 }
 
-/* Tracker glossary — static reference list under the live instrument. No search/filter
-   box: that exact pattern (Fine Print Decoder) was already tried and rejected. */
+/* Tracker glossary — same expand-stack pattern as the lab body (running theme).
+   Wrapper only handles measure/padding; rows reuse .expand-* classes. */
 .tracker-glossary {
   max-width: var(--max);
   margin: 2rem auto 0;
@@ -446,35 +446,376 @@
   margin-bottom: 1.5rem;
 }
 
-.tracker-glossary-list {
-  display: grid;
-  /* min() so a 15rem track can still shrink on a 320px phone instead of overflowing. */
-  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
-  gap: 1.5rem 2rem;
-  margin: 0;
-}
-
-.tracker-glossary-item {
-  border-top: 1px solid var(--rule);
-  padding-top: 0.85rem;
-}
-
-.tracker-glossary-item dt {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--ink);
-  margin-bottom: 0.4rem;
-}
-
-.tracker-glossary-what {
-  color: var(--ink-muted);
+.tracker-glossary .expand-body p {
   margin: 0 0 0.35rem;
   font-size: 0.85rem;
 }
 
-.tracker-glossary-why {
+.tracker-glossary .expand-why {
   color: var(--accent-soft);
-  margin: 0;
+  margin: 0 0 0.85rem;
   font-size: 0.8rem;
+}
+
+/* Mechanical explain drawers — same down-slide for TRACE and GAUGE.
+   Motion: cubic-bezier with a slight settle, like a bay door on runners. Reduced motion
+   skips the travel and just swaps visibility. */
+.trace-stage,
+.gauge-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.trace-stage {
+  max-width: var(--max);
+}
+
+.instr-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.instr-drawer.is-open {
+  grid-template-rows: 1fr;
+}
+
+.instr-drawer-plate {
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #241f18 0%, #16120e 100%);
+  border: 1px solid #4a3f32;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transform: translateY(-10px);
+  opacity: 0;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.35s ease;
+  position: relative;
+}
+
+.instr-drawer.is-open .instr-drawer-plate {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.instr-drawer-rail {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(100, 112, 91, 0.45) 12%,
+    rgba(100, 112, 91, 0.45) 88%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.instr-drawer-rail::before,
+.instr-drawer-rail::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5a4e40;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.instr-drawer-rail::before {
+  left: 0;
+}
+
+.instr-drawer-rail::after {
+  right: 0;
+}
+
+.instr-drawer-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 0.35rem;
+}
+
+.instr-drawer-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  font-weight: 700;
+}
+
+.instr-drawer-close {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid var(--rule);
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+}
+
+.instr-drawer-close:hover {
+  color: var(--ink);
+  border-color: var(--accent-soft);
+}
+
+.instr-drawer-copy {
+  margin: 0;
+  padding: 0.35rem 1rem 1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.instr-drawer-copy dt {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.2rem;
+}
+
+.instr-drawer-copy dd {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/* TRACE under-row plate — opens at the locus of the tapped signal (master-detail).
+   CRT inset styling; no distant tray, no side bay. */
+.trace-row {
+  display: block;
+}
+
+.trace-row-plate {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+  margin: 0.15rem 0 0.45rem;
+}
+
+.trace-row.is-open .trace-row-plate {
+  grid-template-rows: 1fr;
+}
+
+.trace-row-plate-inner {
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(90, 170, 96, 0.18);
+  border-radius: 2px;
+  background: #020805;
+  box-shadow: inset 0 1px 0 rgba(90, 170, 96, 0.06);
+  position: relative;
+  transform: translateY(-6px);
+  opacity: 0;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.3s ease;
+}
+
+.trace-row.is-open .trace-row-plate-inner {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.trace-row-plate .instr-drawer-title {
+  color: #9ad4a1;
+}
+
+.trace-row-plate .instr-drawer-copy dd {
+  color: #8a9a84;
+}
+
+.trace-row-plate .instr-drawer-copy dt {
+  color: #6fc478;
+}
+
+.trace-row-plate .instr-drawer-close {
+  border-color: rgba(90, 170, 96, 0.25);
+  color: #8a9a84;
+}
+
+.trace-line-hit {
+  display: grid;
+  grid-template-columns: 0.9rem 12.75rem minmax(0, 1fr) 1rem;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.05rem 0.2rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.trace-line-hit:hover,
+.trace-line-hit[aria-pressed='true'] {
+  background: rgba(90, 170, 96, 0.1);
+}
+
+.trace-line-hit[aria-pressed='true'] {
+  color: #b7e6ba;
+}
+
+.trace-line-prefix {
+  color: #6fc478;
+}
+
+.trace-line-label {
+  color: #8fd898;
+  white-space: nowrap;
+}
+
+.trace-line-value {
+  color: #6fc478;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trace-line-chevron {
+  color: var(--accent);
+  font-size: 0.65rem;
+  justify-self: end;
+  transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.trace-line-hit[aria-pressed='true'] .trace-line-chevron {
+  transform: rotate(90deg);
+}
+
+.trace-line-head {
+  color: #9ad4a1;
+  margin-top: 0.35rem;
+}
+
+.trace-line-head:first-child {
+  margin-top: 0;
+}
+
+.trace-line-status {
+  color: #b7e6ba;
+  margin-top: 0.25rem;
+}
+
+.scope-crt-hit {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.scope-crt-hit:focus-visible,
+.gauge-readout-hit:focus-visible,
+.gauge-detected-hit:focus-visible,
+.trace-line-hit:focus-visible,
+.instr-drawer-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.gauge-readout-hit {
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: center;
+  padding: 0.15rem 0.2rem;
+  border-radius: 2px;
+}
+
+.gauge-readout-hit:hover,
+.gauge-readout-hit[aria-pressed='true'],
+.gauge-detected-hit:hover,
+.gauge-detected-hit[aria-pressed='true'],
+.scope-crt-hit[aria-pressed='true'] .scope-crt-housing {
+  outline: 1px solid rgba(100, 112, 91, 0.55);
+}
+
+.gauge-detected-hit {
+  display: block;
+  width: 100%;
+  appearance: none;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 0.15rem 0.2rem;
+  /* Keep the receipt rule that lived on the old <p>. */
+  margin-top: 0;
+}
+
+.gauge-stage {
+  width: 340px;
+}
+
+.gauge-stage .scope-body {
+  border-radius: 4px 4px 0 0;
+}
+
+.gauge-stage:not(.is-drawer-open) .scope-body {
+  border-radius: 4px;
+}
+
+.gauge-stage .instr-drawer--down .instr-drawer-plate {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instr-drawer,
+  .instr-drawer-plate,
+  .trace-stage,
+  .trace-line-chevron,
+  .trace-row-plate,
+  .trace-row-plate-inner {
+    transition: none !important;
+  }
+
+  .instr-drawer:not(.is-open) .instr-drawer-plate {
+    display: none;
+  }
+
+  .instr-drawer.is-open .instr-drawer-plate {
+    transform: none;
+    opacity: 1;
+  }
+
+  .trace-row:not(.is-open) .trace-row-plate {
+    display: none;
+  }
+
+  .trace-row.is-open .trace-row-plate-inner {
+    transform: none;
+    opacity: 1;
+  }
 }

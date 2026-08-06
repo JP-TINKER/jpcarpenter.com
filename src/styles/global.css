@@ -765,6 +765,129 @@ h1.band-heading {
   font-size: 1.25rem;
 }
 
+/* Expand stack — running theme for educational depth without walls of text.
+   Native <details>/<summary>: skim the terms, open only what you want.
+   Same pattern as the tracker glossary under FINGERPRINT TRACE. */
+.expand-stack {
+  margin: 1.5rem 0 0;
+}
+
+.expand-item {
+  border-top: 1px solid var(--rule);
+  padding: 0;
+}
+
+.expand-item:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+.expand-term {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+  padding: 0.85rem 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.expand-term::-webkit-details-marker {
+  display: none;
+}
+
+.expand-term::after {
+  content: '\25B8';
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-size: 0.7rem;
+  transition: transform 0.18s ease;
+  flex-shrink: 0;
+}
+
+.expand-item[open] > .expand-term::after {
+  transform: rotate(90deg);
+}
+
+.expand-item[open] > .expand-term {
+  color: var(--accent);
+}
+
+.expand-body {
+  padding: 0 0 0.95rem;
+  max-width: 42rem;
+}
+
+.expand-body > :first-child {
+  margin-top: 0;
+}
+
+.expand-body > :last-child {
+  margin-bottom: 0;
+}
+
+.expand-body p,
+.expand-body li {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.expand-body p {
+  margin: 0 0 0.7rem;
+}
+
+.expand-body ul {
+  margin: 0 0 0.7rem;
+  padding-left: 1.15rem;
+}
+
+.expand-body li + li {
+  margin-top: 0.35rem;
+}
+
+.expand-body code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+}
+
+.expand-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0 0.9rem;
+  font-size: 0.8rem;
+}
+
+.expand-body th,
+.expand-body td {
+  text-align: left;
+  padding: 0.4rem 0.55rem 0.4rem 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+  vertical-align: top;
+}
+
+.expand-body th {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.expand-body a {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expand-term::after {
+    transition: none;
+  }
+}
+
 /* Document-control block — real metadata about the post itself (revision, status,
    review date), formatted like a policy doc header, not a fabricated credential. */
 .doc-control {

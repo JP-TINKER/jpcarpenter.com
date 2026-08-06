@@ -1,13 +1,13 @@
 /** FINGERPRINT TRACE Model 1 — a real, working demonstration of browser fingerprinting,
- *  run only against the visitor viewing it. Canvas, WebGL, and Audio probes are genuine
- *  techniques used by real fingerprinting libraries; the composite hash they produce is
- *  stored in this browser's localStorage (nothing else, nowhere else) so a repeat visit
- *  to THIS site can be recognized without a cookie — the exact mechanism that makes
- *  cross-site fingerprinting possible, demonstrated honestly and scoped to one origin.
+ *  run only against the visitor viewing it. Canvas, WebGL, Audio, font enumeration, and
+ *  math-engine probes are genuine techniques used by real fingerprinting libraries; the
+ *  composite hash they produce is stored in this browser's localStorage (nothing else,
+ *  nowhere else) so a repeat visit to THIS site can be recognized without a cookie.
  *  Nothing computed here is ever sent over the network. A "Forget me" control clears it.
  */
 
-import { getRawSignalString } from './browser-signals';
+import { getPassiveSignalParts, getRawSignalString } from './browser-signals';
+import { getSignalExplain } from './signal-explain';
 
 const STORAGE_KEY = 'bench-fingerprint-demo';
 const BLOCKED_LABEL = 'blocked by this browser (a good sign)';
@@ -50,7 +50,7 @@ function computeCanvasFingerprint(): string | null {
     ctx.textBaseline = 'top';
     ctx.font = '14px "Space Mono", monospace';
     ctx.fillStyle = '#5aaa60';
-    ctx.fillText('bench fingerprint \u2014 0123 !@#$', 2, 2);
+    ctx.fillText('bench fingerprint / 0123 !@#$', 2, 2);
     ctx.strokeStyle = 'rgba(90,170,96,0.5)';
     ctx.beginPath();
     ctx.arc(200, 20, 12, 0, Math.PI * 1.5);
@@ -129,6 +129,99 @@ function computeAudioFingerprint(): Promise<number | null> {
   });
 }
 
+/** Width-based font presence check (Lalit Patel / FingerprintJS pattern). Subset of
+ *  distinctive fonts only: enough entropy for the demo, short enough to finish on load. */
+function computeFontFingerprint(): { count: number; hash: string } | null {
+  try {
+    const testString = 'mmMwWLliI0O&1';
+    const baseFonts = ['monospace', 'sans-serif', 'serif'] as const;
+    const candidates = [
+      'Arial Unicode MS',
+      'Calibri',
+      'Century Gothic',
+      'Franklin Gothic',
+      'Gill Sans',
+      'Helvetica Neue',
+      'Lucida Sans',
+      'Menlo',
+      'MS Mincho',
+      'Meiryo UI',
+      'Monotype Corsiva',
+      'PMingLiU',
+      'Segoe UI Light',
+      'SimHei',
+      'Futura Md BT',
+      'Agency FB',
+      'Bitstream Vera Sans Mono',
+      'Marlett',
+      'Pristina',
+      'TRAJAN PRO',
+    ];
+
+    const holder = document.createElement('div');
+    holder.style.cssText =
+      'position:absolute;left:-9999px;top:-9999px;visibility:hidden;font-size:48px';
+    document.body.appendChild(holder);
+
+    const measure = (fontFamily: string): { w: number; h: number } => {
+      const span = document.createElement('span');
+      span.style.fontFamily = fontFamily;
+      span.textContent = testString;
+      holder.appendChild(span);
+      const size = { w: span.offsetWidth, h: span.offsetHeight };
+      return size;
+    };
+
+    const defaults: Record<string, { w: number; h: number }> = {};
+    for (const base of baseFonts) {
+      defaults[base] = measure(base);
+    }
+
+    const found: string[] = [];
+    for (const font of candidates) {
+      const hit = baseFonts.some((base) => {
+        const size = measure(`'${font}',${base}`);
+        return size.w !== defaults[base].w || size.h !== defaults[base].h;
+      });
+      if (hit) found.push(font);
+    }
+
+    holder.remove();
+    return { count: found.length, hash: shortHash(found.join('|')) };
+  } catch {
+    return null;
+  }
+}
+
+/** JS-engine math quirks (FingerprintJS-style). Same inputs, different float results
+ *  across engines and platforms. */
+function computeMathFingerprint(): string | null {
+  try {
+    const M = Math;
+    const values = [
+      M.acos(0.123124234234234242),
+      M.acosh?.(1e308) ?? 0,
+      M.asin(0.123124234234234242),
+      M.asinh?.(1) ?? 0,
+      M.atanh?.(0.5) ?? 0,
+      M.atan(0.5),
+      M.sin(-1e300),
+      M.sinh?.(1) ?? 0,
+      M.cos(10.000000000123),
+      M.cosh?.(1) ?? 0,
+      M.tan(-1e300),
+      M.tanh?.(1) ?? 0,
+      M.exp(1),
+      M.expm1?.(1) ?? 0,
+      M.log1p?.(10) ?? 0,
+      M.pow(M.PI, -100),
+    ];
+    return shortHash(values.map((v) => String(v)).join(','));
+  } catch {
+    return null;
+  }
+}
+
 function readStored(): StoredRecord | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -147,8 +240,7 @@ function writeStored(record: StoredRecord): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
   } catch {
-    // localStorage unavailable (private mode, blocked) — degrade silently; the read above
-    // still happened and is still shown, only the "recognized on repeat visit" part is lost.
+    // localStorage unavailable (private mode, blocked) — degrade silently.
   }
 }
 
@@ -159,7 +251,7 @@ function checkRevisit(currentId: string): RevisitStatus {
     writeStored({ id: currentId, firstSeen: new Date().toISOString() });
     return {
       message:
-        'First visit recorded on this device \u2014 no cookies used. Reload this page and it should recognize you.',
+        'First visit recorded on this device. No cookies used. Reload this page and it should recognize you.',
     };
   }
 
@@ -170,52 +262,211 @@ function checkRevisit(currentId: string): RevisitStatus {
       day: 'numeric',
     });
     return {
-      message: `Recognized \u2014 matches the fingerprint stored since ${since}. Still no cookies.`,
+      message: `Recognized. Matches the fingerprint stored since ${since}. Still no cookies.`,
     };
   }
 
   writeStored({ id: currentId, firstSeen: new Date().toISOString() });
   return {
     message:
-      "This signature doesn't match what was stored before \u2014 different browser, device, or cleared storage.",
+      "This signature doesn't match what was stored before. Different browser, device, or cleared storage.",
   };
 }
 
-function buildLines(
-  parts: { label: string; value: string }[],
+function buildLogModel(
+  sections: { heading: string; parts: { label: string; value: string }[] }[],
   status: RevisitStatus,
-): string[] {
-  const lines = ['> SCANNING PASSIVE SIGNALS\u2026'];
-  parts.forEach((p) => {
-    lines.push(`> ${p.label.padEnd(16, ' ')} ${p.value}`);
-  });
-  lines.push('>');
-  lines.push(`> STATUS: ${status.message}`);
-  return lines;
+): { kind: 'head' | 'row' | 'blank' | 'status'; label?: string; value?: string; text: string }[] {
+  const rows: { kind: 'head' | 'row' | 'blank' | 'status'; label?: string; value?: string; text: string }[] =
+    [];
+  for (const section of sections) {
+    rows.push({ kind: 'head', text: `> ${section.heading}` });
+    for (const p of section.parts) {
+      rows.push({
+        kind: 'row',
+        label: p.label,
+        value: p.value,
+        text: `>   ${p.label.padEnd(18, ' ')} ${p.value}`,
+      });
+    }
+  }
+  rows.push({ kind: 'blank', text: '>' });
+  rows.push({ kind: 'status', text: `> STATUS: ${status.message}` });
+  return rows;
 }
 
-function renderLog(container: HTMLElement, lines: string[], reduceMotion: boolean): void {
+function buildUnderRowPlate(key: string): HTMLElement | null {
+  const expl = getSignalExplain(key);
+  if (!expl) return null;
+
+  const plate = document.createElement('aside');
+  plate.className = 'trace-row-plate';
+  plate.setAttribute('aria-label', expl.title);
+
+  const inner = document.createElement('div');
+  inner.className = 'trace-row-plate-inner';
+
+  const rail = document.createElement('div');
+  rail.className = 'instr-drawer-rail';
+  rail.setAttribute('aria-hidden', 'true');
+
+  const head = document.createElement('header');
+  head.className = 'instr-drawer-head';
+
+  const title = document.createElement('h3');
+  title.className = 'instr-drawer-title';
+  title.textContent = expl.title;
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'instr-drawer-close';
+  closeBtn.setAttribute('aria-label', 'Close explanation');
+  closeBtn.textContent = 'stow';
+
+  head.append(title, closeBtn);
+
+  const dl = document.createElement('dl');
+  dl.className = 'instr-drawer-copy';
+
+  const entries: [string, string][] = [
+    ['What', expl.what],
+    ['How', expl.how],
+    ['Means', expl.means],
+  ];
+  for (const [dtText, ddText] of entries) {
+    const wrap = document.createElement('div');
+    const dt = document.createElement('dt');
+    dt.textContent = dtText;
+    const dd = document.createElement('dd');
+    dd.textContent = ddText;
+    wrap.append(dt, dd);
+    dl.appendChild(wrap);
+  }
+
+  inner.append(rail, head, dl);
+  plate.appendChild(inner);
+  return plate;
+}
+
+function renderLog(
+  container: HTMLElement,
+  rows: ReturnType<typeof buildLogModel>,
+  reduceMotion: boolean,
+): void {
   container.replaceChildren();
 
-  if (reduceMotion) {
-    lines.forEach((text) => {
-      const el = document.createElement('div');
-      el.className = 'trace-line';
-      el.textContent = text;
-      container.appendChild(el);
+  let openKey: string | null = null;
+  let openWrap: HTMLElement | null = null;
+
+  function closeOpen(): void {
+    if (!openWrap) return;
+    openWrap.classList.remove('is-open');
+    const btn = openWrap.querySelector('.trace-line-hit');
+    btn?.setAttribute('aria-pressed', 'false');
+    btn?.setAttribute('aria-expanded', 'false');
+    const plate = openWrap.querySelector('.trace-row-plate');
+    plate?.remove();
+    openWrap = null;
+    openKey = null;
+  }
+
+  function openRow(key: string, wrap: HTMLElement, btn: HTMLElement): void {
+    if (openKey === key) {
+      closeOpen();
+      return;
+    }
+    closeOpen();
+    const plate = buildUnderRowPlate(key);
+    if (!plate) return;
+
+    const closeBtn = plate.querySelector('.instr-drawer-close');
+    closeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeOpen();
     });
+
+    wrap.appendChild(plate);
+    if (!reduceMotion) {
+      void plate.offsetHeight;
+    }
+    wrap.classList.add('is-open');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.setAttribute('aria-expanded', 'true');
+    openWrap = wrap;
+    openKey = key;
+    plate.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+
+  const appendRow = (row: (typeof rows)[number]) => {
+    if (row.kind === 'row' && row.label) {
+      const wrap = document.createElement('div');
+      wrap.className = 'trace-row';
+      wrap.dataset.explain = row.label;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'trace-line trace-line-hit';
+      btn.dataset.explain = row.label;
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.title = `Explain ${row.label}`;
+
+      const prefix = document.createElement('span');
+      prefix.className = 'trace-line-prefix';
+      prefix.textContent = '>';
+
+      const label = document.createElement('span');
+      label.className = 'trace-line-label';
+      label.textContent = row.label;
+
+      const value = document.createElement('span');
+      value.className = 'trace-line-value';
+      value.textContent = row.value ?? '';
+
+      const chevron = document.createElement('span');
+      chevron.className = 'trace-line-chevron';
+      chevron.setAttribute('aria-hidden', 'true');
+      chevron.textContent = '▸';
+
+      btn.append(prefix, label, value, chevron);
+      btn.addEventListener('click', () => {
+        openRow(row.label!, wrap, btn);
+        btn.setAttribute('aria-expanded', openKey === row.label ? 'true' : 'false');
+      });
+
+      wrap.appendChild(btn);
+      container.appendChild(wrap);
+      return;
+    }
+
+    const el = document.createElement('div');
+    el.className = 'trace-line';
+    if (row.kind === 'status') el.classList.add('trace-line-status');
+    if (row.kind === 'head') el.classList.add('trace-line-head');
+    el.textContent = row.text;
+    container.appendChild(el);
+  };
+
+  type TraceLog = HTMLElement & { _traceEsc?: (e: KeyboardEvent) => void };
+  const log = container as TraceLog;
+  if (log._traceEsc) document.removeEventListener('keydown', log._traceEsc);
+  const onDocEscape = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape' && openKey) closeOpen();
+  };
+  log._traceEsc = onDocEscape;
+  document.addEventListener('keydown', onDocEscape);
+
+  if (reduceMotion) {
+    rows.forEach(appendRow);
     return;
   }
 
   let i = 0;
   function addLine() {
-    if (i >= lines.length) return;
-    const el = document.createElement('div');
-    el.className = 'trace-line';
-    el.textContent = lines[i];
-    container.appendChild(el);
+    if (i >= rows.length) return;
+    appendRow(rows[i]);
     i += 1;
-    if (i < lines.length) setTimeout(addLine, 130);
+    if (i < rows.length) setTimeout(addLine, 90);
   }
   addLine();
 }
@@ -233,30 +484,45 @@ export function initFingerprintTrace(): void {
     const canvasHash = computeCanvasFingerprint();
     const webgl = computeWebglFingerprint();
     const audioValue = await computeAudioFingerprint();
+    const fonts = computeFontFingerprint();
+    const mathHash = computeMathFingerprint();
+    const passive = getPassiveSignalParts();
 
-    const parts = [
+    const activeParts = [
       { label: 'canvas.render', value: canvasHash ?? BLOCKED_LABEL },
       {
         label: 'webgl.renderer',
-        value: webgl ? `${webgl.vendor} \u2014 ${webgl.renderer}` : BLOCKED_LABEL,
+        value: webgl ? `${webgl.vendor} / ${webgl.renderer}` : BLOCKED_LABEL,
       },
       { label: 'audio.context', value: audioValue !== null ? audioValue.toFixed(10) : BLOCKED_LABEL },
+      {
+        label: 'fonts.detected',
+        value: fonts ? `${fonts.count} hits · ${fonts.hash}` : BLOCKED_LABEL,
+      },
+      { label: 'math.engine', value: mathHash ?? BLOCKED_LABEL },
     ];
 
     const compositeInput = [
       canvasHash ?? 'nc',
       webgl ? `${webgl.vendor}${webgl.renderer}` : 'nw',
       audioValue !== null ? audioValue.toFixed(10) : 'na',
+      fonts ? fonts.hash : 'nf',
+      mathHash ?? 'nm',
       getRawSignalString(),
     ].join('::');
 
     const compositeId = shortHash(compositeInput);
-    parts.push({ label: 'composite.hash', value: compositeId });
+
+    const sections = [
+      { heading: 'PASSIVE SIGNALS', parts: passive },
+      { heading: 'ACTIVE PROBES', parts: activeParts },
+      { heading: 'COMPOSITE', parts: [{ label: 'composite.hash', value: compositeId }] },
+    ];
 
     const status = checkRevisit(compositeId);
-    const lines = buildLines(parts, status);
+    const rows = buildLogModel(sections, status);
 
-    renderLog(logEl!, lines, reduceMotion);
+    renderLog(logEl!, rows, reduceMotion);
     logEl!.removeAttribute('aria-busy');
   }
 

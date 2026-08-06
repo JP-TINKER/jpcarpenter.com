@@ -1,23 +1,47 @@
-/** EXPOSURE GAUGE Model 1 — passive instrument, no knobs, no interaction.
- *  Job: read the real signals any site already receives automatically on page load
- *  (User-Agent, timezone, language, screen geometry, CPU cores, cookies, DNT/GPC) and
- *  show how much that combination already reveals — computed once, on load, with
- *  zero clicks. Nothing here is sent anywhere; it's read and rendered in this browser
- *  and never leaves it.
+/** EXPOSURE GAUGE Model 1 — passive instrument. Reads signals any site already gets
+ *  on load and shows how identifying that combination is. Tap the face or a readout
+ *  to slide a plain-English plate down the bay. Nothing leaves this browser.
  */
 
 import { getBasicSignals, parseUserAgent } from './browser-signals';
+import { bindExplainDrawer } from './signal-explain';
 
 export function initExposureGauge(): void {
   const canvas = document.getElementById('exposureCanvas') as HTMLCanvasElement | null;
   const detectedLine = document.getElementById('exposureDetected');
   const heroLine = document.getElementById('heroExposureLine');
+  const root = document.getElementById('gaugeRoot');
+  const drawer = document.getElementById('gaugeDrawer');
+  const titleEl = document.getElementById('gaugeDrawerTitle');
+  const whatEl = document.getElementById('gaugeDrawerWhat');
+  const howEl = document.getElementById('gaugeDrawerHow');
+  const meansEl = document.getElementById('gaugeDrawerMeans');
+  const closeBtn = document.getElementById('gaugeDrawerClose');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (root && drawer && titleEl && whatEl && howEl && meansEl && closeBtn) {
+    const drawerApi = bindExplainDrawer({
+      root,
+      drawer,
+      titleEl,
+      whatEl,
+      howEl,
+      meansEl,
+      closeBtn,
+      direction: 'down',
+    });
+    root.querySelectorAll<HTMLElement>('[data-explain]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const key = el.getAttribute('data-explain');
+        if (key) drawerApi.open(key);
+      });
+    });
+  }
 
   const W = canvas.width;
   const H = canvas.height;
@@ -74,7 +98,7 @@ export function initExposureGauge(): void {
   if (noteEl) noteEl.textContent = note;
   if (detectedLine) detectedLine.textContent = `Detected: ${detectedText}`;
   if (heroLine) {
-    heroLine.textContent = `This page can already see: ${browser} on ${os}, ${tz.split('/').pop()?.replace('_', ' ')}, ${cores} — ${Math.round(score)}/${maxScore} signals, zero clicks.`;
+    heroLine.textContent = `This page can already see: ${browser} on ${os}, ${tz.split('/').pop()?.replace('_', ' ')}, ${cores}. ${Math.round(score)}/${maxScore} signals, zero clicks.`;
   }
 
   let needleFraction = reduceMotion ? targetFraction : 0;

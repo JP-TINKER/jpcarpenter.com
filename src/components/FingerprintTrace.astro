@@ -1,84 +1,115 @@
 ---
-/** FINGERPRINT TRACE Model 1 — a real fingerprinting demo run against the visitor
- *  reading it, not a toy. Canvas/WebGL/Audio probes execute in this browser only;
- *  the composite result is stored in localStorage (this origin only) so a repeat
- *  visit can be recognized without a cookie. Nothing here is ever transmitted, and
- *  the "Forget me" button clears the one thing that gets stored.
- *  Progressive: without JS, the log stays as static explanatory text; the glossary
- *  below is static either way.
+/** FINGERPRINT TRACE Model 1 — real fingerprinting demo against the visitor viewing it.
+ *  Progressive: without JS, static log text; with JS, tap a row to open a plain-English
+ *  plate immediately under that row (single-open). Gauge drawer is a separate instrument.
  */
 
 const trackers = [
   {
     name: 'Third-party cookies',
-    what: 'A small file set by a domain other than the one you\u2019re visiting \u2014 often an ad or analytics network embedded on the page.',
-    why: 'Lets that network recognize you across every site that embeds it, building a browsing history you never agreed to hand over in one place.',
+    what: 'A small file a website other than the one you\u2019re visiting places on your computer \u2014 usually an ad or analytics network embedded in the page.',
+    why: 'It lets that network recognize you on every site that uses it, and quietly stitch together a browsing history you never handed anyone in one place.',
   },
   {
     name: 'Tracking pixels',
-    what: 'An invisible 1\u00d71 image (or similar) that loads from a tracker\u2019s server the moment a page or email opens.',
-    why: 'The request itself \u2014 your IP, timing, device \u2014 is the data. You never see it fire.',
+    what: 'An invisible 1\u00d71 image that loads from a tracker\u2019s server the moment a page or email opens.',
+    why: 'The request itself is the data \u2014 your IP address, the time, your device. You never see it fire, but the tracker just learned you were there.',
   },
   {
-    name: 'Canvas / WebGL / audio fingerprinting',
-    what: 'Rendering text or audio and reading back the exact pixel or waveform output, which varies subtly by GPU, font stack, and OS \u2014 you just saw this above.',
-    why: 'Survives cleared cookies and private browsing. There\u2019s no icon for it and, until now, nothing telling you it happened.',
+    name: 'Canvas / WebGL / audio / fonts / math fingerprinting',
+    what: 'Drawing hidden text and shapes, playing silent sound, listing your fonts, and probing how your browser does math \u2014 then reading back results that vary by your graphics chip, fonts, and system. This is what the instrument above just did to you.',
+    why: 'It survives clearing your cookies and private browsing. There is no icon for it, and on most sites nothing tells you it happened.',
   },
   {
     name: 'Real-time bidding leakage',
-    what: 'The instant an ad slot loads, your browsing context is broadcast to dozens or hundreds of ad exchanges bidding to show you something.',
-    why: 'Every bidder \u2014 win or lose \u2014 received a copy of that context. There is no way to know how many companies briefly held it.',
+    what: 'The moment an ad slot loads, your browsing context is broadcast to dozens or hundreds of ad exchanges competing to show you an ad.',
+    why: 'Every bidder gets a copy of that context, whether they win the auction or not. You have no way to know how many companies briefly held it.',
   },
   {
     name: 'Session replay scripts',
-    what: 'Analytics tooling that records mouse movement, scrolling, and sometimes keystrokes on a page, then replays your session like a video.',
-    why: 'Often catches form fields, including ones marked \u201cprivate,\u201d depending on how carelessly it was configured.',
+    what: 'Tools that record your mouse movements, scrolling, and sometimes your keystrokes on a page, then replay your session like a video.',
+    why: 'They often capture what you type into form fields \u2014 including ones marked \u201cprivate\u201d \u2014 depending on how carelessly the site set them up.',
+  },
+  {
+    name: 'CNAME cloaking',
+    what: 'A third-party tracker disguises itself as part of the site you\u2019re visiting by routing through a name that looks first-party. To your browser it looks like the site you meant to visit; on the network it behaves like a tracker.',
+    why: 'It defeats the usual first-party / third-party cookie rules, because the request looks like it belongs to the site. Safari and Brave now unwrap these disguises. Not every browser does.',
+  },
+  {
+    name: 'Bounce tracking',
+    what: 'A chain of redirects (site-a \u2192 tracker \u2192 site-b) that passes an ID between sites without either one keeping a third-party cookie.',
+    why: 'It works even in browsers that block third-party cookies, because the tracker reads the ID straight out of the address. Storage partitioning is the browser-level fix; the redirect is what makes the trick possible.',
+  },
+  {
+    name: 'Cookie syncing',
+    what: 'Trackers quietly swap IDs behind the scenes, so a profile built on one follows you to the others, even across sites that have nothing to do with each other.',
+    why: 'This is the backend of cross-site tracking \u2014 the part you never see. It was measured at million-site scale in 2016 and is still common across the open web.',
+  },
+  {
+    name: 'TLS / network fingerprinting (JA3 / JA4)',
+    what: 'The first hello your browser sends when opening a secure connection lists its ciphers and options in an order that differs per browser and operating system. A hash of those fields identifies your setup.',
+    why: 'A different surface from canvas, but the same idea: no consent, no storage, no JavaScript needed. The network connection itself is the fingerprint \u2014 it works even with cookies off and a VPN on.',
+  },
+  {
+    name: 'Storage API tracking',
+    what: 'Browser storage like IndexedDB, localStorage, and SharedWorker can leak ordering or state across sites in ways cookies do not.',
+    why: 'In 2026, an IndexedDB ordering flaw let Tor Browser sessions be linked across sites with no cookie at all, until Firefox 150 fixed it. Storage keeps becoming a new tracking surface.',
+  },
+  {
+    name: 'Ambient sensors & side channels',
+    what: 'Device sensors and hardware hooks \u2014 gyroscope, accelerometer, ambient light, microphone, WebHID, WebUSB \u2014 that leak data passively or through a permission prompt.',
+    why: 'On phones, ambient sensors have been used in published attacks to defeat anti-fingerprinting noise. Most users see a permission prompt. Some do not.',
   },
 ];
 ---
 
-<div class="trace-instrument">
-  <div class="trace-body">
-    <div class="trace-brand">
-      <span class="trace-brand-name">FINGERPRINT TRACE</span>
-      <span class="trace-brand-model">Model 1 &nbsp;&bull;&nbsp; runs once, on load, on you</span>
-    </div>
-
-    <div class="trace-log" id="traceLog" aria-live="polite" role="status">
-      <div class="trace-line">
-        &gt; Enable JavaScript to run this scan — it only reads this browser and stays in it.
+<div class="trace-instrument" id="traceRoot">
+  <div class="trace-stage">
+    <div class="trace-body">
+      <div class="trace-brand">
+        <span class="trace-brand-name">FINGERPRINT TRACE</span>
+        <span class="trace-brand-model">Model 1 &nbsp;&bull;&nbsp; tap a row for plain English</span>
       </div>
-    </div>
 
-    <div class="trace-controls">
-      <button class="trace-forget-btn" id="traceForgetBtn" type="button">
-        Forget me (clear the one thing this stored)
-      </button>
-      <p class="trace-disclosure">
-        Only one thing is ever stored: a short id, under the key <code>bench-fingerprint-demo</code>,
-        in this browser&rsquo;s local storage, for this site only. Nothing is sent to a server —
-        there isn&rsquo;t one to send it to.
-      </p>
+      <div class="trace-log" id="traceLog" aria-live="polite" role="status">
+        <div class="trace-line">
+          &gt; Enable JavaScript to run this scan. It only reads this browser and stays in it.
+        </div>
+      </div>
+
+      <div class="trace-controls">
+        <button class="trace-forget-btn" id="traceForgetBtn" type="button">
+          Forget me (clear the one thing this stored)
+        </button>
+        <p class="trace-disclosure">
+          Only one thing is ever stored: a short id, under the key <code>bench-fingerprint-demo</code>,
+          in this browser&rsquo;s local storage, for this site only. Nothing is sent to a server.
+          There isn&rsquo;t one to send it to.
+        </p>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="tracker-glossary">
   <p class="tracker-glossary-intro">
-    None of these ran on this page — the scan above is real, they aren&rsquo;t. This is what the
-    equivalent looks like on a page that doesn&rsquo;t tell you.
+    The scan above ran fingerprinting techniques on this page. None of the other tracker types
+    below ran here. They are named so you can spot them on a page that won&rsquo;t tell you.
+    Tap any row for what it does and why it matters.
   </p>
-  <dl class="tracker-glossary-list">
+  <div class="expand-stack">
     {
       trackers.map((t) => (
-        <div class="tracker-glossary-item">
-          <dt>{t.name}</dt>
-          <dd class="tracker-glossary-what">{t.what}</dd>
-          <dd class="tracker-glossary-why">{t.why}</dd>
-        </div>
+        <details class="expand-item">
+          <summary class="expand-term">{t.name}</summary>
+          <div class="expand-body">
+            <p>{t.what}</p>
+            <p class="expand-why">{t.why}</p>
+          </div>
+        </details>
       ))
     }
-  </dl>
+  </div>
 </div>
 
 <script>

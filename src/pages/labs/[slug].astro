@@ -64,7 +64,7 @@ const readingMinutes = Math.max(1, Math.round(wordCount / 200));
           <p class="lab-instrument-caption">
             What it does: canvas rendering + real-time input handling, driven by hand-rolled
             pointer and scroll listeners. The knobs and scroll-coupling aren't tied to anything
-            else on the site — this widget is the project.
+            else on the site. This widget is the project.
           </p>
         </div>
       )
@@ -76,7 +76,7 @@ const readingMinutes = Math.max(1, Math.round(wordCount / 200));
           <RiskGauge />
           <p class="lab-instrument-caption">
             Turn the knobs. The needle and the readout below it are both driven by the same
-            computed score — Likelihood &times; Impact — not two things pretending to agree.
+            computed score (Likelihood &times; Impact), not two things pretending to agree.
           </p>
         </div>
       )
@@ -84,26 +84,31 @@ const readingMinutes = Math.max(1, Math.round(wordCount / 200));
 
     {
       entry.id === 'browser-exposure' && (
-        <div class="lab-instrument">
-          <ExposureGauge />
-          <p class="lab-instrument-caption">
-            Instrument 1 — passive signals, read once on load. Nothing here is transmitted.
+        <>
+          <p class="page-lede">
+            Fingerprinting is a way a website can recognize your specific browser without asking
+            you and without setting a cookie. It reads a handful of harmless-looking details your
+            browser hands over on every visit &mdash; screen size, installed fonts, time zone, the
+            way your computer draws text &mdash; and together they form a label that&rsquo;s nearly
+            unique to you. The two instruments below read those same details off your browser, right
+            now, and show you exactly what they kept; nothing leaves your device.
           </p>
-        </div>
+          <div class="lab-instrument">
+            <ExposureGauge />
+            <p class="lab-instrument-caption">
+              Instrument 1: passive signals, read once on load. Tap the face or a readout for plain English. Nothing is transmitted.
+            </p>
+          </div>
+          <div class="lab-instrument">
+            <FingerprintTrace />
+          </div>
+        </>
       )
     }
 
     <div class="lab-detail-body">
       <Content />
     </div>
-
-    {
-      entry.id === 'browser-exposure' && (
-        <div class="lab-instrument">
-          <FingerprintTrace />
-        </div>
-      )
-    }
 
     <p><a class="btn-quiet" href="/labs">&larr; Back to Labs</a></p>
   </article>
