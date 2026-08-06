@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { LAB_DISCIPLINE_META } from '../../lib/lab-disciplines';
 
 export async function getStaticPaths() {
-  // Drafts get no route — they're hidden until ready.
+  // Drafts get no route, they're hidden until ready.
   const entries = await getCollection('tutorials', ({ data }) => !data.draft);
   return entries.map((entry) => ({
     params: { slug: entry.id },

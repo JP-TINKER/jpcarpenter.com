@@ -1,10 +1,10 @@
-/* JP Carpenter — Bench DNA
+/* JP Carpenter, Bench DNA
    Authority: Tools/Bench/doctrine/design-system.md
 
    Concept: THE REVIEW DESK. Joe's job is reading the document everyone else skims and
    writing the verdict in the margin. So the page is a reviewed document: a warm desk
    under a work lamp, and a margin rail that annotates every section with its real
-   status. The annotation is the design — it is also the professional habit.
+   status. The annotation is the design, it is also the professional habit.
 
    Fonts imported from BaseLayout.astro (Vite resolves @fontsource). */
 
@@ -93,7 +93,7 @@ body {
 
 @media (max-width: 900px) {
   body {
-    /* Fixed backgrounds are janky or ignored on many phones — scroll is the honest path. */
+    /* Fixed backgrounds are janky or ignored on many phones, scroll is the honest path. */
     background-attachment: scroll;
   }
 }
@@ -167,7 +167,7 @@ h3 {
 }
 
 /* Status stamps carry the honest state of the thing beside them. Verified work and
-   unfinished work look different on purpose — that admission is the credential. */
+   unfinished work look different on purpose, that admission is the credential. */
 .margin-note-stamp {
   align-self: flex-end;
   border: 1px solid var(--rule);
@@ -317,7 +317,7 @@ h3 {
 /* Touch devices only, so nothing here changes the desktop composition. Standalone
    controls get real height; quiet links get an invisible hit area instead, which keeps
    their underline snug against the text where it belongs. Links inside a sentence are
-   left alone — they are exempt from target-size minimums and padding them would break
+   left alone, they are exempt from target-size minimums and padding them would break
    the line box. */
 @media (pointer: coarse) {
   .site-nav-logo,
@@ -385,7 +385,7 @@ h3 {
     linear-gradient(158deg, #55452f 0%, #3a2e21 38%, #241d16 74%, #1a1511 100%);
 }
 
-/* Motion 1 of 3: the work lamp warms up once on load. Presence, not noise — it settles
+/* Motion 1 of 3: the work lamp warms up once on load. Presence, not noise, it settles
    and stays put. */
 .desk-lamp {
   position: absolute;
@@ -532,7 +532,7 @@ h3 {
 
 /* -------------------------------------------------------------------- section heading */
 
-/* Padding-top only — a shorthand here would reset the sheet's horizontal gutter. */
+/* Padding-top only, a shorthand here would reset the sheet's horizontal gutter. */
 .band {
   padding-top: clamp(3.25rem, 7vw, 5rem);
 }
@@ -583,7 +583,7 @@ h1.band-heading {
   transition: background-color 0.2s ease;
 }
 
-/* Motion 2 of 3: hovering a row lights its margin — the accent bar marks where you
+/* Motion 2 of 3: hovering a row lights its margin, the accent bar marks where you
    are in the list, the same job a finger on the page does. */
 .entry-link::before {
   content: '';
@@ -765,7 +765,7 @@ h1.band-heading {
   font-size: 1.25rem;
 }
 
-/* Expand stack — running theme for educational depth without walls of text.
+/* Expand stack, running theme for educational depth without walls of text.
    Native <details>/<summary>: skim the terms, open only what you want.
    Same pattern as the tracker glossary under FINGERPRINT TRACE. */
 .expand-stack {
@@ -888,7 +888,7 @@ h1.band-heading {
   }
 }
 
-/* Document-control block — real metadata about the post itself (revision, status,
+/* Document-control block, real metadata about the post itself (revision, status,
    review date), formatted like a policy doc header, not a fabricated credential. */
 .doc-control {
   display: flex;
@@ -909,7 +909,7 @@ h1.band-heading {
   font-weight: 700;
 }
 
-/* Glossary pattern — native <abbr title="..."> for GRC jargon, zero JS. Hover/tap shows
+/* Glossary pattern, native <abbr title="..."> for GRC jargon, zero JS. Hover/tap shows
    the plain-English definition; this is the "translate jargon for stakeholders" job a
    GRC analyst actually does, not decoration. */
 abbr[title] {
@@ -918,7 +918,7 @@ abbr[title] {
   cursor: help;
 }
 
-/* Evidence exhibit frame — screenshots read as an attached exhibit, not a decorative
+/* Evidence exhibit frame, screenshots read as an attached exhibit, not a decorative
    inline image. */
 .lab-detail-body figure {
   border: 1px solid var(--rule);
@@ -938,7 +938,7 @@ abbr[title] {
 }
 
 /* Motion 3 of 3: on long reads, a marker in the margin tracks how far down the document
-   you are. It reports real state — added by script, absent and unmissed without it. */
+   you are. It reports real state, added by script, absent and unmissed without it. */
 .read-marker {
   position: fixed;
   left: max(1rem, calc(50vw - var(--max) / 2 + var(--pad)));

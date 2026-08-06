@@ -36,7 +36,7 @@ const nav = [
 const isCurrent = (href: string) =>
   href === '/' ? pathname === '/' : pathname.startsWith(href);
 
-// Real build timestamp, baked in at static build time — not decoration, an honest
+// Real build timestamp, baked in at static build time, not decoration, an honest
 // provenance signal (this page was generated on this date, not "live forever" theater).
 const buildDate = new Date().toLocaleDateString('en-US', {
   year: 'numeric',

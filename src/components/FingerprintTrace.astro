@@ -1,5 +1,5 @@
 ---
-/** FINGERPRINT TRACE Model 1 — real fingerprinting demo against the visitor viewing it.
+/** FINGERPRINT TRACE Model 1: real fingerprinting demo against the visitor viewing it.
  *  Progressive: without JS, static log text; with JS, tap a row to open a plain-English
  *  plate immediately under that row (single-open). Gauge drawer is a separate instrument.
  */
@@ -7,17 +7,17 @@
 const trackers = [
   {
     name: 'Third-party cookies',
-    what: 'A small file a website other than the one you\u2019re visiting places on your computer \u2014 usually an ad or analytics network embedded in the page.',
+    what: 'A small file a website other than the one you\u2019re visiting places on your computer, usually an ad or analytics network embedded in the page.',
     why: 'It lets that network recognize you on every site that uses it, and quietly stitch together a browsing history you never handed anyone in one place.',
   },
   {
     name: 'Tracking pixels',
     what: 'An invisible 1\u00d71 image that loads from a tracker\u2019s server the moment a page or email opens.',
-    why: 'The request itself is the data \u2014 your IP address, the time, your device. You never see it fire, but the tracker just learned you were there.',
+    why: 'The request itself is the data: your IP address, the time, your device. You never see it fire, but the tracker just learned you were there.',
   },
   {
     name: 'Canvas / WebGL / audio / fonts / math fingerprinting',
-    what: 'Drawing hidden text and shapes, playing silent sound, listing your fonts, and probing how your browser does math \u2014 then reading back results that vary by your graphics chip, fonts, and system. This is what the instrument above just did to you.',
+    what: 'Drawing hidden text and shapes, playing silent sound, listing your fonts, and probing how your browser does math, then reading back results that vary by your graphics chip, fonts, and system. This is what the instrument above just did to you.',
     why: 'It survives clearing your cookies and private browsing. There is no icon for it, and on most sites nothing tells you it happened.',
   },
   {
@@ -28,7 +28,7 @@ const trackers = [
   {
     name: 'Session replay scripts',
     what: 'Tools that record your mouse movements, scrolling, and sometimes your keystrokes on a page, then replay your session like a video.',
-    why: 'They often capture what you type into form fields \u2014 including ones marked \u201cprivate\u201d \u2014 depending on how carelessly the site set them up.',
+    why: 'They often capture what you type into form fields, including ones marked \u201cprivate,\u201d depending on how carelessly the site set them up.',
   },
   {
     name: 'CNAME cloaking',
@@ -43,12 +43,12 @@ const trackers = [
   {
     name: 'Cookie syncing',
     what: 'Trackers quietly swap IDs behind the scenes, so a profile built on one follows you to the others, even across sites that have nothing to do with each other.',
-    why: 'This is the backend of cross-site tracking \u2014 the part you never see. It was measured at million-site scale in 2016 and is still common across the open web.',
+    why: 'This is the backend of cross-site tracking, the part you never see. It was measured at million-site scale in 2016 and is still common across the open web.',
   },
   {
     name: 'TLS / network fingerprinting (JA3 / JA4)',
     what: 'The first hello your browser sends when opening a secure connection lists its ciphers and options in an order that differs per browser and operating system. A hash of those fields identifies your setup.',
-    why: 'A different surface from canvas, but the same idea: no consent, no storage, no JavaScript needed. The network connection itself is the fingerprint \u2014 it works even with cookies off and a VPN on.',
+    why: 'A different surface from canvas, but the same idea: no consent, no storage, no JavaScript needed. The network connection itself is the fingerprint; it works even with cookies off and a VPN on.',
   },
   {
     name: 'Storage API tracking',
@@ -57,7 +57,7 @@ const trackers = [
   },
   {
     name: 'Ambient sensors & side channels',
-    what: 'Device sensors and hardware hooks \u2014 gyroscope, accelerometer, ambient light, microphone, WebHID, WebUSB \u2014 that leak data passively or through a permission prompt.',
+    what: 'Device sensors and hardware hooks (gyroscope, accelerometer, ambient light, microphone, WebHID, WebUSB) that leak data passively or through a permission prompt.',
     why: 'On phones, ambient sensors have been used in published attacks to defeat anti-fingerprinting noise. Most users see a permission prompt. Some do not.',
   },
 ];
@@ -83,8 +83,8 @@ const trackers = [
         </button>
         <p class="trace-disclosure">
           Only one thing is ever stored: a short id, under the key <code>bench-fingerprint-demo</code>,
-          in this browser&rsquo;s local storage, for this site only. Nothing is sent to a server.
-          There isn&rsquo;t one to send it to.
+          in this browser's local storage, for this site only. Nothing is sent to a server.
+          There isn't one to send it to.
         </p>
       </div>
     </div>
@@ -94,7 +94,7 @@ const trackers = [
 <div class="tracker-glossary">
   <p class="tracker-glossary-intro">
     The scan above ran fingerprinting techniques on this page. None of the other tracker types
-    below ran here. They are named so you can spot them on a page that won&rsquo;t tell you.
+    below ran here. They are named so you can spot them on a page that won't tell you.
     Tap any row for what it does and why it matters.
   </p>
   <div class="expand-stack">

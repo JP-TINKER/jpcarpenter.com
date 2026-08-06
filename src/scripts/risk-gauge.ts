@@ -1,5 +1,5 @@
-/** RISK GAUGE Model 1 — analog risk-matrix instrument.
- *  Job: turn two knobs (Likelihood, Impact), read a real computed score/rating/action —
+/** RISK GAUGE Model 1, analog risk-matrix instrument.
+ *  Job: turn two knobs (Likelihood, Impact), read a real computed score/rating/action,
  *  not a toy readout. Score = Likelihood x Impact, the standard 5x5 risk-matrix heuristic.
  */
 

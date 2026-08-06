@@ -1,5 +1,5 @@
 {"version":2,"width":96,"height":22,"timestamp":1722975600,"env":{"SHELL":"/bin/bash","TERM":"xterm-256color"}}
-[0.3,"o","$ # Reading email authentication headers — a walkthrough\r\n"]
+[0.3,"o","$ # Reading email authentication headers: a walkthrough\r\n"]
 [1.2,"o","$ cat sample-header.txt\r\n"]
 [1.45,"o","Authentication-Results: mx.outlook.com;\r\n    dkim=fail (no signature for key);\r\n    spf=fail (smtp.mailfrom=dalimnthefoob.co);\r\n    dmarc=fail (p=none - no policy published)\r\nReceived-SPF: fail (dalimnthefoob.co: domain not designated as permitted sender)\r\nReturn-Path: <alerts@dalimnthefoob.co>\r\nFrom: \"Account Security\" <alerts@dalimnthefoob.co>\r\n\r\n"]
 [3.05,"o","$ # Three verdicts: SPF fail, DKIM fail, DMARC fail\r\n"]
@@ -8,6 +8,6 @@
 [5.1,"o","$ dig +short TXT _dmarc.dalimnthefoob.co\r\n"]
 [5.35,"o","(no DMARC record published)\r\n\r\n"]
 [6.55,"o","$ # SPF fail + DKIM fail + no DMARC posture = unauthenticated domain\r\n"]
-[7.35,"o","$ # not a spoofed legitimate sender — an unauthenticated one\r\n"]
+[7.35,"o","$ # not a spoofed legitimate sender, an unauthenticated one\r\n"]
 [8.15,"o","$ # verdict: block or quarantine; reportable upstream\r\n"]
 [8.95,"o","$ "]

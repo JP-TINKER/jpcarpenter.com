@@ -1,7 +1,7 @@
 /** Margin reading marker.
  *
  *  Fills a hairline in the page margin to match how far through the document you are.
- *  It reports real state and nothing else — no scroll hijacking, no reveal animations.
+ *  It reports real state and nothing else, no scroll hijacking, no reveal animations.
  *  Without JavaScript the rail simply never appears, and nothing is hidden waiting on it.
  */
 export function initReadMarker(): void {

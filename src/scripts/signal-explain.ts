@@ -46,7 +46,7 @@ const EXPLAINS: Record<string, SignalExplain> = {
     title: 'Device memory',
     what: 'A rough estimate of your computer\u2019s memory.',
     how: 'Read on load, when the browser is willing to share it.',
-    means: 'Even a missing answer is a clue \u2014 it hints at which browser or privacy settings you chose.',
+    means: 'Even a missing answer is a clue: it hints at which browser or privacy settings you chose.',
   },
   'nav.platform': {
     title: 'System label',
@@ -118,7 +118,7 @@ const EXPLAINS: Record<string, SignalExplain> = {
     title: 'Canvas fingerprint',
     what: 'A fingerprint made by drawing hidden text and shapes, then reading back the exact pixels.',
     how: 'The page draws on a hidden canvas and inspects the result. Your graphics chip, drivers, and fonts leave marks in the pixels.',
-    means: 'One of the strongest signals there is \u2014 it survives clearing your cookies and private browsing, and on most sites nothing tells you it happened.',
+    means: 'One of the strongest signals there is. It survives clearing your cookies and private browsing, and on most sites nothing tells you it happened.',
   },
   'webgl.renderer': {
     title: 'Graphics chip name',
@@ -178,7 +178,7 @@ const EXPLAINS: Record<string, SignalExplain> = {
     title: 'Exposure gauge',
     what: 'A meter of how much your browser gives away the instant a page loads.',
     how: 'Twelve passive reads, scored once on load. Tap Signals, Reading, Note, or the face for detail.',
-    means: 'No fingerprinting tricks here \u2014 just the free baseline every site gets. The TRACE below adds the active probes.',
+    means: 'No fingerprinting tricks here, just the free baseline every site gets. The TRACE below adds the active probes.',
   },
 };
 

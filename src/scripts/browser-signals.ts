@@ -1,4 +1,4 @@
-/** Shared browser-signal helpers — used by EXPOSURE GAUGE and FINGERPRINT TRACE so both
+/** Shared browser-signal helpers, used by EXPOSURE GAUGE and FINGERPRINT TRACE so both
  *  instruments read the same underlying values instead of two slightly different copies.
  *  Everything here is a pure read of properties the browser already exposes on page load;
  *  nothing here makes a network call or writes anything.
@@ -146,7 +146,7 @@ export function getPassiveSignalParts(): SignalPart[] {
   ];
 }
 
-/** Full passive set including each media feature — used only for composite hashing. */
+/** Full passive set including each media feature, used only for composite hashing. */
 export function getRawSignalString(): string {
   const nav = navigator as ExtendedNavigator;
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;

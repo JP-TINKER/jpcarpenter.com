@@ -1,4 +1,4 @@
-/** TINKER-SCOPE Model 1A — ported from Ghost tinker-theme-4 index.hbs */
+/** TINKER-SCOPE Model 1A, ported from Ghost tinker-theme-4 index.hbs */
 
 export function initTinkerScope(): void {
   const canvas = document.getElementById('scopeCanvas') as HTMLCanvasElement | null;

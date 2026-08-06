@@ -1,4 +1,4 @@
-/** FINGERPRINT TRACE Model 1 — a real, working demonstration of browser fingerprinting,
+/** FINGERPRINT TRACE Model 1, a real, working demonstration of browser fingerprinting,
  *  run only against the visitor viewing it. Canvas, WebGL, Audio, font enumeration, and
  *  math-engine probes are genuine techniques used by real fingerprinting libraries; the
  *  composite hash they produce is stored in this browser's localStorage (nothing else,
@@ -240,7 +240,7 @@ function writeStored(record: StoredRecord): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
   } catch {
-    // localStorage unavailable (private mode, blocked) — degrade silently.
+    // localStorage unavailable (private mode, blocked), degrade silently.
   }
 }
 

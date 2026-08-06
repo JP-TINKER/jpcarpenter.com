@@ -1,4 +1,4 @@
-/** EXPOSURE GAUGE Model 1 — passive instrument. Reads signals any site already gets
+/** EXPOSURE GAUGE Model 1, passive instrument. Reads signals any site already gets
  *  on load and shows how identifying that combination is. Tap the face or a readout
  *  to slide a plain-English plate down the bay. Nothing leaves this browser.
  */
