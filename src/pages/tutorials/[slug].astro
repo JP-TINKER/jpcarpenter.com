@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import EmailHeaderReader from '../../components/EmailHeaderReader.astro';
 import { LAB_DISCIPLINE_META } from '../../lib/lab-disciplines';
 
 export async function getStaticPaths() {
@@ -53,6 +54,20 @@ const readingMinutes = Math.max(1, Math.round(wordCount / 200));
       }
     </div>
     <h1>{entry.data.title}</h1>
+
+    {
+      entry.id === 'reading-email-headers' && (
+        <>
+          <p class="page-lede">
+            When an email looks suspicious, the first thing to check is whether it really
+            came from the address it claims. That answer sits in three lines of the
+            email's header. The reader below pulls those three lines out of a header you
+            paste; the rest of this page teaches what to do with them.
+          </p>
+          <EmailHeaderReader />
+        </>
+      )
+    }
 
     <div class="lab-detail-body">
       <Content />

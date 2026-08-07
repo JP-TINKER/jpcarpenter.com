@@ -1,0 +1,292 @@
+---
+/** EMAIL HEADER READER Model 1, interactive instrument for the reading-email-headers
+ *  tutorial. Parses a pasted email header locally and shows the SPF, DKIM,
+ *  and DMARC verdicts in plain English. Nothing is transmitted.
+ *
+ * Progressive: without JS the static SVG fallback stays visible; with JS the
+ *  instrument comes alive and the fallback is hidden. Tap a verdict row for
+ * the plain-English plate.
+ */
+---
+
+<div class="email-fallback" id="emailFallback">
+  <img
+    src="/tutorials/reading-email-headers/demo.svg"
+    alt="Terminal recording: reading a spoofed email's SPF/DKIM/DMARC verdicts and confirming the sending domain has no authentication posture."
+    loading="lazy"
+    decoding="async"
+  />
+  <p class="lab-instrument-caption">
+    Reading the three authentication verdicts off one header, then confirming what the sending domain actually publishes with dig.
+  </p>
+  <p class="email-fallback-note">
+    This is the static version. The interactive reader on this page needs JavaScript.
+  </p>
+</div>
+
+<div class="email-reader" id="emailReaderRoot">
+  <div class="email-reader-stage">
+    <div class="email-reader-brand">
+      <span class="email-reader-name">EMAIL HEADER READER</span>
+      <span class="email-reader-model">Model 1 &nbsp;&bull;&nbsp; paste a header, tap a verdict</span>
+    </div>
+
+    <p class="email-reader-intro">
+      Paste a raw email header below. The reader pulls out the three authentication
+      verdicts and shows them in plain English. Nothing leaves your browser.
+    </p>
+
+    <textarea
+      id="emailHeaderInput"
+      class="email-input"
+      spellcheck="false"
+      autocomplete="off"
+      autocapitalize="off"
+      aria-label="Paste a raw email header"
+      placeholder="Paste the raw email header here. Look for the Authentication-Results line."
+    ></textarea>
+
+    <button type="button" class="email-read-btn" id="emailReadBtn">Read it</button>
+
+    <dl class="email-verdicts">
+      <button type="button" class="email-verdict-row" data-explain="email.spf" aria-pressed="false" aria-controls="emailDrawer">
+        <dt class="email-verdict-label">SPF</dt>
+        <dd class="email-verdict-val email-verdict--unknown" id="emailSpfVal">-</dd>
+      </button>
+      <button type="button" class="email-verdict-row" data-explain="email.dkim" aria-pressed="false" aria-controls="emailDrawer">
+        <dt class="email-verdict-label">DKIM</dt>
+        <dd class="email-verdict-val email-verdict--unknown" id="emailDkimVal">-</dd>
+      </button>
+      <button type="button" class="email-verdict-row" data-explain="email.dmarc" aria-pressed="false" aria-controls="emailDrawer">
+        <dt class="email-verdict-label">DMARC</dt>
+        <dd class="email-verdict-val email-verdict--unknown" id="emailDmarcVal">-</dd>
+      </button>
+    </dl>
+
+    <p class="email-domain">
+      Sending domain: <span id="emailDomain">-</span>
+    </p>
+
+    <button
+      type="button"
+      class="email-action"
+      id="emailAction"
+      data-explain="email.action"
+      aria-pressed="false"
+      aria-controls="emailDrawer"
+    >
+      Paste a header and tap Read it.
+    </button>
+  </div>
+</div>
+
+<aside
+  class="instr-drawer instr-drawer--down"
+  id="emailDrawer"
+  aria-hidden="true"
+  aria-labelledby="emailDrawerTitle"
+>
+  <div class="instr-drawer-plate">
+    <div class="instr-drawer-rail" aria-hidden="true"></div>
+    <header class="instr-drawer-head">
+      <h3 class="instr-drawer-title" id="emailDrawerTitle">Email authentication</h3>
+      <button type="button" class="instr-drawer-close" id="emailDrawerClose" aria-label="Close explanation">
+        stow
+      </button>
+    </header>
+    <dl class="instr-drawer-copy">
+      <div>
+        <dt>What</dt>
+        <dd id="emailDrawerWhat"></dd>
+      </div>
+      <div>
+        <dt>How</dt>
+        <dd id="emailDrawerHow"></dd>
+      </div>
+      <div>
+        <dt>Means</dt>
+        <dd id="emailDrawerMeans"></dd>
+      </div>
+    </dl>
+  </div>
+</aside>
+
+<style>
+  .email-fallback.is-hidden {
+    display: none;
+  }
+
+  .email-fallback-note {
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.72rem;
+    color: var(--ink-muted, #8a8478);
+    text-align: center;
+    margin: 0.5rem 0 0;
+  }
+
+  .email-reader {
+    display: none;
+    margin: 2rem 0;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--rule, #d8d2c4);
+    border-bottom: 1px solid var(--rule, #d8d2c4);
+  }
+  .email-reader.is-live {
+    display: block;
+  }
+
+  .email-reader-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 36rem;
+    margin: 0 auto;
+  }
+
+  .email-reader-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  .email-reader-name {
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted, #8a8478);
+  }
+  .email-reader-model {
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted, #8a8478);
+  }
+
+  .email-reader-intro {
+    font-size: 0.92rem;
+    color: var(--ink, #2b2a26);
+    text-align: center;
+    margin: 0 0 0.5rem;
+  }
+
+  .email-input {
+    width: 100%;
+    min-height: 9rem;
+    resize: vertical;
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    padding: 0.75rem;
+    color: var(--ink, #2b2a26);
+    background: color-mix(in srgb, var(--ink, #1c1a16) 4%, transparent);
+    border: 1px solid var(--rule, #d8d2c4);
+    border-radius: 4px;
+  }
+  .email-input:focus {
+    outline: 2px solid var(--sage, #64705b);
+    outline-offset: 1px;
+  }
+
+  .email-read-btn {
+    align-self: center;
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.25rem;
+    color: var(--ink, #2b2a26);
+    background: transparent;
+    border: 1px solid var(--sage, #64705b);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .email-read-btn:hover {
+    background: color-mix(in srgb, var(--sage, #64705b) 12%, transparent);
+  }
+
+  .email-verdicts {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .email-verdict-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.6rem 0.25rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule, #d8d2c4);
+    cursor: pointer;
+    text-align: left;
+  }
+  .email-verdict-row:hover {
+    background: color-mix(in srgb, var(--sage, #64705b) 8%, transparent);
+  }
+  .email-verdict-row:last-child {
+    border-bottom: none;
+  }
+  .email-verdict-label {
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    color: var(--ink, #2b2a26);
+    margin: 0;
+  }
+  .email-verdict-val {
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .email-verdict--pass { color: #4f9a5a; }
+  .email-verdict--fail { color: #c25a4a; }
+  .email-verdict--none { color: #b08a3a; }
+  .email-verdict--unknown { color: var(--ink-muted, #8a8478); }
+
+  .email-domain {
+    width: 100%;
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.74rem;
+    color: var(--ink-muted, #8a8478);
+    margin: 0.75rem 0 0;
+  }
+  .email-domain #emailDomain {
+    color: var(--ink, #2b2a26);
+  }
+
+  .email-action {
+    width: 100%;
+    text-align: left;
+    font-size: 0.92rem;
+    color: var(--ink, #2b2a26);
+    background: transparent;
+    border: none;
+    border-top: 1px solid var(--rule, #d8d2c4);
+    padding: 0.75rem 0.25rem 0;
+    cursor: pointer;
+  }
+  .email-action:hover {
+    background: color-mix(in srgb, var(--sage, #64705b) 6%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .email-reader { display: block; }
+    .email-fallback { display: none; }
+  }
+</style>
+
+<script>
+  import { initEmailHeaderReader } from '../scripts/email-header-reader';
+  initEmailHeaderReader();
+</script>

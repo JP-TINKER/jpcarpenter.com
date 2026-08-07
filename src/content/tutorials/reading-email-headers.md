@@ -12,16 +12,6 @@ draft: false
 recording: /tutorials/reading-email-headers/demo.svg
 ---
 
-When an email looks suspicious, the first thing to check is whether it really came from
-the address it claims. That answer sits in three lines of the email's header. This walks
-through reading those lines on one message, then checking the sending domain's public
-records to decide what to do with it.
-
-<div class="lab-instrument">
-  <img src="/tutorials/reading-email-headers/demo.svg" alt="Terminal recording: reading a spoofed email's SPF/DKIM/DMARC verdicts and confirming the sending domain has no authentication posture." loading="lazy" decoding="async" />
-  <p class="lab-instrument-caption">Reading the three authentication verdicts off one header, then confirming what the sending domain actually publishes with dig.</p>
-</div>
-
 ## The three results that matter
 
 Open the raw header and find the `Authentication-Results` line (or the equivalent
