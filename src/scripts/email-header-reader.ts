@@ -43,18 +43,23 @@ function unfold(lines: string[]): string[] {
   return out;
 }
 
-function verdictFromAuthResults(value: string, key: string): Verdict | null {
+function verdictFromAuthResults(value: string, key: string): { verdict: Verdict | null; reason: string } | null {
   const probe = key + '=';
   const idx = value.toLowerCase().indexOf(probe);
   if (idx === -1) return null;
   const rest = value.slice(idx + probe.length);
   let token = '';
+  let reason = '';
+  let inParen = false;
   for (const ch of rest) {
-    if (ch === ' ' || ch === '\t' || ch === '(' || ch === ';' || ch === '\r') break;
-    token += ch;
+    if (!inParen && (ch === ' ' || ch === '\t' || ch === ';' || ch === '\r')) break;
+    if (ch === '(') { inParen = true; reason += ch; continue; }
+    if (ch === ')') { inParen = false; reason += ch; continue; }
+    if (inParen) reason += ch;
+    else token += ch;
   }
   if (!token) return null;
-  return normalizeVerdict(token);
+  return { verdict: normalizeVerdict(token), reason };
 }
 
 function domainFromEmail(s: string): string {
@@ -129,9 +134,21 @@ function parseHeader(raw: string): ParsedHeader {
     if (line.toLowerCase().startsWith('authentication-results:')) {
       result.hasAuthResults = true;
       const value = line.slice('authentication-results:'.length);
-      if (result.spf === 'unknown') { const v = verdictFromAuthResults(value, 'spf'); if (v) result.spf = v; }
-      if (result.dkim === 'unknown') { const v = verdictFromAuthResults(value, 'dkim'); if (v) result.dkim = v; }
-      if (result.dmarc === 'unknown') { const v = verdictFromAuthResults(value, 'dmarc'); if (v) result.dmarc = v; }
+      if (result.spf === 'unknown') { const r = verdictFromAuthResults(value, 'spf'); if (r?.verdict) result.spf = r.verdict; }
+      if (result.dkim === 'unknown') { const r = verdictFromAuthResults(value, 'dkim'); if (r?.verdict) result.dkim = r.verdict; }
+      if (result.dmarc === 'unknown') {
+        const r = verdictFromAuthResults(value, 'dmarc');
+        if (r?.verdict) {
+          // dmarc=fail with a "no policy" / "p=none" reason means the domain
+          // published no DMARC rule to break. That is the "unauthenticated
+          // domain" case, not the "spoofed defended domain" case.
+          if (r.verdict === 'fail' && (/no policy/i.test(r.reason) || /p=none/i.test(r.reason))) {
+            result.dmarc = 'none';
+          } else {
+            result.dmarc = r.verdict;
+          }
+        }
+      }
     }
   }
   if (result.spf === 'unknown') {

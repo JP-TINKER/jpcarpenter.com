@@ -567,6 +567,26 @@ h1.band-heading {
   max-width: 38rem;
 }
 
+/* An "ask yourself" / "try it" prompt: a short, distinct break that
+   turns a paragraph of explanation into a question the reader acts on. */
+.try-prompt {
+  margin: 1.5rem 0;
+  padding: 0.85rem 1.1rem;
+  border-left: 2px solid var(--accent);
+  background: rgba(147, 161, 134, 0.08);
+  font-size: 0.94rem;
+  color: var(--ink);
+}
+.try-prompt strong {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
 /* ------------------------------------------------------------------- evidence entries */
 
 /* Rows, not cards. A card grid flattens everything to one weight; a numbered list lets
