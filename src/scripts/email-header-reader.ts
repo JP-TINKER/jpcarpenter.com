@@ -1,13 +1,10 @@
 /** EMAIL HEADER READER Model 1, interactive instrument for the reading-email-headers
- *  tutorial. Parses a pasted email header locally and shows the SPF, DKIM, and
- *  DMARC verdicts in plain English. Nothing is transmitted; there is no server.
- *
- * Progressive: without JS the static SVG fallback stays visible (see
- * EmailHeaderReader.astro). With JS, the instrument comes alive and the
- * fallback is hidden.
+ *  tutorial. Renders the pasted (or sample) header as a line-by-line view,
+ * parses the three authentication verdicts, and shows each explanation
+ * directly under its row (a <details> per verdict). Opening a row
+ * highlights the matching line(s) in the header so the reader learns what
+ * to look for. Nothing is transmitted; there is no server.
  */
-
-import { bindExplainDrawer } from './signal-explain';
 
 type Verdict = 'pass' | 'fail' | 'none' | 'unknown';
 
@@ -19,7 +16,13 @@ interface ParsedHeader {
   hasAuthResults: boolean;
 }
 
-/** Normalize a raw verdict string from a header into one of four plain labels. */
+type LineKind = 'auth-results' | 'received-spf' | 'dkim-sig' | 'from' | 'return-path' | 'subject' | 'other';
+
+interface HeaderLine {
+  text: string;
+  kind: LineKind;
+}
+
 function normalizeVerdict(raw: string): Verdict {
   const v = raw.toLowerCase();
   if (v === 'pass') return 'pass';
@@ -28,7 +31,6 @@ function normalizeVerdict(raw: string): Verdict {
   return 'unknown';
 }
 
-/** Unfold RFC 5322 header folding: lines beginning with whitespace continue the prior line. */
 function unfold(lines: string[]): string[] {
   const out: string[] = [];
   for (const line of lines) {
@@ -41,14 +43,11 @@ function unfold(lines: string[]): string[] {
   return out;
 }
 
-/** Pull `key=value` out of an Authentication-Results value. The value may carry a
- *  parenthetical reason like `spf=fail (smtp.mailfrom=example.co)`. */
 function verdictFromAuthResults(value: string, key: string): Verdict | null {
   const probe = key + '=';
   const idx = value.toLowerCase().indexOf(probe);
   if (idx === -1) return null;
-  let rest = value.slice(idx + probe.length);
-  // read the token up to whitespace or '('
+  const rest = value.slice(idx + probe.length);
   let token = '';
   for (const ch of rest) {
     if (ch === ' ' || ch === '\t' || ch === '(' || ch === ';' || ch === '\r') break;
@@ -59,7 +58,6 @@ function verdictFromAuthResults(value: string, key: string): Verdict | null {
 }
 
 function domainFromEmail(s: string): string {
-  // strip a leading '<' or whitespace
   let t = s.trim();
   if (t.startsWith('<')) t = t.slice(1);
   const at = t.indexOf('@');
@@ -74,15 +72,13 @@ function domainFromEmail(s: string): string {
 
 function extractDomain(lines: string[]): string {
   const joined = lines.join('\n');
-  let lower = joined.toLowerCase();
-
+  const lower = joined.toLowerCase();
   let idx = lower.indexOf('smtp.mailfrom=');
   if (idx !== -1) {
     const tail = joined.slice(idx + 'smtp.mailfrom='.length);
     const m = tail.match(/[a-z0-9][a-z0-9.-]+\.[a-z]{2,}/i);
     if (m) return m[0];
   }
-
   idx = lower.indexOf('return-path:');
   if (idx !== -1) {
     const line = joined.slice(idx, idx + 200);
@@ -92,7 +88,6 @@ function extractDomain(lines: string[]): string {
       if (d) return d;
     }
   }
-
   idx = lower.indexOf('from:');
   if (idx !== -1) {
     const line = joined.slice(idx, idx + 200);
@@ -107,8 +102,18 @@ function extractDomain(lines: string[]): string {
       if (d) return d;
     }
   }
-
   return 'unknown domain';
+}
+
+function classifyLine(text: string): LineKind {
+  const lower = text.toLowerCase();
+  if (lower.startsWith('authentication-results:')) return 'auth-results';
+  if (lower.startsWith('received-spf:')) return 'received-spf';
+  if (lower.startsWith('dkim-signature:')) return 'dkim-sig';
+  if (lower.startsWith('from:')) return 'from';
+  if (lower.startsWith('return-path:')) return 'return-path';
+  if (lower.startsWith('subject:')) return 'subject';
+  return 'other';
 }
 
 function parseHeader(raw: string): ParsedHeader {
@@ -120,28 +125,15 @@ function parseHeader(raw: string): ParsedHeader {
     domain: extractDomain(lines),
     hasAuthResults: false,
   };
-
   for (const line of lines) {
-    const lower = line.toLowerCase();
-    if (lower.startsWith('authentication-results:')) {
+    if (line.toLowerCase().startsWith('authentication-results:')) {
       result.hasAuthResults = true;
       const value = line.slice('authentication-results:'.length);
-      if (result.spf === 'unknown') {
-        const v = verdictFromAuthResults(value, 'spf');
-        if (v) result.spf = v;
-      }
-      if (result.dkim === 'unknown') {
-        const v = verdictFromAuthResults(value, 'dkim');
-        if (v) result.dkim = v;
-      }
-      if (result.dmarc === 'unknown') {
-        const v = verdictFromAuthResults(value, 'dmarc');
-        if (v) result.dmarc = v;
-      }
+      if (result.spf === 'unknown') { const v = verdictFromAuthResults(value, 'spf'); if (v) result.spf = v; }
+      if (result.dkim === 'unknown') { const v = verdictFromAuthResults(value, 'dkim'); if (v) result.dkim = v; }
+      if (result.dmarc === 'unknown') { const v = verdictFromAuthResults(value, 'dmarc'); if (v) result.dmarc = v; }
     }
   }
-
-  // Fallback: Received-SPF for SPF when Authentication-Results had none.
   if (result.spf === 'unknown') {
     for (const line of lines) {
       if (line.toLowerCase().startsWith('received-spf:')) {
@@ -150,20 +142,13 @@ function parseHeader(raw: string): ParsedHeader {
       }
     }
   }
-
-  // DKIM-Signature presence means a signature was applied; verification is in
-  // Authentication-Results. If we never saw a dkim verdict, mark none (no signature to check).
   if (result.dkim === 'unknown') {
     const hasSig = lines.some((l) => l.toLowerCase().startsWith('dkim-signature:'));
     if (hasSig) result.dkim = 'none';
   }
-
   return result;
 }
 
-/** The action line from the three verdicts combined (mirrors the tutorial's decision table,
- *  with an AI-era honesty fix: a clean auth pass means the mail came from the domain it
- * claims, not that it is safe). */
 function actionFor(h: ParsedHeader): string {
   const { spf, dkim, dmarc } = h;
   if (spf === 'fail' && dkim === 'fail' && (dmarc === 'none' || dmarc === 'fail')) {
@@ -190,55 +175,70 @@ function setText(el: Element | null, text: string): void {
   if (el) el.textContent = text;
 }
 
+/** Lines a given verdict row should highlight in the header view. */
+const HIGHLIGHT: Record<'spf' | 'dkim' | 'dmarc', LineKind[]> = {
+  spf: ['auth-results', 'received-spf'],
+  dkim: ['auth-results', 'dkim-sig'],
+  dmarc: ['auth-results'],
+};
+
 export function initEmailHeaderReader(): void {
   const root = document.getElementById('emailReaderRoot');
   const fallback = document.getElementById('emailFallback');
   if (!root) return;
-
-  // Progressive enhancement: show the instrument, hide the static fallback.
   root.classList.add('is-live');
   if (fallback) fallback.classList.add('is-hidden');
 
+  const pre = document.getElementById('emailHeaderPre');
+  const view = document.getElementById('emailHeaderView');
   const input = document.getElementById('emailHeaderInput') as HTMLTextAreaElement | null;
+  const pasteBtn = document.getElementById('emailPasteToggle');
   const readBtn = document.getElementById('emailReadBtn');
   const spfVal = document.getElementById('emailSpfVal');
   const dkimVal = document.getElementById('emailDkimVal');
   const dmarcVal = document.getElementById('emailDmarcVal');
   const domainEl = document.getElementById('emailDomain');
   const actionEl = document.getElementById('emailAction');
-  const drawer = document.getElementById('emailDrawer');
-  const titleEl = document.getElementById('emailDrawerTitle');
-  const whatEl = document.getElementById('emailDrawerWhat');
-  const howEl = document.getElementById('emailDrawerHow');
-  const meansEl = document.getElementById('emailDrawerMeans');
-  const closeBtn = document.getElementById('emailDrawerClose');
+  const spfRow = document.getElementById('emailSpfRow');
+  const dkimRow = document.getElementById('emailDkimRow');
+  const dmarcRow = document.getElementById('emailDmarcRow');
 
-  if (drawer && titleEl && whatEl && howEl && meansEl && closeBtn) {
-    const drawerApi = bindExplainDrawer({
-      root,
-      drawer,
-      titleEl,
-      whatEl,
-      howEl,
-      meansEl,
-      closeBtn,
-      direction: 'down',
-    });
-    root.querySelectorAll<HTMLElement>('[data-explain]').forEach((el) => {
-      el.addEventListener('click', () => {
-        const key = el.getAttribute('data-explain');
-        if (key) drawerApi.open(key);
-      });
+  let rawHeader = input?.value ?? '';
+
+  /** Render the raw header into the <pre> as one span per line, tagged by kind. */
+  function renderHeader(raw: string): void {
+    if (!pre) return;
+    pre.textContent = '';
+    const lines = raw.split(/\r?\n/);
+    for (const line of lines) {
+      const span = document.createElement('span');
+      span.className = 'email-header-line';
+      span.dataset.line = classifyLine(line);
+      span.textContent = line === '' ? ' ' : line;
+      pre.appendChild(span);
+      if (line !== lines[lines.length - 1]) {
+        pre.appendChild(document.createTextNode('\n'));
+      }
+    }
+  }
+
+  function clearHighlight(): void {
+    root?.querySelectorAll('.email-header-line.is-hit').forEach((el) => el.classList.remove('is-hit'));
+  }
+
+  function highlightFor(kind: 'spf' | 'dkim' | 'dmarc'): void {
+    clearHighlight();
+    const wanted = HIGHLIGHT[kind];
+    root?.querySelectorAll('.email-header-line').forEach((el) => {
+      const lineKind = el.getAttribute('data-line');
+      if (lineKind && wanted.includes(lineKind as LineKind)) el.classList.add('is-hit');
     });
   }
 
   function render(h: ParsedHeader): void {
-    setText(spfVal, h.spf);
-    if (spfVal) spfVal.className = verdictClass(h.spf);
-    setText(dkimVal, h.dkim);
-    if (dkimVal) dkimVal.className = verdictClass(h.dkim);
-    setText(dmarcVal, h.dmarc);
-    if (dmarcVal) dmarcVal.className = verdictClass(h.dmarc);
+    setText(spfVal, h.spf); if (spfVal) spfVal.className = verdictClass(h.spf);
+    setText(dkimVal, h.dkim); if (dkimVal) dkimVal.className = verdictClass(h.dkim);
+    setText(dmarcVal, h.dmarc); if (dmarcVal) dmarcVal.className = verdictClass(h.dmarc);
     setText(domainEl, h.domain);
     setText(actionEl, actionFor(h));
   }
@@ -248,26 +248,61 @@ export function initEmailHeaderReader(): void {
     setText(dkimVal, '-');
     setText(dmarcVal, '-');
     setText(domainEl, '-');
-    setText(actionEl, 'Paste a header and tap Read it.');
+    setText(actionEl, 'Tap Read it to read the loaded sample, or clear it and paste your own.');
   }
 
-  if (readBtn && input) {
-    readBtn.addEventListener('click', () => {
-      const raw = input.value.trim();
-      if (!raw) {
-        clearRender();
-        setText(actionEl, 'Paste a header first.');
-        return;
+  function readCurrent(): void {
+    const raw = rawHeader.trim();
+    if (!raw) { clearRender(); setText(actionEl, 'Paste a header first.'); return; }
+    const parsed = parseHeader(raw);
+    render(parsed);
+    renderHeader(raw);
+    if (view && input) { view.classList.remove('is-paste'); input.classList.add('is-paste'); }
+    if (pasteBtn) pasteBtn.textContent = 'Paste your own';
+    clearHighlight();
+  }
+
+  // Toggle between the rendered view and a paste textarea.
+  if (pasteBtn && view && input) {
+    pasteBtn.addEventListener('click', () => {
+      if (view.classList.contains('is-paste')) {
+        // Currently in paste mode -> switch back to rendered view.
+        view.classList.remove('is-paste');
+        input.classList.add('is-paste');
+        pasteBtn.textContent = 'Paste your own';
+        renderHeader(rawHeader);
+        clearHighlight();
+      } else {
+        // Currently rendered -> switch to paste textarea.
+        view.classList.add('is-paste');
+        input.classList.remove('is-paste');
+        pasteBtn.textContent = 'Show rendered';
+        if (input) input.value = rawHeader;
+        input.focus();
       }
-      render(parseHeader(raw));
     });
   }
 
-  // If a sample is pre-loaded in the markup (the worked phishing header), read it
-  // immediately so the page opens with the verdicts already shown.
-  if (input && input.value.trim()) {
-    render(parseHeader(input.value.trim()));
-  } else {
-    clearRender();
+  if (readBtn) {
+    readBtn.addEventListener('click', () => {
+      if (input && !view?.classList.contains('is-paste')) {
+        rawHeader = input.value;
+      }
+      readCurrent();
+    });
   }
+
+  // Opening a verdict row highlights the matching line(s); closing clears.
+  const wireRow = (row: Element | null, kind: 'spf' | 'dkim' | 'dmarc'): void => {
+    if (!row) return;
+    row.addEventListener('toggle', () => {
+      if (row instanceof HTMLDetailsElement && row.open) highlightFor(kind);
+      else clearHighlight();
+    });
+  };
+  wireRow(spfRow, 'spf');
+  wireRow(dkimRow, 'dkim');
+  wireRow(dmarcRow, 'dmarc');
+
+  readCurrent();
 }

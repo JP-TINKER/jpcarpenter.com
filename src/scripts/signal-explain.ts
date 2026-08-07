@@ -180,36 +180,6 @@ const EXPLAINS: Record<string, SignalExplain> = {
     how: 'Twelve passive reads, scored once on load. Tap Signals, Reading, Note, or the face for detail.',
     means: 'No fingerprinting tricks here, just the free baseline every site gets. The TRACE below adds the active probes.',
   },
-  'email.spf': {
-    title: 'SPF',
-    what: 'Which servers are allowed to send mail for this domain.',
-    how: 'Read from the Authentication-Results or Received-SPF line in the header you pasted.',
-    means: 'pass means sent from an allowed server; fail means not; none means the domain published no SPF list.',
-  },
-  'email.dkim': {
-    title: 'DKIM',
-    what: 'A cryptographic signature on this message, checked against the domain\'s published key.',
-    how: 'Read from the Authentication-Results line, or the DKIM-Signature block.',
-    means: 'pass means the signature matched the key; fail means it did not, or there was none to check.',
-  },
-  'email.dmarc': {
-    title: 'DMARC',
-    what: 'The domain\'s published rule for what receivers should do with mail that fails SPF or DKIM.',
-    how: 'Read from the Authentication-Results line. A "no DMARC record" result is different from "DMARC fail."',
-    means: 'pass means the message followed the rule; fail means it broke a published rule; none means the domain published no rule at all.',
-  },
-  'email.action': {
-    title: 'What to do',
-    what: 'The decision from the three verdicts combined.',
-    how: 'Matched against the combination table in the tutorial: SPF, DKIM, and DMARC posture together.',
-    means: 'A clean pass means the mail came from the domain it claims, not that it is safe. AI-era scams often send from real, authenticated accounts or lookalike domains, so confirm money or credential requests out-of-band.',
-  },
-  'email.summary': {
-    title: 'This header',
-    what: 'A one-line read of the pasted header.',
-    how: 'Parsed locally in your browser. Nothing is sent anywhere; there is no server to send it to.',
-    means: 'Tap a verdict row for the plain-English version of that check.',
-  },
 };
 
 export function getSignalExplain(key: string): SignalExplain | null {

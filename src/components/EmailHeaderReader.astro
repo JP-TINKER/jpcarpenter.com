@@ -1,11 +1,12 @@
 ---
 /** EMAIL HEADER READER Model 1, interactive instrument for the reading-email-headers
- *  tutorial. Parses a pasted email header locally and shows the SPF, DKIM,
- *  and DMARC verdicts in plain English. Nothing is transmitted.
+ *  tutorial. Renders the sample (or pasted) header as a line-by-line view,
+ * shows the three authentication verdicts, and explains each one
+ * directly under its row. Opening a row highlights the matching
+ * line(s) in the header so the reader learns what to look for.
  *
  * Progressive: without JS the static SVG fallback stays visible; with JS the
- *  instrument comes alive and the fallback is hidden. Tap a verdict row for
- * the plain-English plate.
+ * instrument comes alive and the fallback is hidden.
  */
 ---
 
@@ -28,22 +29,21 @@
   <div class="email-reader-stage">
     <div class="email-reader-brand">
       <span class="email-reader-name">EMAIL HEADER READER</span>
-      <span class="email-reader-model">Model 1 &nbsp;&bull;&nbsp; paste a header, tap a verdict</span>
+      <span class="email-reader-model">Model 1 &nbsp;&bull;&nbsp; tap a row to see what to look for</span>
     </div>
 
     <p class="email-reader-intro">
-      Paste a raw email header below. The reader pulls out the three authentication
-      verdicts and shows them in plain English. Nothing leaves your browser.
+      A worked sample is loaded below. Tap a verdict row to highlight the line it
+      comes from and read what it means. Clear it to paste your own.
     </p>
-    <p class="email-reader-sample-note">
-      A worked sample is loaded for you: the redacted header from the
-      <a href="/labs/phishing-header-forensics">phishing-header-forensics</a> lab.
-      Clear it to paste your own.
-    </p>
+
+    <div class="email-header-view" id="emailHeaderView">
+      <pre class="email-header-pre" id="emailHeaderPre"></pre>
+    </div>
 
     <textarea
       id="emailHeaderInput"
-      class="email-input"
+      class="email-input is-paste"
       spellcheck="false"
       autocomplete="off"
       autocapitalize="off"
@@ -64,76 +64,54 @@ To: undisclosed-recipients:;
 Date: Mon, 28 Jul 2026 09:14:02 +0000
 Message-ID: &lt;phish-2026-07-28@dalimnthefoob.co&gt;</textarea>
 
-    <button type="button" class="email-read-btn" id="emailReadBtn">Read it</button>
+    <div class="email-reader-controls">
+      <button type="button" class="email-toggle-btn" id="emailPasteToggle">Paste your own</button>
+      <button type="button" class="email-read-btn" id="emailReadBtn">Read it</button>
+    </div>
 
     <dl class="email-verdicts">
-      <button type="button" class="email-verdict-row" data-explain="email.spf" aria-pressed="false" aria-controls="emailDrawer">
-        <dt class="email-verdict-label">SPF</dt>
-        <dd class="email-verdict-val email-verdict--unknown" id="emailSpfVal">-</dd>
-      </button>
-      <button type="button" class="email-verdict-row" data-explain="email.dkim" aria-pressed="false" aria-controls="emailDrawer">
-        <dt class="email-verdict-label">DKIM</dt>
-        <dd class="email-verdict-val email-verdict--unknown" id="emailDkimVal">-</dd>
-      </button>
-      <button type="button" class="email-verdict-row" data-explain="email.dmarc" aria-pressed="false" aria-controls="emailDrawer">
-        <dt class="email-verdict-label">DMARC</dt>
-        <dd class="email-verdict-val email-verdict--unknown" id="emailDmarcVal">-</dd>
-      </button>
+      <details class="email-verdict-row" id="emailSpfRow">
+        <summary class="email-verdict-summary">
+          <span class="email-verdict-label">SPF</span>
+          <span class="email-verdict-val email-verdict--unknown" id="emailSpfVal">-</span>
+        </summary>
+        <div class="email-verdict-explain">
+          <p><strong>What to look for:</strong> the line starting with <code>Authentication-Results</code> (or <code>Received-SPF</code>).</p>
+          <p><strong>What it means:</strong> SPF tells you whether the email came from a server the domain allows to send for it. <code>pass</code> means the server was on the domain's allowed list; <code>fail</code> means it was not; <code>none</code> means the domain published no allowed list at all.</p>
+        </div>
+      </details>
+      <details class="email-verdict-row" id="emailDkimRow">
+        <summary class="email-verdict-summary">
+          <span class="email-verdict-label">DKIM</span>
+          <span class="email-verdict-val email-verdict--unknown" id="emailDkimVal">-</span>
+        </summary>
+        <div class="email-verdict-explain">
+          <p><strong>What to look for:</strong> the <code>Authentication-Results</code> line (the <code>dkim=</code> part), or a <code>DKIM-Signature</code> line.</p>
+          <p><strong>What it means:</strong> DKIM is a signature on the message checked against the domain's key. <code>pass</code> means the signature matched; <code>fail</code> means it did not, or there was none; <code>none</code> means no signature was on the message to check.</p>
+        </div>
+      </details>
+      <details class="email-verdict-row" id="emailDmarcRow">
+        <summary class="email-verdict-summary">
+          <span class="email-verdict-label">DMARC</span>
+          <span class="email-verdict-val email-verdict--unknown" id="emailDmarcVal">-</span>
+        </summary>
+        <div class="email-verdict-explain">
+          <p><strong>What to look for:</strong> the <code>Authentication-Results</code> line (the <code>dmarc=</code> part).</p>
+          <p><strong>What it means:</strong> DMARC is the domain's rule for what receivers should do with mail that fails the other two. <code>pass</code> means the message followed the rule; <code>fail</code> means it broke a published rule; <code>none</code> means the domain published no rule at all. "no DMARC" is different from "DMARC fail."</p>
+        </div>
+      </details>
     </dl>
 
     <p class="email-domain">
       Sending domain: <span id="emailDomain">-</span>
     </p>
 
-    <button
-      type="button"
-      class="email-action"
-      id="emailAction"
-      data-explain="email.action"
-      aria-pressed="false"
-      aria-controls="emailDrawer"
-    >
-      Paste a header and tap Read it.
-    </button>
+    <p class="email-action" id="emailAction">Tap Read it to read the loaded sample, or clear it and paste your own.</p>
   </div>
 </div>
 
-<aside
-  class="instr-drawer instr-drawer--down"
-  id="emailDrawer"
-  aria-hidden="true"
-  aria-labelledby="emailDrawerTitle"
->
-  <div class="instr-drawer-plate">
-    <div class="instr-drawer-rail" aria-hidden="true"></div>
-    <header class="instr-drawer-head">
-      <h3 class="instr-drawer-title" id="emailDrawerTitle">Email authentication</h3>
-      <button type="button" class="instr-drawer-close" id="emailDrawerClose" aria-label="Close explanation">
-        stow
-      </button>
-    </header>
-    <dl class="instr-drawer-copy">
-      <div>
-        <dt>What</dt>
-        <dd id="emailDrawerWhat"></dd>
-      </div>
-      <div>
-        <dt>How</dt>
-        <dd id="emailDrawerHow"></dd>
-      </div>
-      <div>
-        <dt>Means</dt>
-        <dd id="emailDrawerMeans"></dd>
-      </div>
-    </dl>
-  </div>
-</aside>
-
 <style>
-  .email-fallback.is-hidden {
-    display: none;
-  }
-
+  .email-fallback.is-hidden { display: none; }
   .email-fallback-note {
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
     font-size: 0.72rem;
@@ -149,16 +127,14 @@ Message-ID: &lt;phish-2026-07-28@dalimnthefoob.co&gt;</textarea>
     border-top: 1px solid var(--rule, #d8d2c4);
     border-bottom: 1px solid var(--rule, #d8d2c4);
   }
-  .email-reader.is-live {
-    display: block;
-  }
+  .email-reader.is-live { display: block; }
 
   .email-reader-stage {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    max-width: 36rem;
+    max-width: 38rem;
     margin: 0 auto;
   }
 
@@ -167,7 +143,6 @@ Message-ID: &lt;phish-2026-07-28@dalimnthefoob.co&gt;</textarea>
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    margin-bottom: 0.25rem;
   }
   .email-reader-name {
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
@@ -190,16 +165,29 @@ Message-ID: &lt;phish-2026-07-28@dalimnthefoob.co&gt;</textarea>
     margin: 0 0 0.5rem;
   }
 
-  .email-reader-sample-note {
+  .email-header-view.is-paste { display: none; }
+  .email-input.is-paste { display: none; }
+
+  .email-header-pre {
+    width: 100%;
+    min-height: 9rem;
+    max-height: 16rem;
+    overflow: auto;
+    margin: 0;
+    padding: 0.75rem;
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
-    font-size: 0.7rem;
-    line-height: 1.5;
-    color: var(--ink-muted, #8a8478);
-    text-align: center;
-    margin: 0 0 0.75rem;
+    font-size: 0.74rem;
+    line-height: 1.55;
+    color: var(--ink, #2b2a26);
+    background: color-mix(in srgb, var(--ink, #1c1a16) 4%, transparent);
+    border: 1px solid var(--rule, #d8d2c4);
+    border-radius: 4px;
+    white-space: pre-wrap;
   }
-  .email-reader-sample-note a {
-    color: var(--sage, #64705b);
+  .email-header-line { display: block; padding: 0.05rem 0.15rem; border-radius: 2px; }
+  .email-header-line.is-hit {
+    background: color-mix(in srgb, var(--sage, #64705b) 28%, transparent);
+    box-shadow: inset 2px 0 0 0 var(--sage, #64705b);
   }
 
   .email-input {
@@ -207,107 +195,93 @@ Message-ID: &lt;phish-2026-07-28@dalimnthefoob.co&gt;</textarea>
     min-height: 9rem;
     resize: vertical;
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
-    font-size: 0.78rem;
-    line-height: 1.5;
+    font-size: 0.74rem;
+    line-height: 1.55;
     padding: 0.75rem;
     color: var(--ink, #2b2a26);
     background: color-mix(in srgb, var(--ink, #1c1a16) 4%, transparent);
     border: 1px solid var(--rule, #d8d2c4);
     border-radius: 4px;
   }
-  .email-input:focus {
-    outline: 2px solid var(--sage, #64705b);
-    outline-offset: 1px;
-  }
+  .email-input:focus { outline: 2px solid var(--sage, #64705b); outline-offset: 1px; }
 
-  .email-read-btn {
-    align-self: center;
+  .email-reader-controls { display: flex; gap: 0.75rem; }
+  .email-toggle-btn, .email-read-btn {
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    padding: 0.5rem 1.25rem;
+    padding: 0.45rem 1.1rem;
     color: var(--ink, #2b2a26);
     background: transparent;
     border: 1px solid var(--sage, #64705b);
     border-radius: 3px;
     cursor: pointer;
   }
-  .email-read-btn:hover {
+  .email-toggle-btn:hover, .email-read-btn:hover {
     background: color-mix(in srgb, var(--sage, #64705b) 12%, transparent);
   }
 
-  .email-verdicts {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin: 0.5rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
+  .email-verdicts { width: 100%; display: flex; flex-direction: column; margin: 0.25rem 0 0; }
   .email-verdict-row {
+    width: 100%;
+    border-bottom: 1px solid var(--rule, #d8d2c4);
+  }
+  .email-verdict-row:last-child { border-bottom: none; }
+  .email-verdict-summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
     width: 100%;
     padding: 0.6rem 0.25rem;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--rule, #d8d2c4);
     cursor: pointer;
-    text-align: left;
+    list-style: none;
   }
-  .email-verdict-row:hover {
+  .email-verdict-summary::-webkit-details-marker { display: none; }
+  .email-verdict-row[open] .email-verdict-summary {
     background: color-mix(in srgb, var(--sage, #64705b) 8%, transparent);
-  }
-  .email-verdict-row:last-child {
-    border-bottom: none;
   }
   .email-verdict-label {
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
     font-size: 0.82rem;
     letter-spacing: 0.08em;
     color: var(--ink, #2b2a26);
-    margin: 0;
   }
   .email-verdict-val {
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
     font-size: 0.74rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    margin: 0;
   }
   .email-verdict--pass { color: #4f9a5a; }
   .email-verdict--fail { color: #c25a4a; }
   .email-verdict--none { color: #b08a3a; }
   .email-verdict--unknown { color: var(--ink-muted, #8a8478); }
+  .email-verdict-explain {
+    padding: 0.5rem 0.25rem 0.75rem;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--ink, #2b2a26);
+  }
+  .email-verdict-explain p { margin: 0 0 0.5rem; }
+  .email-verdict-explain p:last-child { margin-bottom: 0; }
 
   .email-domain {
     width: 100%;
     font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
     font-size: 0.74rem;
     color: var(--ink-muted, #8a8478);
-    margin: 0.75rem 0 0;
+    margin: 0.5rem 0 0;
   }
-  .email-domain #emailDomain {
-    color: var(--ink, #2b2a26);
-  }
+  .email-domain #emailDomain { color: var(--ink, #2b2a26); }
 
   .email-action {
     width: 100%;
-    text-align: left;
     font-size: 0.92rem;
     color: var(--ink, #2b2a26);
-    background: transparent;
-    border: none;
     border-top: 1px solid var(--rule, #d8d2c4);
     padding: 0.75rem 0.25rem 0;
-    cursor: pointer;
-  }
-  .email-action:hover {
-    background: color-mix(in srgb, var(--sage, #64705b) 6%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {
