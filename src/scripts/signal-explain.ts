@@ -202,7 +202,7 @@ const EXPLAINS: Record<string, SignalExplain> = {
     title: 'What to do',
     what: 'The decision from the three verdicts combined.',
     how: 'Matched against the combination table in the tutorial: SPF, DKIM, and DMARC posture together.',
-    means: 'A domain with no DMARC, SPF fail, and DKIM fail is unauthenticated, not a spoof of a defended domain. That distinction changes the action.',
+    means: 'A clean pass means the mail came from the domain it claims, not that it is safe. AI-era scams often send from real, authenticated accounts or lookalike domains, so confirm money or credential requests out-of-band.',
   },
   'email.summary': {
     title: 'This header',

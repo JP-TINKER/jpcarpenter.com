@@ -161,7 +161,9 @@ function parseHeader(raw: string): ParsedHeader {
   return result;
 }
 
-/** The action line from the three verdicts combined (mirrors the tutorial's decision table). */
+/** The action line from the three verdicts combined (mirrors the tutorial's decision table,
+ *  with an AI-era honesty fix: a clean auth pass means the mail came from the domain it
+ * claims, not that it is safe). */
 function actionFor(h: ParsedHeader): string {
   const { spf, dkim, dmarc } = h;
   if (spf === 'fail' && dkim === 'fail' && (dmarc === 'none' || dmarc === 'fail')) {
@@ -169,10 +171,10 @@ function actionFor(h: ParsedHeader): string {
     return 'Spoofed defended domain: block, and it is a reportable event.';
   }
   if (spf === 'pass' && dkim === 'pass' && dmarc === 'pass') {
-    return 'Authenticated: the sender is who it claims to be.';
+    return 'Authenticated to this domain. That means it came from there, not that it is safe. For money or credentials, confirm out-of-band.';
   }
   if (spf === 'pass' && dkim === 'pass' && dmarc === 'none') {
-    return 'Signed and allowed by SPF, but the domain publishes no DMARC rule.';
+    return 'Signed and allowed by SPF, but the domain publishes no DMARC rule. Confirm the sender another way.';
   }
   if (spf === 'unknown' && dkim === 'unknown' && dmarc === 'unknown') {
     return 'No Authentication-Results line found. Check the raw header includes it.';
@@ -261,5 +263,11 @@ export function initEmailHeaderReader(): void {
     });
   }
 
-  clearRender();
+  // If a sample is pre-loaded in the markup (the worked phishing header), read it
+  // immediately so the page opens with the verdicts already shown.
+  if (input && input.value.trim()) {
+    render(parseHeader(input.value.trim()));
+  } else {
+    clearRender();
+  }
 }

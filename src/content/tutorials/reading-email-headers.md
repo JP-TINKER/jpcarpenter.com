@@ -66,11 +66,45 @@ With the three header verdicts and the DNS posture in hand, the decision is mech
 | SPF fail · DKIM pass · DMARC pass | Domain defended, message aligned | Legitimate, relayed; investigate the relay, not the sender |
 | SPF pass · DKIM fail · DMARC fail | DMARC published | Spoofed: block, and it's a reportable event |
 
+## What header auth catches, and what it doesn't
+
+The three verdicts answer one question: did this message come from the domain it
+claims? They do not answer a different one: is this message safe? That distinction matters more
+now, because AI-powered scams are built around it.
+
+- **Compromised real accounts.** A scam sent from a hijacked mailbox passes SPF,
+  DKIM, and DMARC, because it is genuinely from that account. The header read says
+  "authenticated," and it is, but the content is still a phish. For anything involving money or
+  credentials, confirm the request on a second channel (call a known number, not the one
+  in the email).
+- **Lookalike domains.** An attacker registers a close cousin like `paypa1.com` (a Latin
+  "l" swapped for a digit) or a homoglyph domain, then publishes valid SPF, DKIM, and
+  DMARC for it. Every check passes, because the records are genuinely the attacker's.
+  DMARC on the real brand has no authority over a different domain.
+- **Abused legitimate platforms.** Mail sent through a real SaaS (a fundraising
+  platform, a form service) authenticates as that platform, not as the brand it
+  impersonates. The header is clean; the story is in the URLs.
+
+AI makes the lure itself harder to spot: model-generated phishing reads
+cleanly, personalizes at scale, and drops the old grammar tells. The header read is
+still necessary (a spoofed domain still fails), but it is no longer sufficient.
+Pair it with out-of-band verification and sender fingerprinting, and watch for newly
+registered lookalike domains.
+
+Sources: [Adaptive Security](https://www.adaptivesecurity.com/blog/how-ai-generated-phishing-bypasses-traditional-email-filters),
+[Palisade](https://www.palisade.email/learning/why-do-phishing-emails-pass-spf-and-dkim),
+[PowerDMARC](https://powerdmarc.com/what-is-dmarc/),
+[IRONSCALES weekly recap (March 2026)](https://ironscales.com/blog/best-of-the-worst-march-27-2026),
+[IRONSCALES: SPF Pass, DKIM Pass, DMARC Pass. Still Phishing.](https://ironscales.com/threat-intelligence/authenticated-supplier-invoice-cousin-domain-display-name-impersonation).
+
 ## What this teaches, and what it doesn't
 
 **Teaches:** the check a security analyst runs before escalating a phishing report: three
 header lines plus a DNS check, and a decision table that doesn't need a paid tool.
 
-**Doesn't teach:** attribution. An unauthenticated domain is not an actor. A spoofed
-defended domain is not a campaign. The header read tells you what to do with the message,
-not who sent it or why.
+**Doesn't teach:** attribution, and it doesn't teach "safe." An unauthenticated
+domain is not an actor. A spoofed defended domain is not a campaign. And a clean
+authentication pass is not a clean bill of health: in the AI era, authenticated mail
+can still be a scam. The header read tells you what to do with the message, not
+who sent it or whether to trust it.
+

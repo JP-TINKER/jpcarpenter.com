@@ -35,6 +35,11 @@
       Paste a raw email header below. The reader pulls out the three authentication
       verdicts and shows them in plain English. Nothing leaves your browser.
     </p>
+    <p class="email-reader-sample-note">
+      A worked sample is loaded for you: the redacted header from the
+      <a href="/labs/phishing-header-forensics">phishing-header-forensics</a> lab.
+      Clear it to paste your own.
+    </p>
 
     <textarea
       id="emailHeaderInput"
@@ -43,8 +48,21 @@
       autocomplete="off"
       autocapitalize="off"
       aria-label="Paste a raw email header"
-      placeholder="Paste the raw email header here. Look for the Authentication-Results line."
-    ></textarea>
+    >Return-Path: &lt;alerts@dalimnthefoob.co&gt;
+Received: from 89.144.44.17 (mscode.pl [89.144.44.17]) by mx.outlook.com with Microsoft SMTP Server; Mon, 28 Jul 2026 09:14:02 +0000
+Received: from mx.outlook.com (mail.protection.outlook.com) by outlook.office365.com with HTTPS; Mon, 28 Jul 2026 09:14:03 +0000
+Received: from outlook.office365.com by prod.outlook.com node1; Mon, 28 Jul 2026 09:14:04 +0000
+Received: from prod.outlook.com node1 by prod.outlook.com node2; Mon, 28 Jul 2026 09:14:05 +0000
+Authentication-Results: mx.outlook.com;
+    dkim=fail (no signature for key);
+    spf=fail (smtp.mailfrom=dalimnthefoob.co);
+    dmarc=fail (p=none - no policy published)
+Received-SPF: fail (dalimnthefoob.co: domain not designated as permitted sender)
+From: "Account Security" &lt;alerts@dalimnthefoob.co&gt;
+Subject: Someone tried to log in To Your Account
+To: undisclosed-recipients:;
+Date: Mon, 28 Jul 2026 09:14:02 +0000
+Message-ID: &lt;phish-2026-07-28@dalimnthefoob.co&gt;</textarea>
 
     <button type="button" class="email-read-btn" id="emailReadBtn">Read it</button>
 
@@ -170,6 +188,18 @@
     color: var(--ink, #2b2a26);
     text-align: center;
     margin: 0 0 0.5rem;
+  }
+
+  .email-reader-sample-note {
+    font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--ink-muted, #8a8478);
+    text-align: center;
+    margin: 0 0 0.75rem;
+  }
+  .email-reader-sample-note a {
+    color: var(--sage, #64705b);
   }
 
   .email-input {
