@@ -12,99 +12,78 @@ draft: false
 recording: /tutorials/reading-email-headers/demo.svg
 ---
 
-## The three results that matter
+## The email we will read
 
-Open the raw header and find the `Authentication-Results` line (or the equivalent
-`Received-SPF` / `DKIM-Signature` blocks). You are looking for three verdicts:
+We will work through one real phishing email. It is already loaded in the reader above: a "Someone tried to log in to your account" alert, sent from `dalimnthefoob.co` and redacted from a real case (the same one traced in the <a href="/labs/phishing-header-forensics">phishing-header-forensics</a> lab).
 
-- **SPF** (which servers may send for this domain): did the sending IP appear in the domain's published list of allowed senders (`v=spf1`)?
-- **DKIM** (a signature on the message): did the message's signature check out against the domain's published key?
-- **DMARC** (the domain's rule for handling mail that fails the checks above): did the domain publish a rule, and did this message follow it?
+First, tap **Read it** in the reader above. You should see three verdicts: SPF, DKIM, and DMARC, each showing `fail`. We will read each one.
 
-A single `fail` is not always a verdict on its own. The pattern that matters is the
-combination: a domain with **no DMARC record, SPF fail, and DKIM fail** is not a spoofed
-legitimate sender; it is an unauthenticated one. That distinction changes the action.
+## Read the three verdicts
+
+**SPF** says whether the sending server was on the domain's allowed list. Here it says `fail`: the message came from a server `dalimnthefoob.co` never authorized.
+
+**DKIM** says whether the message carried a valid signature from the domain. Here it says `fail (no signature for key)`: there was no signature to check.
+
+**DMARC** says whether the domain published a rule for what receivers should do with mail that fails the other two. Here it says `fail (p=none - no policy published)`: the domain never published a rule at all.
+
+Notice that all three fail, and that the DMARC failure is "no policy," not "broke a policy." That combination is the whole point of this method.
+
+## The combination, not the individual fails
+
+A single `fail` is not always a verdict on its own. The pattern matters. Here, all three fail and the domain has no DMARC record. That is not a spoofed legitimate sender; it is an unauthenticated domain.
+
+The distinction changes the action. A spoofed defended domain is one thing: someone is impersonating a brand that protects itself, and the message broke that brand's rule. An unauthenticated domain is another: no one is defending anything, which is exactly what an attacker wants when there is no rule to break.
 
 <div class="expand-stack">
   <details class="expand-item">
     <summary class="expand-term">Why "no DMARC" is different from "DMARC fail"</summary>
     <div class="expand-body">
       <p>
-        <code>DMARC fail</code> means the domain published a policy and the message did not
-        meet it: the domain is actively trying to protect its identity, and this message is
-        not from it. <code>No DMARC record</code> means the domain never published a policy at
-        all, so there is nothing to align against. The first is a spoof of a defended domain;
-        the second is an unauthenticated domain. Both land in quarantine, but for different
-        reasons and with different reporting upstream.
-      </p>
-    </div>
-  </details>
-  <details class="expand-item">
-    <summary class="expand-term">Checking the DNS posture yourself</summary>
-    <div class="expand-body">
-      <p>Don't trust the header alone; confirm what the domain actually publishes:</p>
-      <pre><code>dig +short TXT example.com
-dig +short TXT _dmarc.example.com</code></pre>
-      <p>
-        If <code>example.com</code> has no <code>v=spf1</code> record and
-        <code>_dmarc.example.com</code> returns nothing, the domain has no email-authentication
-        posture. Any mail from it is unauthenticated by design, not by attack, though an
-        attacker will happily use exactly such a domain, which is why the combination with
-        the header verdict still matters.
+        <code>DMARC fail</code> means the domain published a policy and the message did not meet it: the domain is actively trying to protect its identity, and this message is not from it. <code>No DMARC record</code> means the domain never published a policy at all, so there is nothing to align against. The first is a spoof of a defended domain; the second is an unauthenticated domain. Both land in quarantine, but for different reasons and with different reporting upstream.
       </p>
     </div>
   </details>
 </div>
 
-## The decision
+## Confirm what the domain actually publishes
 
-With the three header verdicts and the DNS posture in hand, the decision is mechanical:
+Don't trust the header alone. The header tells you what the receiver saw; the DNS tells you what the domain actually publishes. Run both from a terminal:
 
-| Header verdict | DNS posture | Read as |
-|----------------|-------------|---------|
-| SPF fail · DKIM fail · no DMARC | No SPF/DMARC published | Unauthenticated domain: block or quarantine |
-| SPF fail · DKIM pass · DMARC pass | Domain defended, message aligned | Legitimate, relayed; investigate the relay, not the sender |
-| SPF pass · DKIM fail · DMARC fail | DMARC published | Spoofed: block, and it's a reportable event |
+<pre><code>dig +short TXT dalimnthefoob.co
+dig +short TXT _dmarc.dalimnthefoob.co</code></pre>
 
-## What header auth catches, and what it doesn't
+You should see nothing back from either. That confirms the header read: this domain has no email-authentication posture at all.
 
-The three verdicts answer one question: did this message come from the domain it
-claims? They do not answer a different one: is this message safe? That distinction matters more
-now, because AI-powered scams are built around it.
+## Make the decision
 
-- **Compromised real accounts.** A scam sent from a hijacked mailbox passes SPF,
-  DKIM, and DMARC, because it is genuinely from that account. The header read says
-  "authenticated," and it is, but the content is still a phish. For anything involving money or
-  credentials, confirm the request on a second channel (call a known number, not the one
-  in the email).
-- **Lookalike domains.** An attacker registers a close cousin like `paypa1.com` (a Latin
-  "l" swapped for a digit) or a homoglyph domain, then publishes valid SPF, DKIM, and
-  DMARC for it. Every check passes, because the records are genuinely the attacker's.
-  DMARC on the real brand has no authority over a different domain.
-- **Abused legitimate platforms.** Mail sent through a real SaaS (a fundraising
-  platform, a form service) authenticates as that platform, not as the brand it
-  impersonates. The header is clean; the story is in the URLs.
+From the combination you just read, the decision is clear: unauthenticated domain, block or quarantine.
 
-AI makes the lure itself harder to spot: model-generated phishing reads
-cleanly, personalizes at scale, and drops the old grammar tells. The header read is
-still necessary (a spoofed domain still fails), but it is no longer sufficient.
-Pair it with out-of-band verification and sender fingerprinting, and watch for newly
-registered lookalike domains.
+The same method gives you the other cases too:
 
-Sources: [Adaptive Security](https://www.adaptivesecurity.com/blog/how-ai-generated-phishing-bypasses-traditional-email-filters),
-[Palisade](https://www.palisade.email/learning/why-do-phishing-emails-pass-spf-and-dkim),
-[PowerDMARC](https://powerdmarc.com/what-is-dmarc/),
-[IRONSCALES weekly recap (March 2026)](https://ironscales.com/blog/best-of-the-worst-march-27-2026),
-[IRONSCALES: SPF Pass, DKIM Pass, DMARC Pass. Still Phishing.](https://ironscales.com/threat-intelligence/authenticated-supplier-invoice-cousin-domain-display-name-impersonation).
+- All three fail and no DMARC published: unauthenticated domain. Block or quarantine.
+- All three pass: the message came from the domain it claims, but that is not the same as safe. For money or credentials, confirm the request on a second channel.
+- SPF and DKIM pass but DMARC is none: signed and allowed, but the domain publishes no rule. Treat as unknown until you confirm the sender.
+- Otherwise mixed: read the three rows individually, then confirm the domain with dig.
 
-## What this teaches, and what it doesn't
+## What this method cannot catch
 
-**Teaches:** the check a security analyst runs before escalating a phishing report: three
-header lines plus a DNS check, and a decision table that doesn't need a paid tool.
+The three verdicts answer one question: did this message come from the domain it claims? They do not answer a different one: is this message safe? That distinction matters more now, because AI-powered scams are built around it.
 
-**Doesn't teach:** attribution, and it doesn't teach "safe." An unauthenticated
-domain is not an actor. A spoofed defended domain is not a campaign. And a clean
-authentication pass is not a clean bill of health: in the AI era, authenticated mail
-can still be a scam. The header read tells you what to do with the message, not
-who sent it or whether to trust it.
+- **Compromised real accounts.** A scam sent from a hijacked mailbox passes all three checks, because it is genuinely from that account. The header says "authenticated," and it is, but the content is still a phish. For anything involving money or credentials, confirm the request on a second channel (call a known number, not the one in the email).
+- **Lookalike domains.** An attacker registers a close cousin like `paypa1.com` (a Latin "l" swapped for a digit) or a homoglyph domain, then publishes valid SPF, DKIM, and DMARC for it. Every check passes, because the records are genuinely the attacker's. DMARC on the real brand has no authority over a different domain.
+- **Abused legitimate platforms.** Mail sent through a real SaaS (a fundraising platform, a form service) authenticates as that platform, not as the brand it impersonates. The header is clean; the story is in the URLs.
 
+AI makes the lure itself harder to spot: model-generated phishing reads cleanly, personalizes at scale, and drops the old grammar tells. The header read is still necessary, but it is no longer sufficient.
+
+Sources: [Adaptive Security](https://www.adaptivesecurity.com/blog/how-ai-generated-phishing-bypasses-traditional-email-filters), [Palisade](https://www.palisade.email/learning/why-do-phishing-emails-pass-spf-and-dkim), [PowerDMARC](https://powerdmarc.com/what-is-dmarc/), [IRONSCALES weekly recap (March 2026)](https://ironscales.com/blog/best-of-the-worst-march-27-2026), [IRONSCALES: SPF Pass, DKIM Pass, DMARC Pass. Still Phishing.](https://ironscales.com/threat-intelligence/authenticated-supplier-invoice-cousin-domain-display-name-impersonation).
+
+## You can now do this
+
+You have just read a real phishing email end to end: three header verdicts, a DNS check, and a decision. The next time a suspicious email lands, do the same:
+
+1. Open the raw header and find the `Authentication-Results` line.
+2. Read the three verdicts: SPF, DKIM, DMARC.
+3. `dig` the sending domain and its `_dmarc.` subdomain.
+4. Decide: all fail with no DMARC means block; all pass means confirm out-of-band for anything sensitive.
+
+Three lines, a dig, a decision. No paid tool.
