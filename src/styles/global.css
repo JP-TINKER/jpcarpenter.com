@@ -535,6 +535,18 @@ h3 {
 /* Padding-top only, a shorthand here would reset the sheet's horizontal gutter. */
 .band {
   padding-top: clamp(3.25rem, 7vw, 5rem);
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  /* Warm wood sheet on the dark desk: a reviewed sheet reads as a
+     warm band, not flat charcoal. Desaturated so sage still owns the
+     "important thing" job; this is material, not a second accent. */
+  background:
+    linear-gradient(
+      172deg,
+      rgba(120, 92, 52, 0.30) 0%,
+      rgba(72, 56, 38, 0.18) 45%,
+      rgba(26, 21, 17, 0.05) 100%
+    );
+  border-bottom: 1px solid var(--wood-edge);
 }
 
 .band-heading {
@@ -561,7 +573,7 @@ h1.band-heading {
    the strongest piece of evidence lead. */
 .entries {
   list-style: none;
-  margin-top: 2.25rem;
+  margin-top: 1.5rem;
 }
 
 .entry {
