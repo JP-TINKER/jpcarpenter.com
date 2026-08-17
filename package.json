@@ -16,7 +16,7 @@
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource/space-grotesk": "^5.2.8",
     "@fontsource/space-mono": "^5.2.8",
-    "astro": "^7.2.0"
+    "astro": "^7.2.2"
   },
   "devDependencies": {
     "svg-term-cli": "^2.1.1"
