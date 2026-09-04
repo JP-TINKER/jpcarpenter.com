@@ -1,7 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MarginNote from '../components/MarginNote.astro';
+import { getCollection, render } from 'astro:content';
 import { formatLastReviewed } from '../lib/site-meta';
+
+const entries = (await getCollection('security'))
+  .filter((e) => !e.data.draft)
+  .sort((a, b) => (a.data.order ?? 50) - (b.data.order ?? 50) || +b.data.date - +a.data.date);
+
+const notes = entries
+  .filter((e) => e.data.kind === 'note')
+  .sort((a, b) => +b.data.date - +a.data.date);
+const controls = entries.filter((e) => e.data.kind === 'control');
+const refuse = entries.filter((e) => e.data.kind === 'refuse');
+
+const rendered = await Promise.all(
+  entries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { id: entry.id, Content, data: entry.data };
+  }),
+);
+const byId = Object.fromEntries(rendered.map((r) => [r.id, r]));
 ---
 
 <BaseLayout
@@ -16,495 +35,69 @@ import { formatLastReviewed } from '../lib/site-meta';
     <div class="prose">
       <h2>How to read this page</h2>
       <p>
-        Skim the labels. Open a row when you want the explanation, what it means, why it
-        matters on a personal site, how it was done, and where the idea comes from. That is the
-        same pattern I use when teaching: headline first, depth on demand.
+        Skim the labels. Open a row when you want the explanation. Field notes are dated
+        posts about what changed. Technical evidence of verification craft lives in
+        <a href="/labs">Labs</a>.
       </p>
       <p>
-        Technical evidence of how I verify controls lives in
-        <a href="/labs">Labs</a>. This page is the posture brief.
+        Add a field note with <code>npm run new -- security "Your title"</code> — no need to
+        edit this page file.
       </p>
     </div>
   </section>
+
+  {
+    notes.length > 0 && (
+      <section class="band sheet">
+        <MarginNote stamp="Notes" note="Field posts" state="verified" />
+        <div class="prose security-teach">
+          <h2>Field notes</h2>
+          <p>Short dated posts.</p>
+          <div class="expand-stack">
+            {notes.map((entry) => {
+              const R = byId[entry.id];
+              return (
+                <details class="expand-item">
+                  <summary class="expand-term">
+                    {entry.data.date.toISOString().slice(0, 10)} — {entry.data.title}
+                  </summary>
+                  <div class="expand-body prose-md">
+                    <p class="note-summary">{entry.data.summary}</p>
+                    <R.Content />
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   <section class="band sheet">
     <MarginNote stamp="In force" note={`Reviewed ${formatLastReviewed()}`} state="verified" />
     <div class="prose security-teach">
       <h2>Controls in force</h2>
-      <p>
-        These are live choices for this website. Open any row for the lesson and citations.
-      </p>
-
+      <p>These are live choices for this website. Open any row for the lesson and citations.</p>
       <div class="expand-stack">
-        <details class="expand-item">
-          <summary class="expand-term">Shrink what can go wrong</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> the fewer moving parts a website has, the fewer
-              ways it can be broken. This site is a set of finished pages, like printed sheets,
-              not a living application that talks to a database when you visit.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> there is no password page for an attacker to
-              guess, and no admin panel hanging off the public site.
-            </p>
-            <p>
-              <strong>How:</strong> pages are finished files on the server, not an app that
-              rebuilds itself from a database on every visit. Fewer moving parts first; fancy
-              gadgets only if they earn their keep.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                OWASP thinking on reducing unnecessary surface:
-                <a href="https://owasp.org/www-project-web-security-testing-guide/">Web Security Testing Guide</a>
-                (configuration / deployment testing).
-              </li>
-              <li>
-                Same idea in practice: prefer a simple static site over stacking defenses on a
-                complicated one.
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Tell the browser what scripts are allowed</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> a
-              <abbr title="Content-Security-Policy, browser rules for what a page may load">Content-Security-Policy (CSP)</abbr>
-              is a packing list the browser must follow. This site's list says: only load scripts
-              and styles from this same website, not from random other places, and do not run
-              leftover "inline" script tags that often show up in attacks.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> even a simple page can be damaged if someone
-              finds a way to inject script. A strict CSP makes that much harder. We also ask
-              supporting browsers for
-              <abbr title="Trusted Types, browser rules that block unsafe script sinks in the page">Trusted Types</abbr>,
-              an extra guard against a common class of page-tampering bugs.
-            </p>
-            <p>
-              <strong>How:</strong> every script and stylesheet ships as its own file from this
-              website. The policy uses <code>script-src 'self'</code> with no
-              <code>'unsafe-inline'</code>, plus <code>form-action 'none'</code> (fill sheets
-              on /resources do not submit) and <code>frame-ancestors 'none'</code> (do not embed this site in someone
-              else's frame).
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html">OWASP Content Security Policy Cheat Sheet</a>
-              </li>
-              <li>
-                <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP">MDN: Content Security Policy</a>
-              </li>
-              <li>
-                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API">MDN: Trusted Types API</a>
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Keep the site locked to HTTPS</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> visitors should always use the secure connection
-              (the lock in the address bar).
-              <abbr title="HTTP Strict Transport Security, tells browsers to use HTTPS only">HSTS</abbr>
-              is a note to the browser: "for a long time, only use HTTPS for this name, and for
-              its subdomains."
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> without HSTS, a first visit or a bad link can
-              still try plain HTTP. HSTS closes that gap after the browser has seen the policy.
-              The <code>preload</code> flag is consent to join the browser vendors' shared list.
-            </p>
-            <p>
-              <strong>How:</strong> HTTPS is required; HTTP redirects to HTTPS. The site sends
-              <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>
-              from one nginx header snippet (HTML and hashed <code>/_astro/</code> assets get the
-              same policy). The unused <code>www</code> DNS record was removed so the name list
-              matches the certificate. The domain is submitted to the shared preload list
-              (hstspreload.org status: <code>pending</code> — browsers pick it up after Chromium
-              ships the entry; that lag is normal).
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet">OWASP HTTP Strict Transport Security Cheat Sheet</a>
-              </li>
-              <li>
-                <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">MDN: Strict-Transport-Security</a>
-              </li>
-              <li>
-                <a href="https://hstspreload.org/">hstspreload.org</a>, submission rules and caveats
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Lock who may issue the site's certificates (CAA)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong>
-              <abbr title="Certification Authority Authorization, DNS records that name which certificate companies may issue for your domain">CAA</abbr>
-              records in DNS say which certificate companies are allowed to issue a lock
-              certificate for this domain.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> without CAA, any public CA can issue a cert
-              for the name if someone tricks the issuance process. CAA makes "wrong issuer"
-              fail closed at the CA, not after the fact.
-            </p>
-            <p>
-              <strong>How:</strong> DNS CAA on the apex names Let's Encrypt
-              (<code>issue "letsencrypt.org"</code>) and routes issuance reports to
-              <code>mailto:jp@jpcarpenter.com</code>. Verify with
-              <code>dig CAA jpcarpenter.com</code>. If the site later moves to Cloudflare Pages,
-              replace these with Cloudflare's CA set before cutover — a stale Let's Encrypt-only
-              CAA will block their issuance.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://www.rfc-editor.org/rfc/rfc8659">RFC 8659, DNS Certification Authority Authorization (CAA) Resource Record</a>
-              </li>
-              <li>
-                <a href="https://letsencrypt.org/docs/caa/">Let's Encrypt: CAA</a>, how issuers
-                check these records
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Stop framing tricks and casual browser features</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> other sites should not wrap this page in a
-              picture-frame and trick someone into clicking the wrong thing. This site also
-              turns off browser features a portfolio never needs (camera, microphone, location,
-              payments, and similar).
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> clickjacking and cross-window tricks are old,
-              but still cheap for attackers. Turning off unused device APIs is free hygiene,
-              there is no legitimate reason for this site to ask for your camera.
-            </p>
-            <p>
-              <strong>How:</strong> framing is denied; content-type sniffing is disabled;
-              cross-origin opener and resource policies keep windows and assets on a short leash;
-              Permissions-Policy is a long deny list.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html">OWASP HTTP Headers Cheat Sheet</a>
-              </li>
-              <li>
-                <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy">MDN: Cross-Origin-Opener-Policy</a>
-              </li>
-              <li>
-                <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy">MDN: Permissions-Policy</a>
-              </li>
-              <li>
-                OWASP ASVS (Application Security Verification Standard), HTTP security header
-                expectations, scaled to a personal static site (Level 1 thinking, not a bank).
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Opt out of AI training, stay findable in AI search</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> many AI companies now use <em>different</em> robots
-              for "copy this into the training pile" versus "index this so people can find it in
-              AI search." This site says no to the training robots and yes to ordinary search and
-              AI search/citation robots.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> blocking everything hides the work from people
-              who search. Allowing everything feeds training without a separate decision. The
-              split is the thoughtful middle: stay discoverable, decline silent harvest.
-            </p>
-            <p>
-              <strong>How:</strong> rules live in <a href="/robots.txt">/robots.txt</a>. That file
-              is a request polite operators honor, not a hard lock against rude scrapers (rate
-              limits on the origin handle the rest). Training bots such as <code>GPTBot</code> and
-              <code>ClaudeBot</code> are Disallow. Live citation / user-fetch tokens such as
-              <code>OAI-SearchBot</code>, <code>ChatGPT-User</code>, <code>Claude-SearchBot</code>,
-              and <code>Claude-User</code> are Allow so a recruiter asking an assistant about this
-              site can still get a live fetch.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://developers.openai.com/api/docs/bots">OpenAI: Overview of crawlers</a>
-                (GPTBot vs OAI-SearchBot vs ChatGPT-User)
-              </li>
-              <li>
-                <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler">Anthropic: Claude crawlers and robots.txt</a>
-              </li>
-              <li>
-                Google's <code>Google-Extended</code> control, training/Gemini opt-out without
-                turning off normal Google Search (documented in Google's AI / robots guidance)
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Markdown identity card (same facts, no cloaking)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> there is a plain Markdown card at
-              <a href="/about.md">/about.md</a> with the same biography, credentials, and contact
-              facts as the HTML About page. Browsers keep the HTML page. Agents that prefer
-              <code>text/markdown</code> can take the card.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> this is how you "only show them what you want"
-              without lying. Same facts, denser format. Different facts for bots would be cloaking
-              and would burn trust with search engines.
-            </p>
-            <p>
-              <strong>How:</strong> <code>/about.md</code> ships as <code>text/markdown</code>.
-              On the origin, nginx Accept negotiation serves that card for
-              <code>/about</code> when the client asks for Markdown, and always sends
-              <code>Vary: Accept</code>. Browsers still get HTML.
-              <a href="/llms.txt">/llms.txt</a> remains the denser whole-site summary.
-            </p>
-            <p><strong>Limits</strong></p>
-            <ul>
-              <li>Anyone can fetch <code>/about.md</code> directly. It is not a secret channel.</li>
-              <li>Without edge bot verification, a scraper can still take the HTML.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Identity stitching (sameAs)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> the About page marks up a Person with LinkedIn and
-              GitHub links as <code>sameAs</code>, so crawlers can treat the site, LinkedIn, and
-              GitHub as one person instead of three strangers.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> recruiter tools lean on LinkedIn and GitHub.
-              The personal site is the identity hub. <code>sameAs</code> is the cheap stitch.
-              Microdata is used instead of JSON-LD because this site's CSP forbids inline script
-              and a static host cannot rotate nonces.
-            </p>
-            <p>
-              <strong>How:</strong> schema.org Person microdata on <a href="/about">/about</a>,
-              mirrored in <a href="/about.md">/about.md</a>.
-            </p>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Terms against training scrapes</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> <a href="/terms.txt">/terms.txt</a> says automated
-              bulk collection for model training is not allowed without written consent, while
-              ordinary reading, linking, hiring review, and robots-respecting search/citation stay
-              welcome.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> a clear permission statement gives a hook for
-              takedown or dispute letters. It does not stop a rude bot by itself.
-            </p>
-            <p>
-              <strong>How:</strong> public terms file plus the robots split above. Weekly access-log
-              review for AI user-agents remains an ops habit, not a page feature.
-            </p>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Same facts for machines, denser format (llms.txt)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> there is a plain-text summary at
-              <a href="/llms.txt">/llms.txt</a> written for automated readers. It packs the same
-              biography, work claims, and lab findings into a structure machines parse easily.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> giving bots a denser copy of the truth is not
-              the same as showing them a <em>different</em> story. Cloaking (one page for humans,
-              another for bots) is dishonest and gets sites penalized. One truth, two formats.
-            </p>
-            <p>
-              <strong>How:</strong> <code>llms.txt</code> is a public file. It is not in the
-              primary navigation so humans are not pushed through it. Anyone who opens the URL
-              sees the same text a bot would. Evidence that <code>llms.txt</code> moves rankings
-              on personal sites is weak; keep it as housekeeping, not a growth lever.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                Emerging <code>llms.txt</code> convention for structured site summaries for LLM /
-                agent readers (paired here with honest robots policy, not as a substitute for it).
-              </li>
-              <li>This site's rule: no cloaking, documented on this page and in <code>llms.txt</code>.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Tell researchers how to report a problem</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> if someone finds a real issue with this website,
-              they should know who to email, without hunting through contact pages.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> disclosure channels are basic operational
-              hygiene. On a small static site the risk surface is small, but the courtesy still
-              matters.
-            </p>
-            <p>
-              <strong>How:</strong>
-              <a href="/.well-known/security.txt">/.well-known/security.txt</a> points to
-              <a href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a> and links back here.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://www.rfc-editor.org/rfc/rfc9116">RFC 9116, A File Format to Aid in Security Vulnerability Disclosure (security.txt)</a>
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Quiet tripwire for scanners</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> there is an unlinked decoy file on the site. Normal
-              readers never see it. If something requests it, that shows up in server logs,
-              useful as an early "someone is poking around" signal.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> it does not stop an attack by itself. It helps
-              detection. The address of the decoy is not published here on purpose, advertising
-              a tripwire teaches scanners where to step.
-            </p>
-            <p>
-              <strong>How:</strong> a small unused file ships with the site; server access logs
-              are checked for requests to it.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                Common defensive pattern: unlinked "canary" or honey paths as an early warning
-                when something probes beyond normal browsing, without changing what real
-                visitors see.
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Origin nginx hygiene</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> the public site is static files behind nginx on a
-              Njalla VPS. The server should not advertise its exact version, should send one
-              consistent security-header set, and should not leave old TLS generations enabled
-              "just in case."
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> version banners help scanners triage targets.
-              Split header configs create gaps (for example assets without HSTS). Old TLS is free
-              attack surface on a site that never needs it.
-            </p>
-            <p>
-              <strong>How:</strong> <code>server_tokens off</code> (responses say
-              <code>Server: nginx</code> without a version). One header snippet covers HTML and
-              <code>/_astro/</code> assets: 1-year HSTS with <code>includeSubDomains; preload</code>,
-              <code>X-Frame-Options: DENY</code>, and the rest of the posture headers. TLS 1.0 and
-              1.1 are disabled in the TLS config. Ghost stays off the public origin.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://nginx.org/en/docs/http/ngx_http_core_module.html#server_tokens">nginx server_tokens</a>
-              </li>
-              <li>
-                <a href="https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html">OWASP HTTP Headers Cheat Sheet</a>
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Slow down rude scrapers (gentle rate limits)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> <code>robots.txt</code> is a polite sign on the
-              door. Some crawlers ignore signs. Soft rate and connection limits on the web server
-              slow machines that hammer the site, without putting a puzzle in front of every
-              human visitor.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> a static portfolio does not need a bot wall.
-              It does need a ceiling so one IP cannot soak the origin with thousands of requests
-              per second. Limits are set high enough that a normal page load (HTML + many assets)
-              never notices.
-            </p>
-            <p>
-              <strong>How:</strong> nginx <code>limit_req</code> at <code>20r/s</code> per IP with
-              <code>burst=80 nodelay</code>, plus <code>limit_conn</code> at 40 concurrent
-              connections per IP. Over-limit responses are <code>429</code>. Verified: ordinary
-              browsing and a 30-request burst return normally.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html">nginx limit_req module</a>
-              </li>
-              <li>
-                <a href="https://nginx.org/en/docs/http/ngx_http_limit_conn_module.html">nginx limit_conn module</a>
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Why there is no CAPTCHA here</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> those "prove you are human" puzzles are useful on
-              login forms and signup walls. This site has neither. A CAPTCHA on every visit would
-              mostly annoy people, and most scrapers never run the puzzle anyway; they just
-              download the page.
-            </p>
-            <p>
-              <strong>Why it matters here:</strong> adding a third-party CAPTCHA would require
-              outside JavaScript and punch holes in the strict script policy above. That trades a
-              real control for theater. If contact spam ever becomes a real problem, the honest
-              next step is a first-party form with a honeypot (and a deliberate policy review),
-              not a badge that weakens CSP.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                Judgment call: do not put CAPTCHA on first contact without evidence of abuse,
-                especially when it would force weaker browser script rules.
-              </li>
-              <li>CSP integrity citations in "Tell the browser what scripts are allowed" above.</li>
-            </ul>
-          </div>
-        </details>
+        {
+          controls.map((entry) => {
+            const R = byId[entry.id];
+            return (
+              <details class="expand-item">
+                <summary class="expand-term">{entry.data.summary}</summary>
+                <div class="expand-body prose-md">
+                  <R.Content />
+                  {entry.data.limits && (
+                    <p>
+                      <strong>Limits:</strong> {entry.data.limits}
+                    </p>
+                  )}
+                </div>
+              </details>
+            );
+          })
+        }
       </div>
     </div>
   </section>
@@ -514,54 +107,23 @@ import { formatLastReviewed } from '../lib/site-meta';
     <div class="prose security-teach">
       <h2>What we refuse</h2>
       <div class="expand-stack">
-        <details class="expand-item">
-          <summary class="expand-term">Security theater that hurts people or weakens real controls</summary>
-          <div class="expand-body">
-            <ul>
-              <li>Sitewide CAPTCHA / bot walls on a site with no login (see row above).</li>
-              <li>Fake "military-grade" badges or seals with nothing to verify.</li>
-              <li>Client-only "encryption" of public HTML, visitors already receive the page.</li>
-              <li>
-                Heavy challenge pages for every human on a low-traffic personal site (including
-                self-hosted proof-of-work gates) unless availability is actually under attack.
-              </li>
-              <li>Third-party scripts "for convenience" that force permanent CSP exceptions.</li>
-            </ul>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                Prefer real controls over badges and puzzles that weaken browser protections;
-                same judgment as the CAPTCHA row above.
-              </li>
-              <li>
-                <a href="https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html">OWASP HTTP Headers Cheat Sheet</a>
-               , configure headers that matter; skip decoration.
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Check it yourself</summary>
-          <div class="expand-body">
-            <p>
-              You do not have to take this page's word for it. From a terminal, or using your
-              browser's developer tools on any page, look for the security headers on the
-              response:
-            </p>
-            <pre class="security-curl"><code>curl -sI https://jpcarpenter.com | grep -Ei 'strict-transport|content-security|x-frame|permissions'</code></pre>
-            <p>
-              Also open <a href="/robots.txt">/robots.txt</a> and
-              <a href="/.well-known/security.txt">/.well-known/security.txt</a>.
-            </p>
-            <p>
-              For how I demonstrate verification craft (not just configuration claims), see
-              <a href="/labs">Labs</a>.
-            </p>
-            <p><em>Last reviewed: {formatLastReviewed()}.</em></p>
-          </div>
-        </details>
+        {
+          refuse.map((entry) => {
+            const R = byId[entry.id];
+            return (
+              <details class="expand-item">
+                <summary class="expand-term">{entry.data.summary}</summary>
+                <div class="expand-body prose-md">
+                  <R.Content />
+                </div>
+              </details>
+            );
+          })
+        }
       </div>
+      <p class="last-reviewed">
+        <em>Last reviewed: {formatLastReviewed()}.</em>
+      </p>
     </div>
   </section>
 </BaseLayout>
@@ -575,7 +137,16 @@ import { formatLastReviewed } from '../lib/site-meta';
     margin-top: 1.25rem;
   }
 
-  .security-curl {
+  .note-summary {
+    margin-top: 0;
+    opacity: 0.85;
+  }
+
+  .last-reviewed {
+    margin-top: 1.5rem;
+  }
+
+  .prose-md :global(pre) {
     margin: 1rem 0 0;
     padding: 0.85rem 1rem;
     overflow-x: auto;
@@ -584,5 +155,9 @@ import { formatLastReviewed } from '../lib/site-meta';
     line-height: 1.45;
     background: color-mix(in srgb, var(--ink, #1c1a16) 4%, transparent);
     border-left: 2px solid var(--sage, #64705b);
+  }
+
+  .prose-md :global(ul) {
+    padding-left: 1.25rem;
   }
 </style>

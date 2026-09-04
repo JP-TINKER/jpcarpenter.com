@@ -105,4 +105,21 @@ const tutorials = defineCollection({
   }),
 });
 
-export const collections = { labs, writing, projects, tutorials, resources };
+/** Public posture page entries — controls, refuse rows, and dated field notes. */
+const security = defineCollection({
+  loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/security' }),
+  schema: z.object({
+    kind: z.enum(['control', 'refuse', 'note']),
+    title: z.string(),
+    /** Expand-row label (controls/refuse) or one-line note blurb. */
+    summary: z.string(),
+    date: z.date(),
+    order: z.number().optional().default(50),
+    state: z.enum(['verified', 'open']).optional().default('verified'),
+    /** Optional one-line honesty limit shown in listings. */
+    limits: z.string().optional(),
+    draft: z.boolean().optional().default(false),
+  }),
+});
+
+export const collections = { labs, writing, projects, tutorials, resources, security };

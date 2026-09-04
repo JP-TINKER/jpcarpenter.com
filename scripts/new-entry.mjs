@@ -42,19 +42,26 @@ const KINDS = {
     url: (slug) => `/tutorials/${slug}`,
     fieldsHelp: 'src/content/tutorials/01-README.md',
   },
+  security: {
+    aliases: ['security', 'sec', 'posture', 's'],
+    dir: 'src/content/security',
+    url: () => '/security',
+    fieldsHelp: 'src/content/security/01-README.md',
+  },
 };
 
 const DISCIPLINES = new Set(['grc', 'networking', 'security', 'instruments']);
 
 function usage(code = 1) {
   console.log(`Usage:
-  npm run new -- <writing|lab|tutorial|project> <title-or-slug> [--title "..."] [--discipline grc|networking|security|instruments]
+  npm run new -- <writing|lab|tutorial|project|security> <title-or-slug> [--title "..."] [--discipline grc|networking|security|instruments]
 
 Examples:
   npm run new -- writing "Read what you sign"
   npm run new -- lab "VLAN routing proof" --discipline networking
   npm run new -- tutorial "Reading email authentication headers" --discipline grc
   npm run new -- project "Shop stool"
+  npm run new -- security "Wired canary alerts"
 `);
   process.exit(code);
 }
@@ -108,7 +115,7 @@ function parseArgs(argv) {
   const kindRaw = positional[0].toLowerCase();
   const kindEntry = Object.entries(KINDS).find(([, v]) => v.aliases.includes(kindRaw));
   if (!kindEntry) {
-    console.error(`Unknown kind "${positional[0]}". Use writing, lab, tutorial, or project.`);
+    console.error(`Unknown kind "${positional[0]}". Use writing, lab, tutorial, project, or security.`);
     usage(1);
   }
 
@@ -227,10 +234,28 @@ commands. Delete this whole body and the comments above once you've copied the f
 `;
 }
 
+function renderSecurity(title, slug) {
+  return `---
+kind: note
+title: ${JSON.stringify(title)}
+summary: "One-line blurb for the Field notes expand row."
+date: ${todayUTC()}
+order: 10
+state: verified
+---
+
+Write the field note in plain Markdown.
+
+For a **control** or **refuse** row instead, set \`kind: control\` or \`kind: refuse\`,
+use \`summary\` as the expand label, and follow \`01-README.md\`.
+`;
+}
+
 function main() {
   const { key, meta, slug, title, discipline } = parseArgs(process.argv.slice(2));
   const dir = join(root, meta.dir);
-  const file = join(dir, `${slug}.md`);
+  const fileName = key === 'security' ? `note-${slug}.md` : `${slug}.md`;
+  const file = join(dir, fileName);
 
   if (existsSync(file)) {
     console.error(`Already exists: ${file}`);
@@ -247,7 +272,8 @@ function main() {
   } else if (key === 'tutorial') {
     body = renderTutorial(title, discipline, slug);
     mkdirSync(join(root, 'public', 'tutorials', slug), { recursive: true });
-  } else body = renderProject(title);
+  } else if (key === 'security') body = renderSecurity(title, slug);
+  else body = renderProject(title);
 
   writeFileSync(file, body, 'utf8');
 

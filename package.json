@@ -10,6 +10,7 @@
     "new": "node scripts/new-entry.mjs",
     "render-tutorial": "node scripts/render-tutorial-svg.mjs",
     "probe": "node scripts/probe-paths.mjs",
+    "headers-ci": "node scripts/headers-ci.mjs",
     "deploy": "node scripts/probe-paths.mjs && bash scripts/deploy-njalla.sh",
     "verify-mobile": "node --experimental-strip-types scripts/test-explore-shell.mjs && node scripts/verify-v5-mobile.mjs"
   },

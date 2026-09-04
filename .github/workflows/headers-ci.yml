@@ -1,0 +1,24 @@
+name: Headers CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly Monday 12:00 UTC — catch live drift even without pushes
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+jobs:
+  headers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check live security headers
+        run: node scripts/headers-ci.mjs
+        env:
+          TARGET: https://jpcarpenter.com

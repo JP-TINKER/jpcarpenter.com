@@ -91,10 +91,14 @@ This file is not in the primary nav.
 - Static site; no accounts; no form submissions; no third-party JS
 - CSP: script-src 'self'; no 'unsafe-inline'; Trusted Types; form-action 'none'
 - HSTS with includeSubDomains; preload directive present; www A removed (apex only)
+- HSTS preload: submitted (hstspreload.org status pending; Chromium list lag is normal)
 - CAA: issue letsencrypt.org; iodef mailto:jp@jpcarpenter.com
 - Origin nginx: server_tokens off; Accept negotiation on /about (Vary: Accept); unified header snippet on HTML + /_astro/
-- HSTS preload: submitted (hstspreload.org status pending; Chromium list lag is normal)
 - Origin rate limits: 20r/s per IP, burst 80 nodelay; 40 concurrent conns; 429 when exceeded (human browsing unaffected)
+- Canary tripwire watched (hit log always; email best-effort); path unpublished on /security
+- Host: fail2ban sshd; unattended-upgrades; unused nginx modules not loaded
+- CT watch: daily crt.sh poll (discovery after issuance; CAA remains prevention)
+- Header drift monitor: npm run headers-ci + weekly GitHub Action (not a full ZAP suite; not a deploy gate)
 - AI policy: block named training crawlers; allow search/citation bots (see robots.txt)
 - No sitewide CAPTCHA (would weaken CSP without stopping raw GET scrapers)
 
