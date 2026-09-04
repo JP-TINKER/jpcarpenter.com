@@ -191,7 +191,7 @@ export function initRiskGauge(): void {
       ctx!.globalAlpha = 1;
     }
 
-    ctx!.font = '9px "Space Mono", monospace';
+    ctx!.font = '9px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx!.fillStyle = 'rgba(200,196,182,0.55)';
     ctx!.textAlign = 'center';
     ctx!.textBaseline = 'middle';

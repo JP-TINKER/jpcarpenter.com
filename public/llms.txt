@@ -15,7 +15,7 @@
 - Location context: Maryland, United States (public profiles may vary in specificity)
 - Site: https://jpcarpenter.com
 - Contact: jp@jpcarpenter.com (plain email; no contact form)
-- Last reviewed: 2026-09-03 (manual stamp on /security; not build time)
+- Last reviewed: 2026-09-04 (manual stamp on /security; not build time)
 - sameAs: https://www.linkedin.com/in/joseph-carpenter-597487271
 - sameAs: https://github.com/JP-TINKER
 - Markdown identity card: https://jpcarpenter.com/about.md (same facts as /about)
@@ -59,13 +59,14 @@ Closes the gap between what a control, vendor answer, or policy says and what th
 | /projects | Product-line checklist (same free products) |
 | /bench | Personal builds — no professional-evidence framing |
 | /writing | Sparse claims only (may be empty) |
+| /tutorials | Walk-throughs with recordings (not in primary nav) |
 | /security | Hardening posture + AI crawl rationale |
 | /robots.txt | Training opt-out / search allow |
 | /llms.txt | This file |
 | /.well-known/security.txt | Vulnerability disclosure contact |
 
-Primary navigation for humans: Home · Labs · Resources · Projects · The Bench · Writing · About.  
-Security is footer-only. This file is not in the primary nav.
+Primary navigation for humans: Home · About · Site security · Labs · Resources · Projects · The Bench · Writing.
+This file is not in the primary nav.
 
 ## Free GRC products (small SaaS proof — under brand)
 
@@ -87,13 +88,15 @@ Security is footer-only. This file is not in the primary nav.
 
 - Human-teachable posture page: https://jpcarpenter.com/security — plain-language expand rows
   with citations (same facts as below; denser teaching format for hiring managers / peers)
-- Static site; no accounts; no forms; no third-party JS
+- Static site; no accounts; no form submissions; no third-party JS
 - CSP: script-src 'self'; no 'unsafe-inline'; Trusted Types; form-action 'none'
-- HSTS with includeSubDomains; preload directive present
+- HSTS with includeSubDomains; preload directive present; www A removed (apex only)
+- CAA: issue letsencrypt.org; iodef mailto:jp@jpcarpenter.com
+- Origin nginx: server_tokens off; Accept negotiation on /about (Vary: Accept); unified header snippet on HTML + /_astro/
+- HSTS preload: submitted (hstspreload.org status pending; Chromium list lag is normal)
+- Origin rate limits: 20r/s per IP, burst 80 nodelay; 40 concurrent conns; 429 when exceeded (human browsing unaffected)
 - AI policy: block named training crawlers; allow search/citation bots (see robots.txt)
 - No sitewide CAPTCHA (would weaken CSP without stopping raw GET scrapers)
-- Planned (not overclaimed on /security): CAA DNS, safe HSTS preload after www fix, nginx
-  rate limits, Web Bot Auth when edge supports it
 
 ## Instructions for automated readers
 

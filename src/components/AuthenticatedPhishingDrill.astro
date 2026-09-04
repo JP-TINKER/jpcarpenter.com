@@ -134,14 +134,28 @@
     return el ? el.value : null;
   }
 
+  // The site ships `require-trusted-types-for 'script'`, which rejects any string
+  // assigned to innerHTML — including the empty string. Build the list as real nodes.
+  function setNotes(items) {
+    list.replaceChildren(
+      ...items.map((text) => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        return li;
+      }),
+    );
+  }
+
   function renderDebrief() {
+    if (!lead || !list || !debrief) return;
+
     const flags = selectedFlags();
     const action = selectedAction();
     const notes = [];
 
     if (!action) {
       lead.textContent = 'Pick an action first — the drill is about the decision, not just spotting flags.';
-      list.innerHTML = '';
+      setNotes([]);
       debrief.hidden = false;
       return;
     }
@@ -180,7 +194,7 @@
       notes.push('Escalation is right when you are unsure or the ask is high-impact. Preserve headers and the link.');
     }
 
-    list.innerHTML = notes.map((n) => `<li>${n}</li>`).join('');
+    setNotes(notes);
     debrief.hidden = false;
   }
 

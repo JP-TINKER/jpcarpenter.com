@@ -17,7 +17,9 @@ npm run new -- project "My build"
 Cheat sheet: [`EDIT.md`](../../../EDIT.md).
 
 Manual fallback: copy `../_templates/projects-entry.md` here and rename it to your slug.
-The filename becomes the URL — `my-build.md` → `/projects/my-build`.
+The filename becomes the detail URL — `my-build.md` → `/projects/my-build`. Personal
+builds (`category: personal`, the default) list on `/bench`, not on `/projects`. `/projects`
+is the free-product list.
 
 Then:
 
@@ -41,6 +43,7 @@ Open the `.md` file, change it, save, rebuild.
 | `state` | no | `open` draws the stamp dashed for anything unfinished/in progress; omit for ordinary finished work |
 | `date` | yes | `YYYY-MM-DD`, treated as UTC |
 | `order` | no (default `50`) | Lower sorts first in listings; ties fall back to date |
+| `category` | no (default `personal`) | `personal` lists on `/bench`. Other values are unused on the live listing |
 | `tags` | no | Array of strings |
 
 ## Adding a photo

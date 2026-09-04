@@ -271,14 +271,6 @@
   word-break: break-word;
 }
 
-.scope-fallback {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--ink-muted);
-  text-align: center;
-  padding: 2rem 1rem;
-}
-
 @media (max-width: 900px) {
   .scope-sticky {
     width: 100%;

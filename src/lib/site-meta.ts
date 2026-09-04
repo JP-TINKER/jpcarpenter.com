@@ -4,7 +4,7 @@
  * ISO date (UTC). Manual stamp — bump when you actually review posture or public copy.
  * Do not replace this with `new Date()` at build.
  */
-export const LAST_REVIEWED = '2026-09-03';
+export const LAST_REVIEWED = '2026-09-04';
 
 export function formatLastReviewed(iso = LAST_REVIEWED): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', {

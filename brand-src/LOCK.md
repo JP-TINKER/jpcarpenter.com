@@ -4,7 +4,7 @@
 **Reproduction:** `public/brand/mark-outlined.svg` (JP as paths — use when the font is not loaded)  
 **Favicon:** `public/favicon.svg` (outlined Atkinson Bold on a 512 canvas; thin plate field for tab contrast)  
 **PNG fallbacks:** `/favicon-32.png`, `/favicon-192.png`, `/apple-touch-icon.png` (180)  
-**Rebuild:** `python3 public/brand/build-favicon.py`  
+**Rebuild:** `python3 scripts/build-favicon.py`  
 **Component:** `src/components/BrandMark.astro`
 
 ## Recipe (chrome / in-page mark)

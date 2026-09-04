@@ -39,7 +39,7 @@ const { label = 'Use this template', options } = Astro.props;
       </div>
     </details>
   ) : (
-    <span class="btn-primary" style="opacity:0.45;pointer-events:none">Template coming</span>
+    <span class="btn-primary is-pending">Template coming</span>
   )
 }
 
@@ -158,6 +158,11 @@ const { label = 'Use this template', options } = Astro.props;
     letter-spacing: 0.05em;
     color: var(--ink-muted);
     text-transform: uppercase;
+  }
+
+  .btn-primary.is-pending {
+    opacity: 0.45;
+    pointer-events: none;
   }
 
   @media (prefers-reduced-motion: reduce) {

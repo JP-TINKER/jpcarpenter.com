@@ -9,7 +9,6 @@ import { bindExplainDrawer } from './signal-explain';
 export function initExposureGauge(): void {
   const canvas = document.getElementById('exposureCanvas') as HTMLCanvasElement | null;
   const detectedLine = document.getElementById('exposureDetected');
-  const heroLine = document.getElementById('heroExposureLine');
   const root = document.getElementById('gaugeRoot');
   const drawer = document.getElementById('gaugeDrawer');
   const titleEl = document.getElementById('gaugeDrawerTitle');
@@ -97,9 +96,6 @@ export function initExposureGauge(): void {
   }
   if (noteEl) noteEl.textContent = note;
   if (detectedLine) detectedLine.textContent = `Detected: ${detectedText}`;
-  if (heroLine) {
-    heroLine.textContent = `This page can already see: ${browser} on ${os}, ${tz.split('/').pop()?.replace('_', ' ')}, ${cores}. ${Math.round(score)}/${maxScore} signals, zero clicks.`;
-  }
 
   let needleFraction = reduceMotion ? targetFraction : 0;
   let raf = 0;
@@ -151,7 +147,7 @@ export function initExposureGauge(): void {
       ctx!.globalAlpha = 1;
     }
 
-    ctx!.font = '9px "Space Mono", monospace';
+    ctx!.font = '9px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx!.fillStyle = 'rgba(200,196,182,0.55)';
     ctx!.textAlign = 'center';
     ctx!.textBaseline = 'middle';

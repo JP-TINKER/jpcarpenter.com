@@ -46,7 +46,6 @@ export interface ResourceOffering {
   order: number;
   download?: string;
   downloads?: ResourceDownloadOption[];
-  seek?: string;
   preview?: ResourceTemplatePreview;
 }
 
@@ -65,7 +64,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/vendor-security-intake.docx', format: 'docx' },
       { label: 'Download PDF', href: '/downloads/resources/vendor-security-intake.pdf', format: 'pdf' },
     ],
-    seek: 'New tool already live — procurement and security both hunt this.',
     preview: {
       kicker: 'TPRM intake',
       intro:
@@ -151,7 +149,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
         format: 'pdf',
       },
     ],
-    seek: 'Auditor says prove MFA; Slack has no answer.',
     preview: {
       kicker: 'Access / MFA evidence',
       intro:
@@ -218,7 +215,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/incident-intake.docx', format: 'docx' },
       { label: 'Download PDF', href: '/downloads/resources/incident-intake.pdf', format: 'pdf' },
     ],
-    seek: 'Blank intake at 2am beats another IR policy PDF.',
     preview: {
       kicker: 'First-hour incident intake',
       intro:
@@ -292,7 +288,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
         format: 'pdf',
       },
     ],
-    seek: 'Manager needs a company-ready awareness pack, not another LMS demo.',
     preview: {
       kicker: 'Training campaign kit',
       intro:
@@ -379,7 +374,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
     kind: 'pack',
     status: 'planned',
     order: 36,
-    seek: 'Deepfake / vishing executive impersonation — high-signal awareness topic.',
   },
   {
     id: 'oauth-mfa-fatigue-campaign-kit',
@@ -388,7 +382,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
     kind: 'pack',
     status: 'planned',
     order: 37,
-    seek: 'SaaS-native gap most small teams undertrain.',
   },
   {
     id: 'change-evidence-ask',
@@ -401,7 +394,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/change-evidence-ask.docx', format: 'docx', primary: true },
       { label: 'Download PDF', href: '/downloads/resources/change-evidence-ask.pdf', format: 'pdf' },
     ],
-    seek: 'Show me five changes — recurring panic search.',
   },
   {
     id: 'policy-exception-log',
@@ -414,7 +406,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/policy-exception-log.docx', format: 'docx', primary: true },
       { label: 'Download PDF', href: '/downloads/resources/policy-exception-log.pdf', format: 'pdf' },
     ],
-    seek: 'Exception registers get filled; policies sit unread.',
   },
 
   // —— Planned companions (only what small SaaS will seek next) ——
@@ -425,7 +416,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
     kind: 'form',
     status: 'planned',
     order: 60,
-    seek: 'Sales-blocking questionnaires — highest stranger pull after Product A.',
   },
   {
     id: 'user-access-review-worksheet',
@@ -434,7 +424,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
     kind: 'worksheet',
     status: 'planned',
     order: 70,
-    seek: 'Pairs with Product A evidence calendar — quarterly pain.',
   },
   {
     id: 'offboarding-checklist',
@@ -443,7 +432,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
     kind: 'checklist',
     status: 'planned',
     order: 80,
-    seek: 'HR + IT constant search. Easy companion to Product A.',
   },
   {
     id: 'soc2-pbc-list',
@@ -452,7 +440,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
     kind: 'checklist',
     status: 'planned',
     order: 90,
-    seek: 'Audit-season fuel; folds into Product A calendar mentally.',
   },
 
   // —— Policy starters (commodity — bottom only) ——
@@ -467,7 +454,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/access-control-policy.docx', format: 'docx', primary: true },
       { label: 'Download PDF', href: '/downloads/resources/access-control-policy.pdf', format: 'pdf' },
     ],
-    seek: 'Commodity. Never lead.',
   },
   {
     id: 'incident-response-policy',
@@ -480,7 +466,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/incident-response-policy.docx', format: 'docx', primary: true },
       { label: 'Download PDF', href: '/downloads/resources/incident-response-policy.pdf', format: 'pdf' },
     ],
-    seek: 'Commodity.',
   },
   {
     id: 'change-management-policy',
@@ -493,7 +478,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/change-management-policy.docx', format: 'docx', primary: true },
       { label: 'Download PDF', href: '/downloads/resources/change-management-policy.pdf', format: 'pdf' },
     ],
-    seek: 'Commodity.',
   },
   {
     id: 'vendor-management-policy',
@@ -506,7 +490,6 @@ export const RESOURCE_CATALOG: ResourceOffering[] = [
       { label: 'Download DOCX', href: '/downloads/resources/vendor-management-policy.docx', format: 'docx', primary: true },
       { label: 'Download PDF', href: '/downloads/resources/vendor-management-policy.pdf', format: 'pdf' },
     ],
-    seek: 'Commodity.',
   },
 ];
 

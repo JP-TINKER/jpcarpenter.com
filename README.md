@@ -7,11 +7,12 @@ Static-first rebuild of [jpcarpenter.com](https://jpcarpenter.com) with **Astro*
 | Piece | Choice |
 |-------|--------|
 | Generator | Astro 7 (MIT) |
-| Fonts | Space Grotesk + Space Mono via `@fontsource` (self-hosted) |
-| Instrument | TINKER-SCOPE Model 1A (island; JS only here) |
-| Hosting target | Cloudflare Pages (default choice — $0/mo, git-connected, tight CSP support) |
+| Fonts | Atkinson Hyperlegible (self-hosted TTFs in `/fonts`) |
+| Instruments | Astro islands — TINKER-SCOPE, RISK GAUGE, EXPOSURE GAUGE, FINGERPRINT TRACE, EMAIL HEADER READER (+ drills). JS only where an instrument runs |
+| Hosting (live) | Njalla VPS — nginx serving `dist/` (live since 2026-09-04) |
+| Hosting (deferred) | Cloudflare Pages — valid later if the VPS is dropped |
 
-## Setup (needs Node 20+)
+## Setup (needs Node 20+ for `dev`/`build`; Node 22.6+ for `verify-mobile`)
 
 ```bash
 # if you don't have Node yet (pick one):
@@ -73,7 +74,7 @@ npm run build && npm run deploy
 Cloudflare Pages remains a valid later option if you want to drop the VPS.
 
 1. Connect the repository in Cloudflare dashboard → Workers & Pages → Create → Pages →
-   Connect to Git → pick the repo above. Build command `npm run build`, output directory
+   Connect to Git → pick `JP-TINKER/jpcarpenter.com`. Build command `npm run build`, output directory
    `dist`, Node version 20+ (or add `NODE_VERSION=22` as an env var). `public/_headers` and
    `public/robots.txt` ship automatically as part of the build output — no extra Pages
    config needed for headers/CSP.
@@ -90,7 +91,7 @@ Cloudflare Pages remains a valid later option if you want to drop the VPS.
    | `jpcarpenter.com` | `issue` | `pki.goog; cansignhttpexchanges=yes` |
    | `jpcarpenter.com` | `issue` | `ssl.com` |
    | `jpcarpenter.com` | `issue` | `sectigo.com` |
-   | `jpcarpenter.com` | `iodef` | `mailto:joe@jpcarpenter.com` |
+   | `jpcarpenter.com` | `iodef` | `mailto:jp@jpcarpenter.com` |
 
    Note: with Universal SSL on, Cloudflare adds its own CAA records as soon as you add any,
    so these lock out other CAs rather than restricting Cloudflare itself.
@@ -119,8 +120,9 @@ All three exit non-zero on failure, so they can run in a pre-commit hook or CI g
 
 ## Security posture
 
-The site is static: no server-side code, no database, no forms, no auth, no third-party
-JS. The Content-Security-Policy in `public/_headers` runs `script-src 'self'` with no
+The site is static: no server-side code, no database, no auth, no third-party
+JS. Resource pages may include on-page fill sheets; they do not submit
+(`form-action 'none'`). The Content-Security-Policy in `public/_headers` runs `script-src 'self'` with no
 `'unsafe-inline'` and no nonces — there are zero inline scripts in the build, so the
 policy is tighter than the nonce approach. `require-trusted-types-for 'script'` is
 enforced as defense-in-depth (Firefox/Chromium); Safari ignores it but `script-src
@@ -130,5 +132,6 @@ Full red-team report: `../../Tools/Bench/brand-ops/security-redteam-2026-08-01.m
 
 ## Design law
 
-The public interface follows a restrained review-desk system: warm materials, one sage
-accent, evidence-led rows, and honest status labels.
+The public interface follows a restrained review-desk system: CLAMS CHROME (amber pip
+and rule, sage as live secondary chrome on the lockup and some instruments), evidence-led
+rows, and honest status labels.

@@ -1,8 +1,8 @@
 # Writing — index
 
 Finder map of the files in this folder only. The real, live listing (with dates and
-descriptions) is always [`/writing`](http://localhost:4321/writing) on the running site —
-this table exists for orientation when browsing the repo, not as a second source of truth.
+descriptions) is always [`/writing`](/writing) on the running site. This table exists for
+orientation when browsing the repo, not as a second source of truth.
 How to add or edit a post: `01-README.md`.
 
 ## Posts

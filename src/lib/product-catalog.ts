@@ -76,11 +76,3 @@ export const FREE_PRODUCTS: FreeProduct[] = [
 export function productById(id: string): FreeProduct | undefined {
   return FREE_PRODUCTS.find((p) => p.id === id);
 }
-
-export function readyProducts(): FreeProduct[] {
-  return FREE_PRODUCTS.filter((p) => p.status === 'ready').sort((a, b) => a.order - b.order);
-}
-
-export function plannedProducts(): FreeProduct[] {
-  return FREE_PRODUCTS.filter((p) => p.status === 'planned').sort((a, b) => a.order - b.order);
-}

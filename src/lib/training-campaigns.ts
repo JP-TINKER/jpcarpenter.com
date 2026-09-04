@@ -96,10 +96,6 @@ export const TRAINING_CAMPAIGNS: TrainingCampaign[] = [
   },
 ];
 
-export function campaignById(id: string): TrainingCampaign | undefined {
-  return TRAINING_CAMPAIGNS.find((c) => c.id === id);
-}
-
 export function readyCampaigns(): TrainingCampaign[] {
   return TRAINING_CAMPAIGNS.filter((c) => c.status === 'ready').sort((a, b) => a.order - b.order);
 }

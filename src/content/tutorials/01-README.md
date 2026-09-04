@@ -59,7 +59,7 @@ Then:
 | `order` | no (default `50`) | Lower sorts first; ties fall back to date |
 | `tags` | no | Array of strings |
 | `draft` | no (default `false`) | `true` hides the entry from the listing and route |
-| `recording` | no | Path to the rendered SVG, e.g. `/tutorials/my-slug/demo.svg`. For reference; the body still renders the `<figure>` so you control placement and caption |
+| `recording` | no | Path to the rendered SVG, e.g. `/tutorials/my-slug/demo.svg`. For reference; the body still renders the `lab-instrument` div so you control placement and caption |
 
 ### `stamp` vocabulary
 
@@ -84,9 +84,8 @@ passes HTML through, and it's styled by `global.css` (reuses the `lab-instrument
 </div>
 ```
 
-If you use `.mdx` instead, the `TutorialRecording` component wraps the same markup
-(`src/components/TutorialRecording.astro`) — but plain `.md` + the raw HTML above is the
-default and matches the Labs convention.
+If you use `.mdx` instead, wrap the same markup in a figure with class `lab-instrument`.
+Plain `.md` plus the raw HTML above is the default and matches the Labs convention.
 
 ## Teaching shape — skim first, depth behind expand rows
 
@@ -120,7 +119,8 @@ with no sanitization, so:
 - **No `<iframe>` embeds** — the CSP blocks framed content entirely.
 - **Interactive asciinema player** (copy-paste, rewind) is available but opt-in: it uses
   `innerHTML` and a web worker, both blocked by the current CSP. Enabling it requires a
-  deliberate CSP + Trusted Types review and a `HANDOFF.md` justification. See
+  deliberate CSP + Trusted Types review and a justification in
+  `~/Desktop/Tools/Bench/HANDOFF.md`. See
   "Recording workflow — opt-in player" below.
 
 ### Redaction checklist — before any recording ships
@@ -142,7 +142,7 @@ node ../../Tools/Bench/scripts/responsive-audit.mjs dist out # no overflow, touc
 node ../../Tools/Bench/scripts/probe-paths.mjs dist          # no sensitive files shipped
 ```
 
-All three must exit 0. If they do, commit and push.
+All three must exit 0. If they do, `npm run build && npm run deploy` to ship to Njalla.
 
 ## Recording workflow
 
@@ -179,10 +179,10 @@ Or call svg-term-cli directly (without the guard):
 
 ```bash
 node_modules/.bin/svg-term --in src/content/tutorials/<your-slug>/demo.cast \
-  --out public/tutorials/<your-slug>/demo.svg --window --padding 12
+  --out public/tutorials/<your-slug>/demo.svg --padding 12
 ```
 
-Reference it in the body with the `TutorialRecording` component (see "Recording pattern
+Reference it in the body with the raw `lab-instrument` HTML (see "Recording pattern
 in the body" above). The SVG ships as a self-hosted image under `img-src 'self'` — no CSP
 change. svg-term-cli's output is script-free; `scripts/render-tutorial-svg.mjs` injects
 a `prefers-reduced-motion` guard that freezes the animation for readers who request
@@ -225,7 +225,7 @@ The player gives the reader pause, rewind, and copy-paste — the best teacher U
 
 Enabling it requires: a small Trusted Types policy wrapping the player's DOM writes,
 confirming the standalone bundle has no other CSP violations, and logging the exception
-in `HANDOFF.md` Justifications. That is a deliberate change to the security posture
+in `~/Desktop/Tools/Bench/HANDOFF.md`. That is a deliberate change to the security posture
 (`doctrine/security-doctrine.md`, control 1), not a tutorial task — raise it with Bench
 before doing it.
 

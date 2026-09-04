@@ -48,6 +48,9 @@ function computeCanvasFingerprint(): string | null {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     ctx.textBaseline = 'top';
+    // Naming a font the site does not ship is deliberate here: the fallback the browser
+    // picks is itself part of what canvas fingerprinting measures. Changing this string
+    // changes every stored composite hash, so leave it alone.
     ctx.font = '14px "Space Mono", monospace';
     ctx.fillStyle = '#5aaa60';
     ctx.fillText('bench fingerprint / 0123 !@#$', 2, 2);

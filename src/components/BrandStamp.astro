@@ -6,17 +6,15 @@
 import { BRAND } from '../lib/brand';
 
 interface Props {
-  /** Where the mark sits on the sheet. */
-  placement?: 'footer' | 'header';
   /** Compact mode for tight footers. */
   compact?: boolean;
 }
 
-const { placement = 'footer', compact = false } = Astro.props;
+const { compact = false } = Astro.props;
 ---
 
 <div
-  class:list={['jp-brand-stamp', placement === 'header' && 'is-header', compact && 'is-compact']}
+  class:list={['jp-brand-stamp', compact && 'is-compact']}
   aria-label={`${BRAND.name} authorship`}
 >
   <img class="jp-brand-mark" src={BRAND.markPath} alt="" width="36" height="27" />
@@ -36,15 +34,6 @@ const { placement = 'footer', compact = false } = Astro.props;
     padding-top: 0.85rem;
     border-top: 1px solid color-mix(in srgb, var(--rule-strong, #b8c0ba) 70%, transparent);
     max-width: 44rem;
-  }
-
-  .jp-brand-stamp.is-header {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    padding-top: 0;
-    padding-bottom: 0.85rem;
-    border-top: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--rule-strong, #b8c0ba) 70%, transparent);
   }
 
   .jp-brand-stamp.is-compact {

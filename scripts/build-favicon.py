@@ -16,7 +16,8 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 
 HERE = Path(__file__).resolve().parent
-PUBLIC = HERE.parent
+PUBLIC = HERE.parent / "public"
+BRAND = PUBLIC / "brand"
 FONT = PUBLIC / "fonts" / "AtkinsonHyperlegible-Bold.ttf"
 
 # Locked tokens (LOCK.md)
@@ -169,20 +170,20 @@ def main() -> None:
     mark_outlined = svg_mark(font)
 
     write(PUBLIC / "favicon.svg", favicon_svg)
-    write(HERE / "favicon.svg", favicon_svg)
-    write(HERE / "mark-outlined.svg", mark_outlined)
+    write(BRAND / "favicon.svg", favicon_svg)
+    write(BRAND / "mark-outlined.svg", mark_outlined)
 
     # Tiny 32 viewBox alias (same vectors, browsers that prefer small files)
-    write(HERE / "mark-32.svg", favicon_svg)
+    write(BRAND / "mark-32.svg", favicon_svg)
 
     sizes = {
         PUBLIC / "favicon-32.png": 32,
         PUBLIC / "favicon-192.png": 192,
         PUBLIC / "apple-touch-icon.png": 180,
-        HERE / "favicon-32.png": 32,
-        HERE / "favicon-192.png": 192,
-        HERE / "apple-touch-icon.png": 180,
-        HERE / "favicon-512.png": 512,
+        BRAND / "favicon-32.png": 32,
+        BRAND / "favicon-192.png": 192,
+        BRAND / "apple-touch-icon.png": 180,
+        BRAND / "favicon-512.png": 512,
     }
     rendered: dict[int, Image.Image] = {}
     for path, size in sizes.items():
@@ -193,8 +194,8 @@ def main() -> None:
 
     # Landscape mark PNG for the brand kit (not the tab icon).
     mark_png = render_png(FONT, 512, square_icon=False)
-    mark_png.save(HERE / "mark.png", "PNG", optimize=True)
-    print(f"wrote {HERE / 'mark.png'} ({(HERE / 'mark.png').stat().st_size} bytes)")
+    mark_png.save(BRAND / "mark.png", "PNG", optimize=True)
+    print(f"wrote {BRAND / 'mark.png'} ({(BRAND / 'mark.png').stat().st_size} bytes)")
 
 
 if __name__ == "__main__":

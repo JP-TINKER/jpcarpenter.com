@@ -48,7 +48,7 @@ const companionForms = RESOURCE_CATALOG.filter(
     </div>
     <p class="home-more">
       <a href="/products">All free products</a>
-      ·
+      <span class="home-more-sep" aria-hidden="true">·</span>
       <a href="/labs">Evidence labs</a>
     </p>
   </section>
@@ -97,6 +97,13 @@ const companionForms = RESOURCE_CATALOG.filter(
   .home-more {
     margin: 0.75rem 0 0;
     font-size: 0.9375rem;
+  }
+
+  /* Astro collapses the whitespace around a bare separator, so the links rendered
+     jammed together as "All free products·Evidence labs". Space it in CSS. */
+  .home-more-sep {
+    margin: 0 0.4rem;
+    color: var(--ink-muted);
   }
 
   .home-cta {

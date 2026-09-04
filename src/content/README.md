@@ -1,16 +1,19 @@
 # Content — front door
 
-Everything on the site that isn't a fixed page (`/`, `/about`) lives here as Markdown, one
+Everything on the site that isn't a fixed page (`/`, `/about`, `/security`, `/products`,
+`/bench`, and the `/projects` product list) lives here as Markdown, one
 file per entry. Edit a file, save, rebuild — that's the whole publishing path. No CMS, no
 database, no admin login.
 
-## The three collections
+## The collections
 
 | Folder | Renders at | Job |
 |--------|-----------|-----|
 | `labs/` | `/labs/<slug>` | Security-adjacent work with real evidence attached — proof of competence |
 | `writing/` | `/writing/<slug>` | Sparse, specific claims worth defending — not a blog treadmill |
-| `projects/` | `/projects/<slug>` | Personal builds unrelated to work — no professional-evidence framing |
+| `projects/` | `/projects/<slug>` | Personal builds. Listed on `/bench`. `/projects` itself is the free-product list |
+| `tutorials/` | `/tutorials/<slug>` | Walk-throughs with a recording; teach the procedure |
+| `resources/` | `/resources/<slug>` | Deadline forms and commodity policy starters |
 
 Full schema, examples, and pre-publish guardrails live in each folder's own `01-README.md`.
 Start there, not here — this file is only the map.
@@ -22,11 +25,13 @@ Start there, not here — this file is only the map.
 ```bash
 npm run new -- writing "Your title here"
 npm run new -- lab "Lab title" --discipline security
+npm run new -- tutorial "Tutorial title" --discipline grc
 npm run new -- project "Project title"
 ```
 
 Manual fallback: copy a skeleton from `_templates/` into the collection folder and rename it
-to your slug, e.g. `_templates/labs-entry.md` → `labs/my-new-lab.md`.
+to your slug, e.g. `_templates/labs-entry.md` → `labs/my-new-lab.md`. Resources have no
+scaffold yet. Add those files by hand next to `01-README.md`.
 
 Then:
 
@@ -42,4 +47,4 @@ Then:
 |------|---------|
 | `README.md` | This map |
 | `_templates/` | Copy-paste skeletons for each collection — not content themselves |
-| `labs/`, `writing/`, `projects/` | The three collections above |
+| `labs/`, `writing/`, `projects/`, `tutorials/`, `resources/` | The collections above |

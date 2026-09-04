@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-/** Fields shared by the two evidence collections.
+/** Fields shared by the labs, projects, and tutorials collections.
  *
  *  `finding` is what the work established, in one line, distinct from `summary`, which
  *  says what the work is. Listings lead with the finding because that is what a reviewer
@@ -26,7 +26,7 @@ const evidenceFields = {
 
 // Every collection folder carries the same two entry docs at its root (00-INDEX.md,
 // 01-README.md, PDRA/Bench filing convention), which must never be picked up as content
-// entries themselves. Keep this exclusion identical across all three collections.
+// entries themselves. Keep this exclusion identical across all five collections.
 const entryDocs = ['!00-INDEX.md', '!01-README.md'];
 
 const labs = defineCollection({
@@ -52,7 +52,7 @@ const writing = defineCollection({
 });
 
 const projects = defineCollection({
-  // Portfolio roadmap (planned GRC packs) plus personal bench builds.
+  // Personal bench builds. Free GRC packs live in product-catalog.ts (/products).
   // Labs remain the place for finished professional evidence.
   loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/projects' }),
   schema: z.object({
@@ -91,7 +91,7 @@ const resources = defineCollection({
 // Tutorials teach. Where Labs prove and Writing argues, a Tutorial walks a reader through
 // doing the thing, paired with a terminal recording (animated SVG by default; the
 // interactive asciinema player is opt-in and requires a CSP review, see
-// public/tutorials/README.md). Reuses the Labs discipline split so a reviewer finds GRC,
+// src/content/tutorials/01-README.md). Reuses the Labs discipline split so a reviewer finds GRC,
 // networking, security, and instrument lessons in the same plain-language buckets.
 const tutorials = defineCollection({
   loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/tutorials' }),

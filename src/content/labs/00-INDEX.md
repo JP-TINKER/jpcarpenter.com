@@ -1,8 +1,8 @@
 # Labs — index
 
 Finder map of the files in this folder only. The real, live listing (with findings, dates,
-and status stamps) is always [`/labs`](http://localhost:4321/labs) on the running site —
-this table exists for orientation when browsing the repo, not as a second source of truth.
+and status stamps) is always [`/labs`](/labs) on the running site. This table exists for
+orientation when browsing the repo, not as a second source of truth.
 How to add or edit an entry: `01-README.md`.
 
 ## Entries

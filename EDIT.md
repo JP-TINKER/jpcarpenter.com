@@ -40,6 +40,16 @@ npm run new -- project "Project title"
 
 Same preview / build / deploy path. Labs are live as soon as they exist (no draft flag).
 
+## Add a Tutorial
+
+```bash
+npm run new -- tutorial "Tutorial title" --discipline grc
+# discipline: grc | networking | security | instruments
+```
+
+That creates `src/content/tutorials/<slug>.md` with `draft: true`. Same preview / ship
+path as Writing. Recording workflow: `src/content/tutorials/01-README.md`.
+
 ## Edit something that already exists
 
 Open the `.md` file under:
@@ -48,7 +58,9 @@ Open the `.md` file under:
 |------|--------|----------|
 | Writing | `src/content/writing/` | `/writing/<slug>` |
 | Labs | `src/content/labs/` | `/labs/<slug>` |
-| Projects | `src/content/projects/` | `/projects/<slug>` |
+| Projects | `src/content/projects/` | `/projects/<slug>` (listed on `/bench`) |
+| Tutorials | `src/content/tutorials/` | `/tutorials/<slug>` |
+| Resources | `src/content/resources/` | `/resources/<slug>` |
 
 Save → `npm run build && npm run deploy`.
 
@@ -65,6 +77,8 @@ Field-by-field docs (only when you need them):
 - Writing → `src/content/writing/01-README.md`
 - Labs → `src/content/labs/01-README.md`
 - Projects → `src/content/projects/01-README.md`
+- Tutorials → `src/content/tutorials/01-README.md`
+- Resources → `src/content/resources/01-README.md`
 
 ## If deploy fails
 

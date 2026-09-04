@@ -30,7 +30,7 @@ if (!existsSync(cast)) {
 
 const bin = 'node_modules/.bin/svg-term';
 // No --window: that flag stamps a macOS title bar with red/yellow/green traffic-light
-// dots. Joe is on Linux; render a clean, chrome-less dark terminal instead.
+// dots. JP is on Linux; render a clean, chrome-less dark terminal instead.
 execFileSync(bin, ['--in', cast, '--out', svg, '--padding', '12'], {
   stdio: 'inherit',
 });

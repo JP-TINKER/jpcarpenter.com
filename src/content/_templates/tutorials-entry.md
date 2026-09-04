@@ -36,7 +36,7 @@ tags: ["tag-one", "tag-two"]
 draft: true
 
 # Optional: path to the rendered animated SVG, e.g. /tutorials/your-slug/demo.svg.
-# For reference only — the body still renders the <figure>, so you control placement.
+# For reference only — the body still renders the lab-instrument div, so you control placement.
 recording: /tutorials/your-slug/demo.svg
 ---
 
@@ -68,5 +68,5 @@ over-trust a method.
 ## Recording
 
 Record the terminal session and render the animated SVG, then drop it in
-`public/tutorials/your-slug/`. See `public/tutorials/README.md` for the exact commands.
+`public/tutorials/your-slug/`. See `src/content/tutorials/01-README.md` for the exact commands.
 Delete this whole body and the comments above once you've copied the file.

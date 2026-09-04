@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Scaffold a new Writing / Labs / Projects markdown entry.
+ * Scaffold a new Writing / Labs / Projects / Tutorials markdown entry.
  *
  * Usage:
  *   npm run new -- writing "Read what you sign"

@@ -7,13 +7,13 @@ export async function GET(context) {
 
   return rss({
     title: 'JP Carpenter · Writing',
-    description: 'Posts from the bench.',
+    description: 'Sparse claims from JP Carpenter · Writing.',
     site: context.site,
     items: sorted.map((post) => ({
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.date,
-      link: `/writing/${post.id}/`,
+      link: `/writing/${post.id}`,
     })),
   });
 }

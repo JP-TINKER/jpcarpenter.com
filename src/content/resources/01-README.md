@@ -3,7 +3,7 @@
 Downloadable **policies**, **forms**, **checklists**, and planned worksheets/packs.
 
 - **Pages** = how to use the document.
-- **Downloads** = working Markdown copies under `/public/downloads/resources/`.
+- **Downloads** = DOCX and PDF under `/public/downloads/resources/` (chooser on each page).
 - **Catalog** = `src/lib/resource-catalog.ts` (ready + planned shelf).
-- Web fill → PDF is planned; not built yet.
+- **Web fill** = on-page sheets that do not submit. Client-side filled PDF export is still planned.
 - Not legal advice. Not an audit opinion.

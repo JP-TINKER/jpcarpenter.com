@@ -1,4 +1,6 @@
-# JP mark — round 2 plan
+# JP mark — round 2 plan (historical)
+
+**Status:** Archived. The live mark is Soft Block T04-D, locked 2026-09-01. See [`LOCK.md`](LOCK.md).
 
 ## One sentence
 

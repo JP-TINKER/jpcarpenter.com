@@ -7,7 +7,7 @@ import { formatLastReviewed } from '../lib/site-meta';
 <BaseLayout
   title="Security"
   view="Security"
-  bluf="No login, no forms, no database, no third-party tracking. Site posture in plain language."
+  bluf="No login, no submitting forms, no database, no third-party tracking. On-page fill sheets do not post. Site posture in plain language."
   description="How jpcarpenter.com is protected — JP Carpenter. Static-first, strict browser rules, AI crawl policy."
 >
 
@@ -88,8 +88,8 @@ import { formatLastReviewed } from '../lib/site-meta';
             <p>
               <strong>How:</strong> every script and stylesheet ships as its own file from this
               website. The policy uses <code>script-src 'self'</code> with no
-              <code>'unsafe-inline'</code>, plus <code>form-action 'none'</code> (there are no
-              forms) and <code>frame-ancestors 'none'</code> (do not embed this site in someone
+              <code>'unsafe-inline'</code>, plus <code>form-action 'none'</code> (fill sheets
+              on /resources do not submit) and <code>frame-ancestors 'none'</code> (do not embed this site in someone
               else's frame).
             </p>
             <p><strong>Sources</strong></p>
@@ -120,12 +120,16 @@ import { formatLastReviewed } from '../lib/site-meta';
             <p>
               <strong>Why it matters here:</strong> without HSTS, a first visit or a bad link can
               still try plain HTTP. HSTS closes that gap after the browser has seen the policy.
-              The <code>preload</code> flag is consent to join the browser vendors' shared list;
-              submission happens only after every published hostname is ready (see "Next" below).
+              The <code>preload</code> flag is consent to join the browser vendors' shared list.
             </p>
             <p>
               <strong>How:</strong> HTTPS is required; HTTP redirects to HTTPS. The site sends
-              <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>.
+              <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>
+              from one nginx header snippet (HTML and hashed <code>/_astro/</code> assets get the
+              same policy). The unused <code>www</code> DNS record was removed so the name list
+              matches the certificate. The domain is submitted to the shared preload list
+              (hstspreload.org status: <code>pending</code> — browsers pick it up after Chromium
+              ships the entry; that lag is normal).
             </p>
             <p><strong>Sources</strong></p>
             <ul>
@@ -137,6 +141,41 @@ import { formatLastReviewed } from '../lib/site-meta';
               </li>
               <li>
                 <a href="https://hstspreload.org/">hstspreload.org</a>, submission rules and caveats
+              </li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="expand-item">
+          <summary class="expand-term">Lock who may issue the site's certificates (CAA)</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong>
+              <abbr title="Certification Authority Authorization, DNS records that name which certificate companies may issue for your domain">CAA</abbr>
+              records in DNS say which certificate companies are allowed to issue a lock
+              certificate for this domain.
+            </p>
+            <p>
+              <strong>Why it matters here:</strong> without CAA, any public CA can issue a cert
+              for the name if someone tricks the issuance process. CAA makes "wrong issuer"
+              fail closed at the CA, not after the fact.
+            </p>
+            <p>
+              <strong>How:</strong> DNS CAA on the apex names Let's Encrypt
+              (<code>issue "letsencrypt.org"</code>) and routes issuance reports to
+              <code>mailto:jp@jpcarpenter.com</code>. Verify with
+              <code>dig CAA jpcarpenter.com</code>. If the site later moves to Cloudflare Pages,
+              replace these with Cloudflare's CA set before cutover — a stale Let's Encrypt-only
+              CAA will block their issuance.
+            </p>
+            <p><strong>Sources</strong></p>
+            <ul>
+              <li>
+                <a href="https://www.rfc-editor.org/rfc/rfc8659">RFC 8659, DNS Certification Authority Authorization (CAA) Resource Record</a>
+              </li>
+              <li>
+                <a href="https://letsencrypt.org/docs/caa/">Let's Encrypt: CAA</a>, how issuers
+                check these records
               </li>
             </ul>
           </div>
@@ -196,8 +235,8 @@ import { formatLastReviewed } from '../lib/site-meta';
             </p>
             <p>
               <strong>How:</strong> rules live in <a href="/robots.txt">/robots.txt</a>. That file
-              is a request polite operators honor, not a hard lock against rude scrapers (see
-              "Next" for rate limits). Training bots such as <code>GPTBot</code> and
+              is a request polite operators honor, not a hard lock against rude scrapers (rate
+              limits on the origin handle the rest). Training bots such as <code>GPTBot</code> and
               <code>ClaudeBot</code> are Disallow. Live citation / user-fetch tokens such as
               <code>OAI-SearchBot</code>, <code>ChatGPT-User</code>, <code>Claude-SearchBot</code>,
               and <code>Claude-User</code> are Allow so a recruiter asking an assistant about this
@@ -235,10 +274,11 @@ import { formatLastReviewed } from '../lib/site-meta';
               and would burn trust with search engines.
             </p>
             <p>
-              <strong>How:</strong> <code>/about.md</code> ships with the static site today.
-              Optional nginx Accept negotiation (serve Markdown when
-              <code>Accept: text/markdown</code>) is documented for Njalla and not yet applied on
-              the origin. <a href="/llms.txt">/llms.txt</a> remains the denser whole-site summary.
+              <strong>How:</strong> <code>/about.md</code> ships as <code>text/markdown</code>.
+              On the origin, nginx Accept negotiation serves that card for
+              <code>/about</code> when the client asks for Markdown, and always sends
+              <code>Vary: Accept</code>. Browsers still get HTML.
+              <a href="/llms.txt">/llms.txt</a> remains the denser whole-site summary.
             </p>
             <p><strong>Limits</strong></p>
             <ul>
@@ -374,6 +414,72 @@ import { formatLastReviewed } from '../lib/site-meta';
         </details>
 
         <details class="expand-item">
+          <summary class="expand-term">Origin nginx hygiene</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong> the public site is static files behind nginx on a
+              Njalla VPS. The server should not advertise its exact version, should send one
+              consistent security-header set, and should not leave old TLS generations enabled
+              "just in case."
+            </p>
+            <p>
+              <strong>Why it matters here:</strong> version banners help scanners triage targets.
+              Split header configs create gaps (for example assets without HSTS). Old TLS is free
+              attack surface on a site that never needs it.
+            </p>
+            <p>
+              <strong>How:</strong> <code>server_tokens off</code> (responses say
+              <code>Server: nginx</code> without a version). One header snippet covers HTML and
+              <code>/_astro/</code> assets: 1-year HSTS with <code>includeSubDomains; preload</code>,
+              <code>X-Frame-Options: DENY</code>, and the rest of the posture headers. TLS 1.0 and
+              1.1 are disabled in the TLS config. Ghost stays off the public origin.
+            </p>
+            <p><strong>Sources</strong></p>
+            <ul>
+              <li>
+                <a href="https://nginx.org/en/docs/http/ngx_http_core_module.html#server_tokens">nginx server_tokens</a>
+              </li>
+              <li>
+                <a href="https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html">OWASP HTTP Headers Cheat Sheet</a>
+              </li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="expand-item">
+          <summary class="expand-term">Slow down rude scrapers (gentle rate limits)</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong> <code>robots.txt</code> is a polite sign on the
+              door. Some crawlers ignore signs. Soft rate and connection limits on the web server
+              slow machines that hammer the site, without putting a puzzle in front of every
+              human visitor.
+            </p>
+            <p>
+              <strong>Why it matters here:</strong> a static portfolio does not need a bot wall.
+              It does need a ceiling so one IP cannot soak the origin with thousands of requests
+              per second. Limits are set high enough that a normal page load (HTML + many assets)
+              never notices.
+            </p>
+            <p>
+              <strong>How:</strong> nginx <code>limit_req</code> at <code>20r/s</code> per IP with
+              <code>burst=80 nodelay</code>, plus <code>limit_conn</code> at 40 concurrent
+              connections per IP. Over-limit responses are <code>429</code>. Verified: ordinary
+              browsing and a 30-request burst return normally.
+            </p>
+            <p><strong>Sources</strong></p>
+            <ul>
+              <li>
+                <a href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html">nginx limit_req module</a>
+              </li>
+              <li>
+                <a href="https://nginx.org/en/docs/http/ngx_http_limit_conn_module.html">nginx limit_conn module</a>
+              </li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="expand-item">
           <summary class="expand-term">Why there is no CAPTCHA here</summary>
           <div class="expand-body">
             <p>
@@ -396,162 +502,6 @@ import { formatLastReviewed } from '../lib/site-meta';
                 especially when it would force weaker browser script rules.
               </li>
               <li>CSP integrity citations in "Tell the browser what scripts are allowed" above.</li>
-            </ul>
-          </div>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <section class="band sheet">
-    <MarginNote stamp="Next" note="Planned · not overclaimed" state="open" />
-    <div class="prose security-teach">
-      <h2>Recommended next, not fully live yet</h2>
-      <p>
-        These are the next thoughtful moves. They are listed separately so this page does not
-        pretend they are finished.
-      </p>
-
-      <div class="expand-stack">
-        <details class="expand-item">
-          <summary class="expand-term">Lock who may issue the site's certificates (CAA)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong>
-              <abbr title="Certification Authority Authorization, DNS records that name which certificate companies may issue for your domain">CAA</abbr>
-              records in DNS say which certificate companies are allowed to issue a lock
-              certificate for this domain. Today the live certificate comes from Let's Encrypt,
-              but CAA is not set yet, that is a gap.
-            </p>
-            <p>
-              <strong>How we will do it:</strong> add CAA records at the domain registrar naming
-              Let's Encrypt (the current certificate issuer), plus an email address for
-              issuance reports.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://www.rfc-editor.org/rfc/rfc8659">RFC 8659, DNS Certification Authority Authorization (CAA) Resource Record</a>
-              </li>
-              <li>
-                <a href="https://letsencrypt.org/docs/caa/">Let's Encrypt: CAA</a>, how issuers
-                check these records
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Finish HSTS preload safely (fix www first)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> browsers keep a shared list of sites that must
-              always use HTTPS. Joining that list is powerful, and hard to undo quickly. Before
-              submitting, every hostname people might type (including <code>www</code>) needs a
-              matching valid certificate. Right now <code>www</code> points at the server but is
-              not on the certificate name list.
-            </p>
-            <p>
-              <strong>How we will do it:</strong> expand the certificate (or remove the unused
-              <code>www</code> DNS record), then submit at hstspreload.org only when checks pass.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li><a href="https://hstspreload.org/">hstspreload.org</a>, requirements and submission</li>
-              <li>
-                <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">MDN: Strict-Transport-Security</a>
-               , what preload implies for every subdomain
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Slow down rude scrapers on the server</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> <code>robots.txt</code> is a polite sign on the
-              door. Some crawlers ignore signs. Rate limits on the web server slow down machines
-              that hammer the site, without putting a puzzle in front of every human visitor.
-            </p>
-            <p>
-              <strong>How we will do it:</strong> request limits on the web server, tuned so
-              normal reading stays smooth, and watch logs for unusual probe patterns (including
-              the tripwire above).
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html">nginx limit_req module</a>
-               , common server-side rate limiting
-              </li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Accept negotiation for /about (Njalla nginx)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> today <a href="/about.md">/about.md</a> is a
-              separate URL. The upgrade is: if a client asks for Markdown, the server can return
-              that card for <code>/about</code> with a <code>Vary: Accept</code> header, while
-              browsers still get HTML.
-            </p>
-            <p>
-              <strong>How we will do it:</strong> nginx map on <code>$http_accept</code>. Snippet
-              lives in Bench <code>brand-ops/nginx-accept-about-2026-08-31.md</code>. Same facts
-              only. Not applied on the origin yet.
-            </p>
-            <p>
-              <strong>Limit:</strong> this is format routing, not a bot fence.
-            </p>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Cloudflare edge (real bot gate)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> robots.txt asks nicely. A CDN can refuse training
-              bots by IP and behavior, enable Web Bot Auth, and run Accept negotiation in a
-              Worker. That is the first real gate.
-            </p>
-            <p>
-              <strong>How we will do it:</strong> only if Joe chooses Cloudflare Pages over staying
-              origin-only on Njalla. Presets: Training = Block, Search = Allow. Strategy decision
-              D2 in the 2026-08-31 crawler handoff.
-            </p>
-            <p>
-              <strong>Limit:</strong> without that move, origin + robots + terms + logs is the
-              honest ceiling.
-            </p>
-          </div>
-        </details>
-
-        <details class="expand-item">
-          <summary class="expand-term">Prove which bots are real (Web Bot Auth)</summary>
-          <div class="expand-body">
-            <p>
-              <strong>In plain terms:</strong> today many bots introduce themselves with a name
-              tag (the User-Agent string). Name tags are easy to forge. A newer approach,
-              Web Bot Auth, lets serious bots cryptographically sign their requests so a site
-              (or its edge provider) can verify identity.
-            </p>
-            <p>
-              <strong>Why wait:</strong> verification is easiest at an edge that already
-              implements the checks. On a plain static host it is early to hand-roll. The roadmap
-              is: adopt when the hosting edge supports it, not as theater today.
-            </p>
-            <p><strong>Sources</strong></p>
-            <ul>
-              <li>
-                <a href="https://developers.google.com/crawling/docs/crawlers-fetchers/web-bot-auth">Google: Authenticating requests with Web Bot Auth</a>
-              </li>
-              <li>
-                <a href="https://datatracker.ietf.org/doc/html/draft-meunier-web-bot-auth-architecture">IETF draft: Web Bot Auth architecture</a>
-                (HTTP Message Signatures for automated traffic)
-              </li>
             </ul>
           </div>
         </details>
@@ -608,7 +558,7 @@ import { formatLastReviewed } from '../lib/site-meta';
               For how I demonstrate verification craft (not just configuration claims), see
               <a href="/labs">Labs</a>.
             </p>
-            <p><em>Last reviewed: August 2026.</em></p>
+            <p><em>Last reviewed: {formatLastReviewed()}.</em></p>
           </div>
         </details>
       </div>

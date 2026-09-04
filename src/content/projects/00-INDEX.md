@@ -1,9 +1,8 @@
 # Projects — index
 
-Finder map of the files in this folder only. The real, live listing is always
-[`/projects`](http://localhost:4321/projects) on the running site — this table exists for
-orientation when browsing the repo, not as a second source of truth. How to add or edit an
-entry: `01-README.md`.
+Finder map of the files in this folder only. Personal-category entries list on
+[`/bench`](/bench). Detail URLs stay `/projects/<slug>`. `/projects` on the live site
+is the free-product list, not this folder. How to add or edit an entry: `01-README.md`.
 
 ## Entries
 

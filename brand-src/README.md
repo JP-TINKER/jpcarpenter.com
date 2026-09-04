@@ -1,5 +1,10 @@
 # JP Carpenter mark
 
+Working files only. This directory sits outside `public/` on purpose: everything under
+`public/` is copied verbatim to the web root, so design notes, rejected explorations, and
+the favicon build script used to be fetchable at `https://jpcarpenter.com/brand/*`.
+Shipped assets (marks, favicons) stay in `public/brand/`; the thinking stays here.
+
 **Brief:** Calm reviewer's stamp for a Security and Compliance Analyst who checks signed claims against running systems.
 
 **Type:** Symbol + lockup (wordmark).
@@ -20,8 +25,10 @@
 
 ## Grounds
 
+Live recipe is in [`LOCK.md`](LOCK.md). Short version:
+
 | Ground | Ink |
 |--------|-----|
-| Bone field | Sage `#64705b` |
-| Wood plate | Bone `#ebe6dc` or sage wash `#a8b39a` |
-| CRT / near-black | Trace sage `#a8b39a` |
+| Bone field | Steel/bone `#eef1ee` with sage secondary `#64705b` |
+| Plate | Near-black `#161c1b` |
+| Mark | Soft face `#b8c9c4`, lift-hot `#3d4a46`, amber rule `#c47a3a` |

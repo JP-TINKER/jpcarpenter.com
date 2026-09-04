@@ -70,7 +70,7 @@ on `/labs/browser-exposure` (classes live in `global.css`).
 
 This is **not** a locked enum — `stamp` is free text, because an honest description of a
 piece of work's real status is the whole design concept of this site (see the margin-note
-pattern in `../../../doctrine` if you have Bench open). Write the true state in your own
+pattern in `~/Desktop/Tools/Bench/doctrine/` if you have Bench open). Write the true state in your own
 words. What's in use today, for consistency:
 
 | Stamp | Used when |
@@ -139,4 +139,4 @@ node ../../Tools/Bench/scripts/responsive-audit.mjs dist out # no overflow, touc
 node ../../Tools/Bench/scripts/probe-paths.mjs dist          # no sensitive files shipped
 ```
 
-All three must exit 0. If they do, commit and push — the site is safe to publish.
+All three must exit 0. If they do, `npm run build && npm run deploy` to ship to Njalla.
