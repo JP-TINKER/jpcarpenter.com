@@ -1,7 +1,8 @@
 # jpcarpenter.com — crawler policy
 # Intent: block AI *training* collection; allow traditional search and AI *search/citation*
-# bots. robots.txt is honored by polite operators; it is not a hard gate for abusive scrapers.
-# Public rationale: https://jpcarpenter.com/security
+# (including user-initiated fetches). robots.txt is honored by polite operators; it is not
+# a hard gate for abusive scrapers. Public rationale: https://jpcarpenter.com/security
+# Bot token names match vendor docs (OpenAI / Anthropic) as of 2026-08.
 
 # --- Traditional search (keep discoverable) ---
 User-agent: Googlebot
@@ -13,11 +14,17 @@ Allow: /
 User-agent: DuckDuckBot
 Allow: /
 
-# --- AI search / citation / answer retrieval (allowed) ---
+# --- AI search / citation / live answer retrieval (allowed) ---
 User-agent: OAI-SearchBot
 Allow: /
 
+User-agent: ChatGPT-User
+Allow: /
+
 User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
 Allow: /
 
 User-agent: PerplexityBot
@@ -28,9 +35,6 @@ Allow: /
 
 # --- AI training / extended training opt-outs (blocked) ---
 User-agent: GPTBot
-Disallow: /
-
-User-agent: ChatGPT-User
 Disallow: /
 
 User-agent: ClaudeBot

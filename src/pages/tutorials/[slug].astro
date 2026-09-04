@@ -2,7 +2,11 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EmailHeaderReader from '../../components/EmailHeaderReader.astro';
+import AuthenticatedPhishingDrill from '../../components/AuthenticatedPhishingDrill.astro';
+import BrandStamp from '../../components/BrandStamp.astro';
 import { LAB_DISCIPLINE_META } from '../../lib/lab-disciplines';
+import { brandedDescription } from '../../lib/brand';
+import { TRAINING_CAMPAIGNS } from '../../lib/training-campaigns';
 
 export async function getStaticPaths() {
   // Drafts get no route, they're hidden until ready.
@@ -28,9 +32,11 @@ const dateLabel = entry.data.date.toLocaleDateString('en-US', {
 // Real word count from the entry body, not a placeholder estimate.
 const wordCount = entry.body?.trim().split(/\s+/).filter(Boolean).length ?? 0;
 const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+const campaign = TRAINING_CAMPAIGNS.find((c) => c.lessonSlug === entry.id);
+const pageDescription = brandedDescription(entry.data.summary);
 ---
 
-<BaseLayout title={entry.data.title} description={entry.data.summary} marker>
+<BaseLayout title={entry.data.title} description={pageDescription} marker>
   <article class="page-main lab-detail">
     <div class="lab-detail-meta">
       {
@@ -67,9 +73,30 @@ const readingMinutes = Math.max(1, Math.round(wordCount / 200));
       )
     }
 
+    {
+      entry.id === 'authenticated-phishing' && (
+        <>
+          <p class="page-lede">
+            Authentication can pass and the message can still be a phish. Mark the red flags,
+            choose report / verify out of band / escalate, then read the debrief.
+            {campaign?.kitHref && (
+              <>
+                {' '}
+                Managers: use the{' '}
+                <a href={campaign.kitHref}>campaign kit</a> for rollout.
+              </>
+            )}
+          </p>
+          <AuthenticatedPhishingDrill />
+        </>
+      )
+    }
+
     <div class="lab-detail-body">
       <Content />
     </div>
+
+    <BrandStamp compact />
 
     <p><a class="btn-quiet" href="/tutorials">&larr; Back to Tutorials</a></p>
   </article>

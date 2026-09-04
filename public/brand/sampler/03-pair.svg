@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 96" role="img" aria-label="JP tight pair">
+  <g fill="#161c1b">
+    <!-- J -->
+    <rect x="34" y="8" width="12" height="60" rx="1.5"/>
+    <rect x="8" y="56" width="12" height="28" rx="1.5"/>
+    <rect x="8" y="72" width="38" height="12" rx="1.5"/>
+    <!-- gap, then P -->
+    <rect x="66" y="8" width="12" height="76" rx="1.5"/>
+    <path d="M78 8h34c16 0 27 9.5 27 26.5S128 61 112 61H78V8zm12 13v23h21c8.5 0 14-5 14-11.5S119.5 21 111 21H90z"/>
+  </g>
+</svg>

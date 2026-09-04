@@ -1,62 +1,116 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import MarginNote from '../../components/MarginNote.astro';
-import EvidenceEntry from '../../components/EvidenceEntry.astro';
+import { FREE_PRODUCTS } from '../../lib/product-catalog';
 
-const entries = (await getCollection('projects')).sort(
-  (a, b) => a.data.order - b.data.order || b.data.date.valueOf() - a.data.date.valueOf(),
-);
-
-const isoDate = (date: Date) => date.toISOString().slice(0, 10);
-const pad = (n: number) => String(n + 1).padStart(2, '0');
+const products = [...FREE_PRODUCTS].sort((a, b) => a.order - b.order);
 ---
 
 <BaseLayout
   title="Projects"
-  description="Personal builds unrelated to work: physical and hobby-tech."
+  view="Projects"
+  bluf="Free GRC product line as portfolio proof — not an 18-item fantasy checklist."
+  description="JP Carpenter product roadmap: free GRC packs that demonstrate how he works with small SaaS compliance."
 >
-  <section class="band sheet">
-    <MarginNote index="02" stamp="Personal" note="Not a work claim" />
-    <div>
-      <h1 class="band-heading">Projects</h1>
-      <p class="band-lede">
-        Things built for their own sake: physical builds and hobby-tech, mixed freely. Nothing
-        here is offered as professional evidence; that is what Labs is for.
-      </p>
-    </div>
+  <p class="projects-lede">
+    Portfolio = open work samples founders can use and hiring managers can judge. Personal
+    hobby builds live on <a href="/bench">The Bench</a>. Finished professional proof lives in
+    <a href="/labs">Labs</a>.
+  </p>
+
+  <section class="sy-group" aria-labelledby="products-h">
+    <h2 class="sy-h" id="products-h">Product line</h2>
+    <ul class="pending-list sy-panel" aria-label="Free GRC products">
+      {
+        products.map((p) => (
+          <li>
+            <a class="pending-row" href={p.href}>
+              <span
+                class:list={['pending-check', p.status === 'ready' && 'is-done']}
+                aria-hidden="true"
+              />
+              <span class="pending-body">
+                <span class="pending-title">{p.title}</span>
+                <span class="pending-caption">{p.tagline}</span>
+              </span>
+              <span class="pending-stamp">{p.status === 'ready' ? 'Free' : 'Pending'}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
-  {entries.length === 0 && (
-    <section class="band sheet">
-      <MarginNote />
-      <p class="band-lede">Nothing here yet.</p>
-    </section>
-  )}
-
-  {
-    entries.length > 0 && (
-      <ul class="entries sheet-full">
-        {entries.map((entry, i) => (
-          <EvidenceEntry
-            href={`/projects/${entry.id}`}
-            index={pad(i)}
-            title={entry.data.title}
-            finding={entry.data.finding ?? entry.data.summary}
-            stamp={entry.data.stamp ?? 'Build'}
-            state={entry.data.state}
-            date={isoDate(entry.data.date)}
-          />
-        ))}
-      </ul>
-    )
-  }
+  <p class="projects-note">
+    Companion deadline forms (not portfolio projects) → <a href="/resources">Resources</a>.
+  </p>
 </BaseLayout>
 
 <style>
-  .sheet-full {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 0 var(--pad) 5rem;
+  .projects-lede {
+    margin: 0 0 1.5rem;
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .pending-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .pending-row {
+    display: grid;
+    grid-template-columns: 1.1rem 1fr auto;
+    gap: 0.75rem 1rem;
+    align-items: start;
+    padding: 0.85rem 1rem;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .pending-row:last-child {
+    border-bottom: none;
+  }
+
+  .pending-check {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.2rem;
+    border: 1.5px solid var(--ink-body);
+    border-radius: 2px;
+  }
+
+  .pending-check.is-done {
+    background: var(--soft, #b8c9c4);
+    border-color: var(--soft, #b8c9c4);
+  }
+
+  .pending-title {
+    display: block;
+    font-weight: 700;
+    color: var(--bone, var(--ink));
+  }
+
+  .pending-caption {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.9375rem;
+    color: var(--ink-body);
+  }
+
+  .pending-stamp {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent, #c47a3a);
+  }
+
+  .projects-note {
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
   }
 </style>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 96" role="img" aria-label="JP unit logotype">
+  <g fill="#161c1b">
+    <!-- J: stem + left hook -->
+    <rect x="36" y="10" width="14" height="62" rx="2"/>
+    <rect x="10" y="58" width="14" height="28" rx="2"/>
+    <rect x="10" y="74" width="40" height="12" rx="2"/>
+    <!-- P -->
+    <rect x="70" y="10" width="14" height="76" rx="2"/>
+    <path d="M84 10h30c17 0 29 10.5 29 27.5S131 65 114 65H84V10zm14 14v25h15c9 0 15-5.5 15-12.5S122 24 113 24H98z"/>
+  </g>
+</svg>

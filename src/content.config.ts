@@ -52,10 +52,40 @@ const writing = defineCollection({
 });
 
 const projects = defineCollection({
-  // Personal builds unrelated to work, physical/craft or hobby-tech. No professional-evidence
-  // framing (that's Labs' job).
+  // Portfolio roadmap (planned GRC packs) plus personal bench builds.
+  // Labs remain the place for finished professional evidence.
   loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/projects' }),
-  schema: z.object(evidenceFields),
+  schema: z.object({
+    ...evidenceFields,
+    category: z
+      .enum([
+        'risk',
+        'frameworks',
+        'identity',
+        'assurance',
+        'detect',
+        'endpoint',
+        'privacy',
+        'personal',
+      ])
+      .optional()
+      .default('personal'),
+  }),
+});
+
+const resources = defineCollection({
+  // Downloadable GRC documents. Pages are how-to; files live under /downloads.
+  loader: glob({ pattern: ['**/*.{md,mdx}', ...entryDocs], base: './src/content/resources' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    date: z.date(),
+    order: z.number().optional().default(50),
+    kind: z.enum(['checklist', 'policy', 'form', 'worksheet', 'pack']).default('checklist'),
+    status: z.enum(['ready', 'planned']).optional().default('ready'),
+    /** Public path to the downloadable working copy. */
+    download: z.string().optional(),
+  }),
 });
 
 // Tutorials teach. Where Labs prove and Writing argues, a Tutorial walks a reader through
@@ -75,4 +105,4 @@ const tutorials = defineCollection({
   }),
 });
 
-export const collections = { labs, writing, projects, tutorials };
+export const collections = { labs, writing, projects, tutorials, resources };

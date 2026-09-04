@@ -1,0 +1,198 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { FREE_PRODUCTS } from '../../lib/product-catalog';
+import {
+  primaryDownloads,
+  RESOURCE_CATALOG,
+  RESOURCE_FORMAT_LABEL,
+  RESOURCE_KIND_LABEL,
+} from '../../lib/resource-catalog';
+
+const products = [...FREE_PRODUCTS].sort((a, b) => a.order - b.order);
+const shelf = [...RESOURCE_CATALOG].sort((a, b) => a.order - b.order);
+const readyForms = shelf.filter((r) => r.status === 'ready' && r.kind !== 'policy' && r.kind !== 'pack');
+const campaignKits = shelf.filter((r) => r.kind === 'pack');
+const policyStarters = shelf.filter((r) => r.status === 'ready' && r.kind === 'policy');
+const planned = shelf.filter((r) => r.status === 'planned' && r.kind !== 'pack');
+---
+
+<BaseLayout
+  title="Resources"
+  view="Resources"
+  bluf="Free deadline forms for small SaaS — plus the compliance starter pack. Not another pile of generic policies."
+  description="Free GRC forms, training campaign kits, and the Small SaaS Compliance Starter from JP Carpenter."
+>
+  <p class="resources-lede">
+    Start with the free product pack if you need a program spine. Use the forms below when
+    something is due today. Manager kits for awareness campaigns sit with the packs — they are
+    companions, not the home-page identity.
+  </p>
+
+  <section class="sy-group" aria-labelledby="res-products">
+    <h2 class="sy-h" id="res-products">Free products</h2>
+    <div class="sy-panel">
+      {
+        products.map((p) => (
+          <a class="sy-row sy-row--link" href={p.href}>
+            <div>
+              <p class="sy-row-label">{p.title}</p>
+              <p class="sy-row-caption">{p.tagline}</p>
+            </div>
+            <span class="sy-row-status" data-mark={p.status === 'ready' ? 'held' : 'open'}>
+              {p.status === 'ready' ? 'Free' : 'Planned'}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="sy-group" aria-labelledby="res-ready">
+    <h2 class="sy-h" id="res-ready">Deadline forms</h2>
+    <div class="sy-panel">
+      {
+        readyForms.map((entry) => (
+          <a class="sy-row sy-row--link" href={`/resources/${entry.id}`}>
+            <div>
+              <p class="sy-row-label">{entry.title}</p>
+              <p class="sy-row-caption">{entry.summary}</p>
+              {
+                entry.downloads && primaryDownloads(entry).length > 0 && (
+                  <p class="resources-format-line">
+                    {primaryDownloads(entry)
+                      .map((item) => RESOURCE_FORMAT_LABEL[item.format] ?? item.label)
+                      .join(' + ')}
+                  </p>
+                )
+              }
+            </div>
+            <span class="sy-row-status" data-mark="held">
+              {RESOURCE_KIND_LABEL[entry.kind]}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="sy-group" aria-labelledby="res-campaigns">
+    <h2 class="sy-h" id="res-campaigns">Training campaign kits</h2>
+    <p class="resources-planned-bluf">
+      Manager rollout packs that pair with interactive lessons under Tutorials. Company-generic
+      placeholders only.
+    </p>
+    <div class="sy-panel">
+      {
+        campaignKits.map((entry) =>
+          entry.status === 'ready' ? (
+            <a class="sy-row sy-row--link" href={`/resources/${entry.id}`}>
+              <div>
+                <p class="sy-row-label">{entry.title}</p>
+                <p class="sy-row-caption">{entry.summary}</p>
+                {entry.downloads && primaryDownloads(entry).length > 0 && (
+                  <p class="resources-format-line">
+                    {primaryDownloads(entry)
+                      .map((item) => RESOURCE_FORMAT_LABEL[item.format] ?? item.label)
+                      .join(' + ')}
+                  </p>
+                )}
+              </div>
+              <span class="sy-row-status" data-mark="held">
+                Pack
+              </span>
+            </a>
+          ) : (
+            <div class="sy-row">
+              <div>
+                <p class="sy-row-label">{entry.title}</p>
+                <p class="sy-row-caption">{entry.summary}</p>
+              </div>
+              <span class="sy-row-status" data-mark="open">
+                Planned
+              </span>
+            </div>
+          ),
+        )
+      }
+    </div>
+  </section>
+
+  <section class="sy-group" aria-labelledby="res-planned">
+    <h2 class="sy-h" id="res-planned">Build next (companions)</h2>
+    <p class="resources-planned-bluf">
+      Only forms small SaaS will seek after the starter pack.
+    </p>
+    <div class="sy-panel">
+      {
+        planned.map((entry) => (
+          <div class="sy-row">
+            <div>
+              <p class="sy-row-label">{entry.title}</p>
+              <p class="sy-row-caption">{entry.summary}</p>
+            </div>
+            <span class="sy-row-status" data-mark="open">
+              Planned
+            </span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="sy-group" aria-labelledby="res-policies">
+    <h2 class="sy-h" id="res-policies">Policy starters</h2>
+    <p class="resources-planned-bluf">
+      Commodity shapes. Use after the form you actually needed.
+    </p>
+    <div class="sy-panel">
+      {
+        policyStarters.map((entry) => (
+          <a class="sy-row sy-row--link" href={`/resources/${entry.id}`}>
+            <div>
+              <p class="sy-row-label">{entry.title}</p>
+              <p class="sy-row-caption">{entry.summary}</p>
+            </div>
+            <span class="sy-row-status" data-mark="held">
+              Policy
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <p class="resources-next">
+    Questions → <a href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a>.
+  </p>
+</BaseLayout>
+
+<style>
+  .resources-lede {
+    margin: 0 0 1.75rem;
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .resources-planned-bluf {
+    margin: -0.35rem 0 0.85rem;
+    max-width: 44rem;
+    font-size: 0.9375rem;
+    color: var(--ink-body);
+  }
+
+  .resources-format-line {
+    margin: 0.3rem 0 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.76rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .resources-next {
+    margin-top: 1.75rem;
+    font-size: 0.9375rem;
+  }
+</style>

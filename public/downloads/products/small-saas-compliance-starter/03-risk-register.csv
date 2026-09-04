@@ -1,0 +1,4 @@
+risk_id,title,description,csf_function,likelihood,impact,priority,owner,current_controls,gap,treatment_plan,status,target_date,residual_risk
+R-001,Example: prod admin without MFA,Replace with a real risk,Protect,High,High,1,Name,Conditional Access MFA,Break-glass accounts undocumented,Document break-glass + quarterly review,Open,YYYY-MM-DD,Medium
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,

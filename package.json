@@ -9,13 +9,12 @@
     "preview": "astro preview",
     "new": "node scripts/new-entry.mjs",
     "render-tutorial": "node scripts/render-tutorial-svg.mjs",
-    "deploy": "bash scripts/deploy-njalla.sh"
+    "deploy": "bash scripts/deploy-njalla.sh",
+    "verify-mobile": "node --experimental-strip-types scripts/test-explore-shell.mjs && node scripts/verify-v5-mobile.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
-    "@fontsource/space-grotesk": "^5.2.8",
-    "@fontsource/space-mono": "^5.2.8",
     "astro": "^7.2.0"
   },
   "devDependencies": {

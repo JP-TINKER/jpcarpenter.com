@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import MarginNote from '../../components/MarginNote.astro';
 import EvidenceEntry from '../../components/EvidenceEntry.astro';
 import { LAB_DISCIPLINES, LAB_DISCIPLINE_META } from '../../lib/lab-disciplines';
+import { plannedCampaigns, readyCampaigns } from '../../lib/training-campaigns';
 
 // Drafts are hidden from the public listing. The discipline grouping mirrors Labs so a
 // reviewer finds GRC / networking / security / instrument lessons in the same buckets.
@@ -19,20 +20,45 @@ const groups = LAB_DISCIPLINES.map((discipline) => ({
 
 const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 const pad = (n: number) => String(n + 1).padStart(2, '0');
+const ready = readyCampaigns();
+const planned = plannedCampaigns();
 ---
 
-<BaseLayout title="Tutorials" description="Walk-throughs that teach a reader to do the work, paired with a terminal recording.">
-  <section class="band sheet">
-    <MarginNote index="02" stamp="Tutorials" note="Teach, with the recording attached" />
-    <div>
-      <h1 class="band-heading">Tutorials</h1>
-      <p class="band-lede">
-        Walk-throughs a reader can follow and do themselves, each paired with a terminal
-        recording so the commands can be paused, rewound, and copied. Grouped by the same
-        plain-language domains as Labs.
+<BaseLayout
+  title="Tutorials"
+  view="Tutorials"
+  bluf="Follow-along labs with instruments you can pause, rewind, and decide with."
+  description="Tutorials by JP Carpenter — walk-throughs and interactive security awareness lessons."
+>
+
+  {(ready.length > 0 || planned.length > 0) && (
+    <section class="sy-group campaign-band" aria-labelledby="campaign-lessons">
+      <h2 class="sy-h" id="campaign-lessons">Interactive lessons</h2>
+      <p class="campaign-bluf">
+        Company-ready awareness drills. Manager kits live under Resources — home still leads with analyst identity, not downloads.
       </p>
-    </div>
-  </section>
+      <div class="sy-panel">
+        {ready.map((c) => (
+          <a class="sy-row sy-row--link" href={c.lessonHref}>
+            <div>
+              <p class="sy-row-label">{c.title}</p>
+              <p class="sy-row-caption">{c.tagline}</p>
+            </div>
+            <span class="sy-row-status" data-mark="held">Lesson</span>
+          </a>
+        ))}
+        {planned.map((c) => (
+          <div class="sy-row">
+            <div>
+              <p class="sy-row-label">{c.title}</p>
+              <p class="sy-row-caption">{c.tagline}</p>
+            </div>
+            <span class="sy-row-status" data-mark="open">Planned</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
 
   {entries.length === 0 && (
     <section class="band sheet">
@@ -71,6 +97,19 @@ const pad = (n: number) => String(n + 1).padStart(2, '0');
 </BaseLayout>
 
 <style>
+  .campaign-band {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 3rem) var(--pad) 0;
+  }
+
+  .campaign-bluf {
+    margin: 0 0 0.85rem;
+    max-width: 40rem;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+  }
+
   .sheet-full {
     max-width: var(--max);
     margin: 0 auto;

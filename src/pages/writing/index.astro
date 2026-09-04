@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import MarginNote from '../../components/MarginNote.astro';
 import EvidenceEntry from '../../components/EvidenceEntry.astro';
 
 const entries = (await getCollection('writing', ({ data }) => !data.draft)).sort(
@@ -12,24 +11,16 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 const pad = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
-<BaseLayout title="Writing" description="Sparse, specific pieces published only when there is a claim worth defending.">
-  <section class="band sheet">
-    <MarginNote
-      index="03"
-      stamp={entries.length === 0 ? 'Empty' : 'Published'}
-      state={entries.length === 0 ? 'open' : undefined}
-    />
-    <div>
-      <h1 class="band-heading">Writing</h1>
-      <p class="band-lede">
-        {
-          entries.length === 0
-            ? 'Nothing published yet. When something goes up it will be because I have a specific claim worth defending. A section carrying four stale posts says less than an empty one.'
-            : 'Specific claims, published when there is one worth defending.'
-        }
-      </p>
-    </div>
-  </section>
+<BaseLayout
+  title="Writing"
+  view="Writing"
+  bluf={
+    entries.length === 0
+      ? 'Nothing published yet. Empty is honest.'
+      : 'Specific claims only — published when one is worth defending.'
+  }
+  description="Writing by JP Carpenter — sparse claims only."
+>
 
   {
     entries.length > 0 && (
@@ -51,8 +42,9 @@ const pad = (n: number) => String(n + 1).padStart(2, '0');
 
 <style>
   .sheet-full {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 0 var(--pad) 5rem;
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0 0 5rem;
   }
 </style>

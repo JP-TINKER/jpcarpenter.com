@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <!-- E · Stack interlock: J above, P below, shared waist bar -->
+  <path fill="currentColor" d="M26 6h12v18H26z"/>
+  <path fill="currentColor" d="M18 24h20v7H18z"/>
+  <path fill="currentColor" d="M18 24h7v28c0 4.5-2.4 7.5-7.5 7.5H8v-6h8.2c1.8 0 2.8-1 2.8-2.8V24z"/>
+  <path fill="currentColor" d="M30 31h6.5c7.8 0 12.8 4.2 12.8 11.2S44.3 53.2 36.5 53.2H30V31zm6.2 6v10h1.8c3.8 0 6-2 6-5s-2.2-5-6-5h-1.8z"/>
+</svg>

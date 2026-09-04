@@ -1,0 +1,102 @@
+---
+/**
+ * Discrete JP Carpenter authorship mark for sheets and campaign docs.
+ * Soft Block mark + amber rule + quiet footer line. Not a seal or watermark farm.
+ */
+import { BRAND } from '../lib/brand';
+
+interface Props {
+  /** Where the mark sits on the sheet. */
+  placement?: 'footer' | 'header';
+  /** Compact mode for tight footers. */
+  compact?: boolean;
+}
+
+const { placement = 'footer', compact = false } = Astro.props;
+---
+
+<div
+  class:list={['jp-brand-stamp', placement === 'header' && 'is-header', compact && 'is-compact']}
+  aria-label={`${BRAND.name} authorship`}
+>
+  <img class="jp-brand-mark" src={BRAND.markPath} alt="" width="36" height="27" />
+  <div class="jp-brand-copy">
+    <span class="jp-brand-name">{BRAND.name}</span>
+    <span class="jp-brand-rule" aria-hidden="true" />
+    <span class="jp-brand-line">{BRAND.footerLine}</span>
+  </div>
+</div>
+
+<style>
+  .jp-brand-stamp {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid color-mix(in srgb, var(--rule-strong, #b8c0ba) 70%, transparent);
+    max-width: 44rem;
+  }
+
+  .jp-brand-stamp.is-header {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding-top: 0;
+    padding-bottom: 0.85rem;
+    border-top: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--rule-strong, #b8c0ba) 70%, transparent);
+  }
+
+  .jp-brand-stamp.is-compact {
+    gap: 0.55rem;
+    margin-top: 1rem;
+    padding-top: 0.65rem;
+  }
+
+  .jp-brand-mark {
+    flex: 0 0 auto;
+    width: 2.25rem;
+    height: auto;
+    opacity: 0.92;
+  }
+
+  .jp-brand-stamp.is-compact .jp-brand-mark {
+    width: 1.75rem;
+  }
+
+  .jp-brand-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .jp-brand-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink, var(--plate, #161c1b));
+  }
+
+  .jp-brand-rule {
+    width: 2.4rem;
+    height: 3px;
+    border-radius: 1px;
+    background: var(--accent, #c47a3a);
+    box-shadow: 0 0 0 1px rgba(100, 112, 91, 0.28);
+  }
+
+  .jp-brand-line {
+    font-size: 0.75rem;
+    color: var(--ink-muted, #6b746f);
+    line-height: 1.35;
+  }
+
+  @media print {
+    .jp-brand-name,
+    .jp-brand-line {
+      color: #333;
+    }
+  }
+</style>

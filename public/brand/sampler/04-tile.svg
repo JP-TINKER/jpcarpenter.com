@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="JP solid tile">
+  <g fill="#161c1b">
+    <path fill-rule="evenodd" d="M6 6h88v88H6V6zm38 12h14v52c0 6-3 10-9.5 10H32v-9h12c2.5 0 4-1.5 4-4V18zm18 0h6c12 0 21 7 21 19.5S80 57 68 57h-6V18zm12 10v19h5c5.5 0 9-3.2 9-9.5S71.5 28 66 28h-4zM22 70h14v12H28c-5 0-8-2.8-8-7.5V70h2z"/>
+  </g>
+</svg>

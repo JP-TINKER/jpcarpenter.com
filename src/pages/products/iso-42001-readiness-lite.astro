@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { productById } from '../../lib/product-catalog';
+
+const product = productById('iso-42001-readiness-lite')!;
+
+const tenFiles = [
+  'Lite gap (10–15 questions)',
+  'AI systems inventory',
+  'Scope one-pager',
+  'Ethics one-pager',
+  'Model card',
+  'Supplier AI questionnaire',
+  'AI risk register',
+  'RACI',
+  'Impact assessment lite',
+  'Readiness-not-certified statement',
+];
+---
+
+<BaseLayout
+  title={product.title}
+  view="Products"
+  bluf={product.tagline}
+  description="Planned free ISO 42001 readiness lite pack from JP Carpenter — ten files for AI-feature SaaS. Not certification."
+>
+  <p class="product-kicker">Free GRC product · planned</p>
+
+  <p class="product-lede">
+    {product.summary}
+  </p>
+
+  <p class="product-status">
+    <span class="sy-row-status" data-mark="open">Planned</span>
+    — files not downloadable yet. Live free pack today →
+    <a href="/products/small-saas-compliance-starter">Small SaaS Compliance Starter</a>.
+  </p>
+
+  <section class="sy-group" aria-labelledby="limits-h">
+    <h2 class="sy-h" id="limits-h">Honest limits (will ship on every file)</h2>
+    <ul class="product-limits">
+      {product.limits.map((line) => <li>{line}</li>)}
+    </ul>
+  </section>
+
+  <section class="sy-group" aria-labelledby="ten-h">
+    <h2 class="sy-h" id="ten-h">The ten files</h2>
+    <div class="sy-panel">
+      {
+        tenFiles.map((label, i) => (
+          <div class="sy-row">
+            <div>
+              <p class="sy-row-label">
+                {i + 1}. {label}
+              </p>
+            </div>
+            <span class="sy-row-status" data-mark="open">
+              Planned
+            </span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <p class="product-next">
+    Want this sooner? →
+    <a href="mailto:jp@jpcarpenter.com?subject=42001%20Readiness%20Lite">jp@jpcarpenter.com</a>
+  </p>
+</BaseLayout>
+
+<style>
+  .product-kicker {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-body);
+  }
+
+  .product-lede {
+    margin: 0 0 1rem;
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .product-status {
+    margin: 0 0 1.75rem;
+    max-width: 44rem;
+    font-size: 0.9375rem;
+  }
+
+  .product-limits {
+    margin: 0;
+    padding-left: 1.2rem;
+    max-width: 44rem;
+    color: var(--ink-body);
+  }
+
+  .product-limits li {
+    margin-bottom: 0.35rem;
+  }
+
+  .product-next {
+    margin-top: 1.75rem;
+    font-size: 0.9375rem;
+  }
+</style>

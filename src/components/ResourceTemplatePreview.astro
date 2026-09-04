@@ -1,0 +1,283 @@
+---
+import type { ResourceTemplatePreview } from '../lib/resource-catalog';
+import BrandStamp from './BrandStamp.astro';
+
+interface Props {
+  title: string;
+  kind: string;
+  preview: ResourceTemplatePreview;
+}
+
+const { title, kind, preview } = Astro.props;
+---
+
+<section class="template-sheet" id="resource-template" aria-labelledby="resource-template-title">
+  <div class="template-head">
+    <p class="template-kicker">{preview.kicker} · {kind}</p>
+    <h2 class="template-title" id="resource-template-title">{title}</h2>
+    <p class="template-intro">{preview.intro}</p>
+  </div>
+
+  <section class="template-limits" aria-labelledby="resource-limits-title">
+    <h3 class="template-section-title" id="resource-limits-title">Honest limits</h3>
+    <ul>
+      {preview.limits.map((line) => <li>{line}</li>)}
+    </ul>
+  </section>
+
+  <form class="template-form">
+    {preview.sections.map((section, index) => (
+      <section class="template-block" aria-labelledby={`template-block-${index}`}>
+        <div class="template-rail" aria-hidden="true">
+          <span class="template-index">{String(index + 1).padStart(2, '0')}</span>
+          <span class="template-rule" />
+        </div>
+
+        <div class="template-body">
+          <h3 class="template-section-title" id={`template-block-${index}`}>{section.title}</h3>
+          {section.note && <p class="template-note">{section.note}</p>}
+
+          <div class="template-fields">
+            {section.fields.map((field) => (
+              <label class:list={['template-field', field.kind === 'textarea' && 'is-area']}>
+                <span class="template-label">{field.label}</span>
+                {field.hint && <span class="template-hint">{field.hint}</span>}
+                {
+                  field.kind === 'textarea' ? (
+                    <textarea rows={4} />
+                  ) : field.kind === 'date' ? (
+                    <input type="date" />
+                  ) : field.kind === 'time' ? (
+                    <input type="time" />
+                  ) : field.kind === 'checkboxes' ? (
+                    <span class="template-checks">
+                      {field.options?.map((option) => (
+                        <span class="template-check">
+                          <input type="checkbox" />
+                          <span>{option}</span>
+                        </span>
+                      ))}
+                    </span>
+                  ) : (
+                    <input type="text" />
+                  )
+                }
+              </label>
+            ))}
+          </div>
+        </div>
+      </section>
+    ))}
+  </form>
+
+  <BrandStamp compact />
+</section>
+
+<style>
+  .template-sheet {
+    margin-top: 2rem;
+    max-width: 52rem;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bone) 96%, white 4%), var(--bone));
+    border: 1px solid var(--lift-hot);
+    border-radius: var(--radius-soft);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lift-hot) 55%, transparent);
+    padding: 1.35rem 1rem;
+  }
+
+  .template-head {
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .template-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .template-title {
+    margin: 0 0 0.5rem;
+    color: var(--plate);
+    font-size: clamp(1.35rem, 4vw, 1.7rem);
+  }
+
+  .template-intro,
+  .template-note,
+  .template-hint,
+  .template-limits li {
+    color: color-mix(in srgb, var(--plate) 78%, black 22%);
+  }
+
+  .template-limits {
+    margin-top: 1.25rem;
+    padding: 0.95rem 1rem;
+    background: color-mix(in srgb, var(--accent-wash) 35%, var(--bone));
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  }
+
+  .template-limits ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1rem;
+  }
+
+  .template-form {
+    margin-top: 1.5rem;
+  }
+
+  .template-block {
+    display: grid;
+    grid-template-columns: 3.4rem minmax(0, 1fr);
+    gap: 0.9rem;
+    padding: 1rem 0;
+    border-top: 1px solid color-mix(in srgb, var(--rule-strong) 65%, transparent);
+  }
+
+  .template-block:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .template-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.2rem;
+  }
+
+  .template-index {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .template-rule {
+    width: 1px;
+    flex: 1;
+    min-height: 3rem;
+    background: color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+
+  .template-section-title {
+    margin: 0;
+    color: var(--plate);
+    font-size: 1rem;
+  }
+
+  .template-note {
+    margin: 0.35rem 0 0.85rem;
+    font-size: 0.9375rem;
+  }
+
+  .template-fields {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .template-field {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .template-label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--plate);
+  }
+
+  .template-hint {
+    font-size: 0.82rem;
+  }
+
+  .template-field input[type='text'],
+  .template-field input[type='date'],
+  .template-field input[type='time'],
+  .template-field textarea {
+    width: 100%;
+    border: 1px solid color-mix(in srgb, var(--rule-strong) 70%, transparent);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, white 75%, var(--bone));
+    padding: 0.7rem 0.75rem;
+    color: var(--plate);
+    font: inherit;
+  }
+
+  .template-field textarea {
+    resize: vertical;
+    min-height: 6rem;
+  }
+
+  .template-checks {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.2rem 0 0.15rem;
+  }
+
+  .template-check {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--plate);
+    font-size: 0.93rem;
+  }
+
+  .template-check input {
+    accent-color: var(--accent);
+  }
+
+  @media (max-width: 720px) {
+    .template-sheet {
+      padding: 1rem 0.85rem;
+    }
+
+    .template-block {
+      grid-template-columns: 1fr;
+      gap: 0.65rem;
+    }
+
+    .template-rail {
+      flex-direction: row;
+      justify-content: flex-start;
+    }
+
+    .template-rule {
+      width: 3rem;
+      height: 1px;
+      min-height: 1px;
+    }
+  }
+
+  @media print {
+    .template-sheet {
+      margin-top: 0;
+      border: 0;
+      box-shadow: none;
+      background: white;
+      padding: 0;
+    }
+
+    .template-title,
+    .template-section-title,
+    .template-label,
+    .template-check,
+    .template-intro,
+    .template-note,
+    .template-hint,
+    .template-limits li {
+      color: black;
+    }
+
+    .template-field input[type='text'],
+    .template-field input[type='date'],
+    .template-field input[type='time'],
+    .template-field textarea {
+      background: white;
+      border-color: #777;
+    }
+  }
+</style>

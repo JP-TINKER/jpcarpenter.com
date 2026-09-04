@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { FREE_PRODUCTS } from '../../lib/product-catalog';
+
+const products = [...FREE_PRODUCTS].sort((a, b) => a.order - b.order);
+---
+
+<BaseLayout
+  title="Free products"
+  view="Products"
+  bluf="Free packs that show how I scope compliance for small SaaS — proof of judgment, not a template shop."
+  description="Free GRC products from JP Carpenter: Small SaaS Compliance Starter and ISO 42001 readiness lite. Built as open proof of how a Security and Compliance Analyst works."
+>
+  <p class="products-lede">
+    Audience for the packs: 10–50 person cloud SaaS. Audience for the site: hiring managers,
+    collaborators, and peers who want someone who closes signed-control gaps. Downloads are
+    the sample; the brand is the analyst.
+  </p>
+
+  <div class="sy-panel">
+    {
+      products.map((p) => (
+        <a class="sy-row sy-row--link" href={p.href}>
+          <div>
+            <p class="sy-row-label">{p.title}</p>
+            <p class="sy-row-caption">{p.tagline}</p>
+          </div>
+          <span class="sy-row-status" data-mark={p.status === 'ready' ? 'held' : 'open'}>
+            {p.status === 'ready' ? 'Free' : 'Planned'}
+          </span>
+        </a>
+      ))
+    }
+  </div>
+
+  <p class="products-next">
+    One-off deadline forms → <a href="/resources">Resources</a>.
+  </p>
+</BaseLayout>
+
+<style>
+  .products-lede {
+    margin: 0 0 1.25rem;
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .products-next {
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+  }
+</style>

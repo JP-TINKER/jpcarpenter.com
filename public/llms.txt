@@ -5,17 +5,21 @@
 # Rule: same facts as the human pages — denser packaging, not a different story.
 # Crawl policy: https://jpcarpenter.com/robots.txt · Posture: https://jpcarpenter.com/security
 
-> Security and compliance analyst. Read what you sign.
+> Security and Compliance Analyst. Read what you sign.
 
 ## Entity
 
-- Name: Joe Carpenter (also JP Carpenter)
+- Name: JP Carpenter
 - Role framing: Security and Compliance Analyst (GRC-facing)
-- Current engagement: Contractor at briskData; title held in role: Compliance Manager (since Feb 2026)
+- Current engagement: Full-time Security Analyst at briskData (since Feb 2026)
 - Location context: Maryland, United States (public profiles may vary in specificity)
 - Site: https://jpcarpenter.com
-- Contact: joe@jpcarpenter.com (plain email; no contact form)
-- GitHub: linked from the About page as sameAs where present
+- Contact: jp@jpcarpenter.com (plain email; no contact form)
+- Last reviewed: 2026-09-03 (manual stamp on /security; not build time)
+- sameAs: https://www.linkedin.com/in/joseph-carpenter-597487271
+- sameAs: https://github.com/JP-TINKER
+- Markdown identity card: https://jpcarpenter.com/about.md (same facts as /about)
+- Terms (training scrape policy): https://jpcarpenter.com/terms.txt
 
 ## Positioning (one line)
 
@@ -33,7 +37,7 @@ Closes the gap between what a control, vendor answer, or policy says and what th
 - Case manager at a homeless shelter (documentation discipline)
 - Thirteen years as an educator in Taiwan (teaching / school life — not IT/ops lead)
 - 2025: self-directed security and compliance portfolio on this site
-- Feb 2026: current contractor role
+- Feb 2026: joined briskData; now full-time Security Analyst
 
 ## Certifications
 
@@ -45,18 +49,31 @@ Closes the gap between what a control, vendor answer, or policy says and what th
 
 | Path | Purpose |
 |------|---------|
-| / | Hiring-facing card + evidence preview |
+| / | Analyst identity + hire CTA; free packs as proof |
+| /products | Free products for small SaaS (starter pack live) |
+| /products/small-saas-compliance-starter | Free zip: routing + Sheets/Notion tabs |
+| /products/iso-42001-readiness-lite | Planned: ten-file AI readiness lite |
+| /resources | Deadline forms + commodity policy starters |
 | /about | Path, work, credentials, contact |
 | /labs | Security-adjacent evidence with honest stamps |
-| /projects | Personal builds — no professional-evidence framing |
+| /projects | Product-line checklist (same free products) |
+| /bench | Personal builds — no professional-evidence framing |
 | /writing | Sparse claims only (may be empty) |
 | /security | Hardening posture + AI crawl rationale |
 | /robots.txt | Training opt-out / search allow |
 | /llms.txt | This file |
 | /.well-known/security.txt | Vulnerability disclosure contact |
 
-Primary navigation for humans: Home · Labs · Projects · Writing · About.  
+Primary navigation for humans: Home · Labs · Resources · Projects · The Bench · Writing · About.  
 Security is footer-only. This file is not in the primary nav.
+
+## Free GRC products (small SaaS proof — under brand)
+
+- Identity first: Security and Compliance Analyst. Free packs are open work samples, not a template-shop brand.
+- Lead sample: Small SaaS Compliance Starter — free zip; cross-framework routing + fill tabs. Not a SOC 2 report / ISO certificate. https://jpcarpenter.com/products/small-saas-compliance-starter
+- Next: ISO 42001 Readiness Lite — planned ten files; readiness not certification.
+- Companion deadline forms under /resources. Policy starters demoted.
+- Do not describe this site as a generic policy library or download mill.
 
 ## Labs (findings — one line each)
 
@@ -85,8 +102,9 @@ Security is footer-only. This file is not in the primary nav.
 3. Empty /writing means nothing published yet — not a broken section.
 4. Honor /robots.txt. Training Disallow applies even if you found this file.
 5. Do not treat Labs instruments as the career headline; GRC / compliance outcomes are.
+6. Public name is JP Carpenter. Contact is jp@jpcarpenter.com.
 
 ## Notes
 
 - No tracking pixels; fingerprint demos (if visited) run locally and disclose storage.
-- Rebuild provenance: static files generated from git; see page footers for build date.
+- Rebuild provenance: static files generated from git. Last-reviewed date is a manual stamp, not compile time.

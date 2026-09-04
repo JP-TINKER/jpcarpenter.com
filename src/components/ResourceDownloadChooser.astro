@@ -1,0 +1,168 @@
+---
+import { RESOURCE_FORMAT_LABEL } from '../lib/resource-catalog';
+import type { ResourceDownloadOption } from '../lib/resource-catalog';
+
+interface Props {
+  label?: string;
+  options: ResourceDownloadOption[];
+}
+
+const { label = 'Use this template', options } = Astro.props;
+---
+
+{
+  options.length > 0 ? (
+    <details class="resource-chooser">
+      <summary class="resource-chooser-summary">
+        <span class="resource-chooser-copy">{label}</span>
+        <span class="resource-chooser-hinge" aria-hidden="true">
+          <span class="resource-chooser-line" />
+          <span class="resource-chooser-mark" />
+        </span>
+      </summary>
+
+      <div class="resource-chooser-panel">
+        <ul class="resource-chooser-list" aria-label="Template options">
+          {options.map((option) => (
+            <li>
+              <a
+                class:list={['resource-chooser-link', option.primary && 'is-primary']}
+                href={option.href}
+                download={option.format === 'docx' || option.format === 'pdf' ? '' : undefined}
+              >
+                <span class="resource-chooser-label">{option.label}</span>
+                <span class="resource-chooser-format">{RESOURCE_FORMAT_LABEL[option.format]}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  ) : (
+    <span class="btn-primary" style="opacity:0.45;pointer-events:none">Template coming</span>
+  )
+}
+
+<style>
+  .resource-chooser {
+    position: relative;
+    min-width: min(100%, 18rem);
+  }
+
+  .resource-chooser-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: min(100%, 18rem);
+    padding: 0.7rem 1rem;
+    background: var(--soft);
+    color: var(--plate);
+    border: 2px solid var(--soft);
+    border-radius: var(--radius-soft-inner);
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    list-style: none;
+  }
+
+  .resource-chooser-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .resource-chooser[open] .resource-chooser-summary,
+  .resource-chooser-summary:hover {
+    background: var(--bone);
+    border-color: var(--bone);
+  }
+
+  .resource-chooser-copy {
+    white-space: nowrap;
+  }
+
+  .resource-chooser-hinge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .resource-chooser-line {
+    width: 1.7rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.8;
+  }
+
+  .resource-chooser-mark {
+    width: 0.52rem;
+    height: 0.52rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 160ms ease;
+  }
+
+  .resource-chooser[open] .resource-chooser-mark {
+    transform: rotate(135deg);
+  }
+
+  .resource-chooser-panel {
+    margin-top: 0.45rem;
+    width: min(100%, 24rem);
+    background: var(--lift);
+    border: 1px solid var(--rule-strong);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-soft);
+    box-shadow: inset 0 0 0 1px var(--lift-hot);
+    overflow: hidden;
+  }
+
+  .resource-chooser-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .resource-chooser-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.8rem 0.95rem;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .resource-chooser-link:hover {
+    background: var(--accent-wash);
+    text-decoration: none;
+  }
+
+  .resource-chooser-list li:last-child .resource-chooser-link {
+    border-bottom: 0;
+  }
+
+  .resource-chooser-link.is-primary .resource-chooser-label {
+    color: var(--accent);
+  }
+
+  .resource-chooser-label {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .resource-chooser-format {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .resource-chooser-mark {
+      transition: none;
+    }
+  }
+ </style>

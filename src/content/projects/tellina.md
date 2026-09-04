@@ -4,6 +4,7 @@ summary: "A silent Linux post-download guard for ~/Downloads: scan in RAM when p
 finding: "Clean downloads stay quiet; malware and disguised launchers get blocked without a settings screen. ClamAV plus a few hard rules, not theater."
 stamp: "Build"
 state: verified
+category: personal
 date: 2026-08-01
 order: 20
 tags: ["linux", "security", "clamav"]

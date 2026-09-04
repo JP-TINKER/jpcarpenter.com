@@ -1,0 +1,72 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entries = (await getCollection('projects'))
+  .filter((e) => (e.data.category ?? 'personal') === 'personal')
+  .sort(
+    (a, b) =>
+      (a.data.order ?? 50) - (b.data.order ?? 50) ||
+      b.data.date.valueOf() - a.data.date.valueOf(),
+  );
+
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+<BaseLayout
+  title="The Bench"
+  view="The Bench"
+  bluf="Personal builds. Hobby craft and side tech — not GRC evidence. Honest status, including unfinished work."
+  description="JP Carpenter personal bench builds — hobby projects, not professional evidence."
+>
+  <p class="bench-lede">
+    This shelf is separate from <a href="/projects">Projects</a> (planned GRC packs) and
+    <a href="/labs">Labs</a> (finished professional evidence). If it is not hiring proof, it
+    lives here.
+  </p>
+
+  {
+    entries.length === 0 ? (
+      <p class="bench-empty">Nothing on the bench yet.</p>
+    ) : (
+      <div class="sy-panel">
+        {entries.map((entry) => {
+          const state = entry.data.state ?? 'verified';
+          const mark =
+            entry.data.stamp ?? (state === 'open' ? 'Not yet run' : 'Build');
+          return (
+            <a class="sy-row sy-row--link" href={`/projects/${entry.id}`}>
+              <div>
+                <p class="sy-row-label">{entry.data.title}</p>
+                <p class="sy-row-caption">
+                  {isoDate(entry.data.date)} ◆{' '}
+                  {entry.data.finding ?? entry.data.summary}
+                </p>
+              </div>
+              <span
+                class="sy-row-status"
+                data-mark={state === 'open' ? 'open' : 'held'}
+              >
+                {mark}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .bench-lede {
+    margin: 0 0 1.75rem;
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .bench-empty {
+    color: var(--ink-body);
+  }
+</style>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <!-- A · Shared stem: one vertical; J hook left-bottom; P bowl right -->
+  <path fill="currentColor" d="M28 10h6v36.5c0 4.8-2.6 8.5-8.2 8.5H18v-5.5h7.2c2.4 0 3.3-1.4 3.3-3.2V10z"/>
+  <path fill="currentColor" d="M34 10h4.5c8.2 0 13.5 4.6 13.5 12.2S46.7 34 38.5 34H34V10zm5.8 5.2v13.4h.7c4.4 0 7-2.3 7-6.7s-2.6-6.7-7-6.7h-.7z"/>
+</svg>

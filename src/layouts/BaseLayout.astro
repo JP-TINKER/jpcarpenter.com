@@ -1,48 +1,112 @@
 ---
-import '@fontsource/space-grotesk/400.css';
-import '@fontsource/space-grotesk/500.css';
-import '@fontsource/space-grotesk/700.css';
-import '@fontsource/space-mono/400.css';
-import '@fontsource/space-mono/700.css';
+import BrandMark from '../components/BrandMark.astro';
+import ExploreBranch from '../components/ExploreBranch.astro';
+import { getCollection } from 'astro:content';
+import { LAB_DISCIPLINES, LAB_DISCIPLINE_META } from '../lib/lab-disciplines';
+import { FREE_PRODUCTS } from '../lib/product-catalog';
+import { RESOURCE_CATALOG } from '../lib/resource-catalog';
+import { BRAND } from '../lib/brand';
+import { formatLastReviewed } from '../lib/site-meta';
 
 interface Props {
   title?: string;
   description?: string;
-  /** Long-form pages opt into the margin reading marker. */
+  view?: string;
+  bluf?: string;
+  kickers?: string[];
   marker?: boolean;
 }
 
 const {
   title = 'JP Carpenter',
-  description = 'Security and compliance analyst. Read what you sign.',
+  description =
+    'JP Carpenter — Security and Compliance Analyst. PCI DSS, SOC 2, ISO 27001. Signed claims checked against running systems.',
+  view,
+  bluf,
+  kickers = [],
   marker = false,
 } = Astro.props;
 
 const pathname = Astro.url.pathname;
 const pageTitle = title === 'JP Carpenter' ? title : `${title} · JP Carpenter`;
-// Astro.site is set from astro.config.mjs; canonicalURL always resolves to an absolute,
-// trailing-slash-free URL so it matches the sitemap and doesn't fight `trailingSlash: 'never'`.
 const canonicalURL = new URL(pathname, Astro.site);
 
-const nav = [
-  { href: '/', label: 'Home' },
-  { href: '/labs', label: 'Labs' },
-  { href: '/tutorials', label: 'Tutorials' },
-  { href: '/projects', label: 'Projects' },
-  { href: '/writing', label: 'Writing' },
+const viewLabel =
+  view ??
+  (pathname === '/'
+    ? 'Home'
+    : pathname.startsWith('/labs')
+      ? 'Labs'
+      : pathname.startsWith('/products')
+        ? 'Products'
+        : pathname.startsWith('/resources')
+          ? 'Resources'
+          : pathname.startsWith('/bench')
+            ? 'The Bench'
+            : pathname.startsWith('/projects')
+              ? 'Projects'
+              : pathname.startsWith('/writing')
+                ? 'Writing'
+                : pathname.startsWith('/about')
+                  ? 'About'
+                  : pathname.startsWith('/security')
+                    ? 'Security'
+                    : title);
+
+const allProjects = await getCollection('projects');
+const benchEntries = allProjects
+  .filter((e) => (e.data.category ?? 'personal') === 'personal')
+  .sort(
+    (a, b) =>
+      (a.data.order ?? 50) - (b.data.order ?? 50) ||
+      b.data.date.valueOf() - a.data.date.valueOf(),
+  );
+
+const writing = (
+  await getCollection('writing', ({ data }) => !data.draft)
+).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+/** Nest leads with forms/checklists; policies stay on /resources, not the drawer. */
+const readyResources = RESOURCE_CATALOG.filter(
+  (r) => r.status === 'ready' && r.kind !== 'policy',
+).sort((a, b) => a.order - b.order);
+
+const labNav = LAB_DISCIPLINES.map((id) => ({
+  id,
+  href: `/labs#disc-${id}`,
+  label: LAB_DISCIPLINE_META[id].label,
+  hash: `#disc-${id}`,
+}));
+
+const productNav = [...FREE_PRODUCTS]
+  .sort((a, b) => a.order - b.order)
+  .map((p) => ({
+    id: p.id,
+    href: p.href,
+    label: p.title,
+  }));
+
+const helpNav = [
   { href: '/about', label: 'About' },
+  { href: '/security', label: 'Site security' },
 ];
 
 const isCurrent = (href: string) =>
-  href === '/' ? pathname === '/' : pathname.startsWith(href);
+  href === '/' ? pathname === '/' : pathname.startsWith(href.split('#')[0]!);
 
-// Real build timestamp, baked in at static build time, not decoration, an honest
-// provenance signal (this page was generated on this date, not "live forever" theater).
-const buildDate = new Date().toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-});
+const norm = pathname.replace(/\/$/, '') || '/';
+const labsOpen = pathname.startsWith('/labs');
+const resourcesOpen = pathname.startsWith('/resources');
+const productsOpen = pathname.startsWith('/products');
+const projectsOpen = pathname.startsWith('/projects') || productsOpen;
+const benchOpen = pathname.startsWith('/bench');
+const writingOpen = pathname.startsWith('/writing');
+const onBenchProject =
+  pathname.startsWith('/projects/') &&
+  benchEntries.some((e) => norm === `/projects/${e.id}`);
+
+const plateView = onBenchProject ? 'The Bench' : viewLabel;
+const lastReviewed = formatLastReviewed();
 ---
 
 <!doctype html>
@@ -52,12 +116,12 @@ const buildDate = new Date().toLocaleDateString('en-US', {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260903-t04d" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=20260903-t04d" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png?v=20260903-t04d" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260903-t04d" />
+    <meta name="theme-color" content="#161c1b" />
     <title>{pageTitle}</title>
-
-    <!-- Open Graph + Twitter Card: plain meta tags only, no script, so a link pasted into
-         LinkedIn, Slack, or an email preview shows a real title/description instead of a
-         blank or guessed one. No og:image yet; see HANDOFF (no fabricated stock image). -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="JP Carpenter" />
     <meta property="og:title" content={pageTitle} />
@@ -68,50 +132,247 @@ const buildDate = new Date().toLocaleDateString('en-US', {
     <meta name="twitter:description" content={description} />
   </head>
   <body>
-    <nav class="site-nav" aria-label="Primary">
-      <div class="site-nav-inner">
-        <a class="site-nav-logo" href="/">JP Carpenter</a>
-        <ul class="site-nav-links">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="shell">
+      <header class="plate">
+        <div class="plate-brand">
+          <a class="plate-lockup" href="/" aria-label="JP Carpenter home">
+            <BrandMark class="plate-mark" />
+            <span class="plate-word">
+              <span class="plate-name">JP Carpenter</span>
+              <span class="plate-view">{plateView}</span>
+            </span>
+          </a>
+        </div>
+        <p class="plate-role">Security and Compliance Analyst</p>
+        <button
+          type="button"
+          class="plate-menu"
+          data-explore-open
+          aria-expanded="false"
+          aria-controls="explore-drawer"
+        >
+          Menu
+        </button>
+      </header>
+
+      <button
+        type="button"
+        class="explore-backdrop"
+        data-explore-backdrop
+        hidden
+        aria-label="Close"
+        aria-hidden="true"
+        tabindex="-1"
+      />
+
+      <aside
+        class="explore"
+        id="explore-drawer"
+        data-explore-shell
+        aria-label="Menu"
+      >
+        <div class="explore-head">
+          <p class="explore-head-label">Menu</p>
+          <button type="button" class="explore-close" data-explore-close>
+            Close
+          </button>
+        </div>
+        <nav class="explore-nav" aria-label="Primary">
+          <ul>
+            <li>
+              <a
+                class="explore-row"
+                href="/"
+                aria-current={norm === '/' ? 'page' : undefined}
+              >
+                <span class="explore-pip" aria-hidden="true" />
+                <span class="explore-label">Home</span>
+              </a>
+            </li>
+            {
+              helpNav.map((item) => (
+                <li>
+                  <a
+                    class="explore-row"
+                    href={item.href}
+                    aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  >
+                    <span class="explore-pip" aria-hidden="true" />
+                    <span class="explore-label">{item.label}</span>
+                  </a>
+                </li>
+              ))
+            }
+
+            <ExploreBranch
+              id="labs"
+              label="Labs"
+              open={labsOpen}
+              sectionCurrent={labsOpen}
+              nestLabel="Lab disciplines"
+              allHref="/labs"
+              allLabel="All labs"
+              allCurrent={norm === '/labs'}
+              items={labNav.map((item) => ({
+                href: item.href,
+                label: item.label,
+                hash: item.hash,
+              }))}
+            />
+
+            <ExploreBranch
+              id="resources"
+              label="Resources"
+              open={resourcesOpen}
+              sectionCurrent={resourcesOpen}
+              nestLabel="Resources"
+              allHref="/resources"
+              allLabel="All resources"
+              allCurrent={norm === '/resources'}
+              items={readyResources.map((r) => ({
+                href: `/resources/${r.id}`,
+                label: r.title,
+                current: norm === `/resources/${r.id}`,
+              }))}
+            />
+
+            <ExploreBranch
+              id="projects"
+              label="Projects"
+              open={projectsOpen && !onBenchProject}
+              sectionCurrent={projectsOpen && !onBenchProject}
+              nestLabel="Free products"
+              allHref="/products"
+              allLabel="All products"
+              allCurrent={norm === '/products' || norm === '/projects'}
+              items={productNav.map((item) => ({
+                href: item.href,
+                label: item.label,
+                current: norm === item.href || norm === `${item.href}/`,
+              }))}
+            />
+
+            <ExploreBranch
+              id="bench"
+              label="The Bench"
+              open={benchOpen || onBenchProject}
+              sectionCurrent={benchOpen || onBenchProject}
+              nestLabel="Bench builds"
+              allHref="/bench"
+              allLabel="All bench"
+              allCurrent={norm === '/bench'}
+              items={
+                benchEntries.length > 0
+                  ? benchEntries.map((entry) => ({
+                      href: `/projects/${entry.id}`,
+                      label: entry.data.title,
+                      current: norm === `/projects/${entry.id}`,
+                    }))
+                  : [
+                      {
+                        href: '/bench',
+                        label: 'Nothing on the bench yet',
+                        current: false,
+                      },
+                    ]
+              }
+            />
+
+            <ExploreBranch
+              id="writing"
+              label="Writing"
+              open={writingOpen}
+              sectionCurrent={writingOpen}
+              nestLabel="Writing"
+              allHref="/writing"
+              allLabel="All writing"
+              allCurrent={norm === '/writing'}
+              items={
+                writing.length > 0
+                  ? writing.map((entry) => ({
+                      href: `/writing/${entry.id}`,
+                      label: entry.data.title,
+                      current: norm === `/writing/${entry.id}`,
+                    }))
+                  : [
+                      {
+                        href: '/writing',
+                        label: 'Nothing published yet',
+                        current: false,
+                      },
+                    ]
+              }
+            />
+          </ul>
+        </nav>
+
+        <div class="explore-foot">
+          <a href={BRAND.linkedin} rel="me">LinkedIn</a>
+          <a class="explore-foot-reviewed" href="/security">
+            Last reviewed {lastReviewed}
+          </a>
+        </div>
+      </aside>
+
+      <div class="field">
+        {
+          marker && (
+            <div class="read-marker" aria-hidden="true">
+              <span class="read-marker-fill" id="readMarkerFill" />
+            </div>
+          )
+        }
+
+        <main id="main">
           {
-            nav.map((item) => (
-              <li>
-                <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-                  {item.label}
-                </a>
-              </li>
-            ))
+            bluf && (
+              <header
+                class:list={[
+                  'page-intro',
+                  viewLabel === 'Home' && 'page-intro--home',
+                ]}
+              >
+                {
+                  viewLabel === 'Home' ? (
+                    <div class="page-intro-lockup">
+                      <BrandMark class="page-brand-mark" />
+                      <h1 class="page-title">JP Carpenter</h1>
+                    </div>
+                  ) : (
+                    <h1 class="page-title">{viewLabel}</h1>
+                  )
+                }
+                <p class="page-bluf">{bluf}</p>
+                {
+                  kickers.length > 0 && (
+                    <ul class="page-kicker" aria-label="Focus areas">
+                      {kickers.map((item) => (
+                        <li>{item}</li>
+                      ))}
+                    </ul>
+                  )
+                }
+              </header>
+            )
           }
-        </ul>
+          <slot />
+        </main>
+
+        <footer class="field-footer">
+          <a href="/security">Security posture</a>
+          <span class="field-footer-sep" aria-hidden="true">◆</span>
+          <a href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a>
+        </footer>
       </div>
-    </nav>
-
-    {
-      marker && (
-        <div class="read-marker" aria-hidden="true">
-          <span class="read-marker-fill" id="readMarkerFill" />
-        </div>
-      )
-    }
-
-    <main>
-      <slot />
-    </main>
-
-    <footer class="site-footer">
-      <div class="site-footer-inner">
-        <div>JP Carpenter · I Tinker</div>
-        <div>Built {buildDate}</div>
-        <div>
-          <a href="/security">Security</a>
-          ·
-          <a href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>
-        </div>
-      </div>
-    </footer>
+    </div>
 
     <script>
       import { initReadMarker } from '../scripts/read-marker';
+      import { initExploreBranch } from '../scripts/explore-branch';
       initReadMarker();
+      initExploreBranch();
     </script>
   </body>
 </html>

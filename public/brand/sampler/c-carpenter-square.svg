@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <!-- C · Carpenter square: L-rule reads as J; P bowl rides the upright -->
+  <path fill="currentColor" d="M14 12h8v34H14z"/>
+  <path fill="currentColor" d="M14 46h28v8H14z"/>
+  <path fill="currentColor" fill-rule="evenodd" d="M30 12h16c7.2 0 12 4.2 12 11S53.2 34 46 34H30V12zm8 6.5v9h6.2c3.1 0 5-1.7 5-4.5s-1.9-4.5-5-4.5H38z"/>
+</svg>

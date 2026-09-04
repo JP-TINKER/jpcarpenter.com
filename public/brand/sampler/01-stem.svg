@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="JP stem monogram">
+  <g fill="#161c1b">
+    <!-- shared stem -->
+    <rect x="40" y="8" width="16" height="84" rx="2"/>
+    <!-- J hook to the LEFT -->
+    <rect x="12" y="68" width="16" height="24" rx="2"/>
+    <rect x="12" y="80" width="44" height="12" rx="2"/>
+    <!-- P bowl to the RIGHT -->
+    <path d="M56 8h22c15 0 26 9.5 26 25.5S93 59 78 59H56V8zm16 14v23h5c7.5 0 12.5-4.8 12.5-11.5S84.5 22 77 22h-5z"/>
+  </g>
+</svg>

@@ -19,18 +19,12 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 const pad = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
-<BaseLayout title="Labs" description="Security work with the evidence attached.">
-  <section class="band sheet">
-    <MarginNote index="01" stamp="Labs" note="Four plain-language domains" />
-    <div>
-      <h1 class="band-heading">Labs</h1>
-      <p class="band-lede">
-        Work is split by what it actually proves: governance, networking, security, or
-        instrument craft. Each entry still carries the notes, artifacts, limits, and honest
-        status needed to check the claim.
-      </p>
-    </div>
-  </section>
+<BaseLayout
+  title="Labs"
+  view="Labs"
+  bluf="Evidence by what it proves — filter left by GRC, Networking, Security, or Instruments. Each entry has notes, artifacts, limits, and honest status."
+  description="Security and compliance labs with evidence attached — JP Carpenter."
+>
 
   {entries.length === 0 && (
     <section class="band sheet">
@@ -41,7 +35,7 @@ const pad = (n: number) => String(n + 1).padStart(2, '0');
 
   {
     groups.map((group) => (
-      <section class="lab-domain">
+      <section class="lab-domain" id={`disc-${group.discipline}`}>
         <div class="sheet domain-heading">
           <MarginNote stamp={group.label} note={`${group.entries.length} logged`} />
           <div>

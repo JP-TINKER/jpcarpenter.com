@@ -1,133 +1,109 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import MarginNote from '../components/MarginNote.astro';
-import EvidenceEntry from '../components/EvidenceEntry.astro';
-import { LAB_DISCIPLINE_META } from '../lib/lab-disciplines';
+import { FREE_PRODUCTS } from '../lib/product-catalog';
+import { RESOURCE_CATALOG, RESOURCE_KIND_LABEL } from '../lib/resource-catalog';
 
-const labsEntries = (await getCollection('labs'))
-  .sort((a, b) => a.data.order - b.data.order || b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
-
-const writingEntries = (await getCollection('writing', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
-
-const isoDate = (date: Date) => date.toISOString().slice(0, 10);
-const pad = (n: number) => String(n + 1).padStart(2, '0');
+const products = [...FREE_PRODUCTS].sort((a, b) => a.order - b.order);
+const companionForms = RESOURCE_CATALOG.filter(
+  (r) => r.status === 'ready' && r.kind !== 'policy' && r.kind !== 'pack',
+).sort((a, b) => a.order - b.order);
 ---
 
-<BaseLayout description="Security and compliance analyst. Read what you sign.">
-  <section class="desk">
-    <div class="desk-surface" aria-hidden="true"></div>
-    <div class="desk-lamp" aria-hidden="true"></div>
-    <div class="desk-shadow" aria-hidden="true"></div>
-    <div class="sheet desk-inner">
-      <MarginNote>
-        <span class="desk-eyebrow">Transmitting<br />from the bench</span>
-      </MarginNote>
-      <div>
-        <h1 class="desk-brand">JP Carpenter</h1>
-        <p class="desk-claim">Read what you sign.</p>
-        <p class="desk-support">
-          Security and compliance analyst. I read the policies, vendor answers, and
-          configurations other people skim, and write down what they actually commit you to.
-        </p>
-        <div class="desk-actions">
-          <a class="btn-primary" href="/about">About the work</a>
-          <a class="btn-quiet" href="/labs">Read the evidence</a>
-        </div>
-      </div>
-    </div>
-  </section>
+<BaseLayout
+  view="Home"
+  bluf="Security and Compliance Analyst. Read what you sign."
+  description="JP Carpenter — Security and Compliance Analyst. PCI DSS, SOC 2, ISO 27001. Closes gaps between signed controls and running systems."
+  kickers={['PCI DSS', 'SOC 2', 'ISO 27001']}
+>
+  <p class="home-lede">
+    Hire me when policy, questionnaires, and dashboards need to match what the systems
+    actually do — with evidence a reviewer can check.
+  </p>
 
-  <section class="band sheet">
-    <MarginNote index="01" stamp="Labs" />
-    <div>
-      <h2 class="band-heading">Work with the evidence attached</h2>
-      <p class="band-lede">
-        Each entry links to the notes, the artifacts, and (where it matters) the limits of what
-        the work actually proves.
-      </p>
-    </div>
-  </section>
+  <p class="home-cta">
+    <a class="btn-primary" href="/about">Path and credentials</a>
+    <a class="btn-quiet" href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a>
+  </p>
 
-  <ul class="entries sheet-full">
-    {
-      labsEntries.map((entry, i) => (
-        <EvidenceEntry
-          href={`/labs/${entry.id}`}
-          index={pad(i)}
-          title={entry.data.title}
-          finding={entry.data.finding ?? entry.data.summary}
-          stamp={entry.data.stamp ?? 'Logged'}
-          state={entry.data.state}
-          discipline={LAB_DISCIPLINE_META[entry.data.discipline].label}
-          date={isoDate(entry.data.date)}
-        />
-      ))
-    }
-  </ul>
-
-  <section class="band sheet">
-    <MarginNote index="02" stamp="Empty" state="open" />
-    <div>
-      <h2 class="band-heading">Writing</h2>
+  <section class="sy-group" aria-labelledby="proof-h">
+    <h2 class="sy-h" id="proof-h">How I work (free proof)</h2>
+    <p class="home-section-bluf">
+      Open packs that show judgment: which program this quarter, what to track, and where the
+      honest limits are. Built for founders — useful as a hiring sample of how I think.
+    </p>
+    <div class="sy-panel">
       {
-        writingEntries.length === 0 ? (
-          <p class="band-lede">
-            Nothing here yet. When something goes up it will be because I have a specific claim
-            worth defending. A section with four stale posts is worse than an empty one.
-          </p>
-        ) : (
-          <p class="band-lede">Published thinking, kept sparse on purpose.</p>
-        )
+        products.map((p) => (
+          <a class="sy-row sy-row--link" href={p.href}>
+            <div>
+              <p class="sy-row-label">{p.title}</p>
+              <p class="sy-row-caption">{p.tagline}</p>
+            </div>
+            <span class="sy-row-status" data-mark={p.status === 'ready' ? 'held' : 'open'}>
+              {p.status === 'ready' ? 'Free' : 'Planned'}
+            </span>
+          </a>
+        ))
       }
     </div>
+    <p class="home-more">
+      <a href="/products">All free products</a>
+      ·
+      <a href="/labs">Evidence labs</a>
+    </p>
   </section>
 
-  {
-    writingEntries.length > 0 && (
-      <ul class="entries sheet-full">
-        {writingEntries.slice(0, 3).map((entry, i) => (
-          <EvidenceEntry
-            href={`/writing/${entry.id}`}
-            index={pad(i)}
-            title={entry.data.title}
-            finding={entry.data.description}
-            stamp="Published"
-            date={isoDate(entry.data.date)}
-          />
-        ))}
-      </ul>
-    )
-  }
-
-  <section class="closing">
-    <div class="sheet closing-inner">
-      <MarginNote index="03" stamp="Open" state="open" note="Plain email · no form" />
-      <div>
-        <h2>Want a second reader on something?</h2>
-        <p>
-          Send me what you're looking at: a policy, a vendor questionnaire, a control you're
-          not sure is doing anything. I'll tell you what I'd check first. No form, no
-          funnel, and no obligation on either side.
-        </p>
-        <div class="desk-actions">
-          <a class="btn-primary" href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>
-          <a class="btn-quiet" href="/projects">Personal builds</a>
-        </div>
-      </div>
+  <section class="sy-group" aria-labelledby="resources-h">
+    <h2 class="sy-h" id="resources-h">Deadline forms</h2>
+    <p class="home-section-bluf">
+      Panic downloads when something is due — companions to the starter pack, not a policy library.
+    </p>
+    <div class="sy-panel">
+      {
+        companionForms.map((entry) => (
+          <a class="sy-row sy-row--link" href={`/resources/${entry.id}`}>
+            <div>
+              <p class="sy-row-label">{entry.title}</p>
+              <p class="sy-row-caption">{entry.summary}</p>
+            </div>
+            <span class="sy-row-status" data-mark="held">
+              {RESOURCE_KIND_LABEL[entry.kind]}
+            </span>
+          </a>
+        ))
+      }
     </div>
+    <p class="home-more">
+      <a href="/resources">All resources</a>
+    </p>
   </section>
 </BaseLayout>
 
 <style>
-  /* The rows keep the sheet's rail alignment but let their hover state bleed to the
-     page edge, so the row reads as one continuous line rather than a boxed item. */
-  .sheet-full {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 0 var(--pad);
+  .home-lede {
+    margin: 0 0 1.25rem;
+    max-width: 40rem;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .home-section-bluf {
+    margin: -0.35rem 0 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--ink-body);
+  }
+
+  .home-more {
+    margin: 0.75rem 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .home-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.25rem;
+    align-items: center;
+    margin: 0 0 2rem;
   }
 </style>

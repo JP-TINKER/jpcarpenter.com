@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { productById } from '../../lib/product-catalog';
+
+const product = productById('small-saas-compliance-starter')!;
+
+const zipHref = product.download!;
+
+const files = [
+  { name: '00-README.md', label: 'README + limits', href: '/downloads/products/small-saas-compliance-starter/00-README.md' },
+  { name: '01-routing.md', label: 'If/then routing', href: '/downloads/products/small-saas-compliance-starter/01-routing.md' },
+  { name: '02-scope.csv', label: 'Scope (CSV → Sheets)', href: '/downloads/products/small-saas-compliance-starter/02-scope.csv' },
+  { name: '03-risk-register.csv', label: 'Risk register', href: '/downloads/products/small-saas-compliance-starter/03-risk-register.csv' },
+  { name: '04-control-map.csv', label: 'Control map', href: '/downloads/products/small-saas-compliance-starter/04-control-map.csv' },
+  { name: '05-evidence-calendar.csv', label: 'Evidence calendar', href: '/downloads/products/small-saas-compliance-starter/05-evidence-calendar.csv' },
+  { name: '06-raci.csv', label: 'RACI', href: '/downloads/products/small-saas-compliance-starter/06-raci.csv' },
+  { name: '07-type1-type2-worksheet.md', label: 'Type 1 → Type 2 worksheet', href: '/downloads/products/small-saas-compliance-starter/07-type1-type2-worksheet.md' },
+];
+---
+
+<BaseLayout
+  title={product.title}
+  view="Products"
+  bluf={product.tagline}
+  description="Free Small SaaS Compliance Starter from JP Carpenter — routing + Sheets tabs for 10–50 person cloud SaaS. Not a SOC 2 report."
+>
+  <p class="product-kicker">Free GRC product · small SaaS</p>
+
+  <p class="product-lede">
+    {product.summary}
+  </p>
+
+  <div class="product-actions">
+    <a class="btn-primary" href={zipHref} download>Download free pack (zip)</a>
+    <a class="btn-quiet" href="mailto:jp@jpcarpenter.com?subject=Small%20SaaS%20Compliance%20Starter">
+      Ask a scoping question
+    </a>
+  </div>
+
+  <section class="sy-group" aria-labelledby="limits-h">
+    <h2 class="sy-h" id="limits-h">Honest limits</h2>
+    <ul class="product-limits">
+      {product.limits.map((line) => <li>{line}</li>)}
+    </ul>
+  </section>
+
+  <section class="sy-group" aria-labelledby="includes-h">
+    <h2 class="sy-h" id="includes-h">What’s in the pack</h2>
+    <div class="sy-panel">
+      {
+        files.map((f) => (
+          <a class="sy-row sy-row--link" href={f.href} download>
+            <div>
+              <p class="sy-row-label">{f.label}</p>
+              <p class="sy-row-caption">{f.name}</p>
+            </div>
+            <span class="sy-row-status" data-mark="held">
+              Free
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="sy-group" aria-labelledby="how-h">
+    <h2 class="sy-h" id="how-h">How to use</h2>
+    <ol class="product-how">
+      <li>Read routing. Pick <strong>one</strong> examination for this quarter.</li>
+      <li>Import CSVs into Google Sheets (or Notion databases).</li>
+      <li>Freeze the header. Color Status.</li>
+      <li>Replace every placeholder with facts you can defend.</li>
+      <li>Keep the limits box on any copy you share with customers.</li>
+    </ol>
+  </section>
+
+  <p class="product-next">
+    Deadline forms (vendor intake, MFA ask, incident, change evidence) →
+    <a href="/resources">Resources</a>. Next free product →
+    <a href="/products/iso-42001-readiness-lite">42001 Readiness Lite</a> (planned).
+  </p>
+</BaseLayout>
+
+<style>
+  .product-kicker {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-body);
+  }
+
+  .product-lede {
+    margin: 0 0 1.25rem;
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .product-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.25rem;
+    margin: 0 0 1.75rem;
+  }
+
+  .product-limits {
+    margin: 0;
+    padding-left: 1.2rem;
+    max-width: 44rem;
+    color: var(--ink-body);
+  }
+
+  .product-limits li {
+    margin-bottom: 0.35rem;
+  }
+
+  .product-how {
+    margin: 0;
+    padding-left: 1.2rem;
+    max-width: 44rem;
+    color: var(--ink-body);
+    line-height: 1.45;
+  }
+
+  .product-how li {
+    margin-bottom: 0.4rem;
+  }
+
+  .product-next {
+    margin-top: 1.75rem;
+    font-size: 0.9375rem;
+  }
+</style>

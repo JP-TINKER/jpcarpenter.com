@@ -1,0 +1,401 @@
+---
+/**
+ * AUTHENTICATED PHISHING DRILL — decision instrument for the hard case:
+ * SPF / DKIM / DMARC all pass, and the message is still malicious.
+ * Reader marks red flags, picks an action, then gets a calm debrief.
+ */
+---
+
+<div class="aphish-fallback" id="aphishFallback">
+  <aside class="aphish-fallback-card" aria-label="Static scenario preview">
+    <p class="aphish-fallback-kicker">Authenticated phishing drill · static preview</p>
+    <p>
+      <strong>From:</strong> Maya Chen &lt;maya.chen@northline-ops.com&gt;<br />
+      <strong>Subject:</strong> Urgent: wire approval needed before 4pm close<br />
+      <strong>Auth:</strong> SPF pass · DKIM pass · DMARC pass
+    </p>
+    <p class="aphish-fallback-note">
+      JavaScript required for the interactive decision drill. The lesson body below still teaches the method.
+    </p>
+  </aside>
+</div>
+
+<div class="aphish-drill" id="aphishDrillRoot">
+  <div class="aphish-brand">
+    <span class="aphish-name">AUTHENTICATED PHISHING DRILL</span>
+    <span class="aphish-model">Model 1 · mark flags · choose an action</span>
+  </div>
+
+  <p class="aphish-intro">
+    Authentication passed. That answers “did this come from the claimed domain?” — not “is this safe?”
+    Mark every red flag you see, then choose what you would do.
+  </p>
+
+  <article class="aphish-message" aria-label="Sample message">
+    <header class="aphish-msg-head">
+      <p><span class="aphish-label">From</span> Maya Chen &lt;maya.chen@northline-ops.com&gt;</p>
+      <p><span class="aphish-label">To</span> you@[Company].com</p>
+      <p><span class="aphish-label">Subject</span> Urgent: wire approval needed before 4pm close</p>
+      <p class="aphish-auth">
+        <span class="aphish-auth-pill" data-pass>SPF pass</span>
+        <span class="aphish-auth-pill" data-pass>DKIM pass</span>
+        <span class="aphish-auth-pill" data-pass>DMARC pass</span>
+      </p>
+    </header>
+    <div class="aphish-msg-body">
+      <p>Hi — stuck in back-to-backs. Need you to approve the vendor wire for $48,750 to close the Q3 invoice.</p>
+      <p>
+        Use this payment portal (finance already set it up):
+        <span class="aphish-url">https://northline-ops-payments.vercel.app/pay/inv-4481</span>
+      </p>
+      <p>Please do it before 4pm or we miss the cutoff. Don’t loop others — I’m offline after this.</p>
+      <p>— Maya</p>
+    </div>
+    <p class="aphish-context">
+      Context card: Maya is a real colleague at a partner firm. Her mailbox was compromised last week
+      (you would not know that yet). The portal domain is <em>not</em> the company finance system.
+    </p>
+  </article>
+
+  <fieldset class="aphish-flags">
+    <legend>Red flags (select all that apply)</legend>
+    <label class="aphish-flag"><input type="checkbox" name="flag" value="urgency" /> Time pressure + money move</label>
+    <label class="aphish-flag"><input type="checkbox" name="flag" value="secrecy" /> “Don’t loop others” / stay quiet</label>
+    <label class="aphish-flag"><input type="checkbox" name="flag" value="offchannel" /> Payment link on an unfamiliar host</label>
+    <label class="aphish-flag"><input type="checkbox" name="flag" value="auth-trust" /> Clean SPF/DKIM/DMARC means the request is safe</label>
+    <label class="aphish-flag"><input type="checkbox" name="flag" value="tone" /> Unusual ask pattern for this sender</label>
+  </fieldset>
+
+  <fieldset class="aphish-actions">
+    <legend>Your next action</legend>
+    <label class="aphish-action">
+      <input type="radio" name="action" value="click" />
+      Open the portal and approve — auth passed, so it is fine
+    </label>
+    <label class="aphish-action">
+      <input type="radio" name="action" value="verify" />
+      Verify out of band (known good number / chat) before any payment
+    </label>
+    <label class="aphish-action">
+      <input type="radio" name="action" value="report" />
+      Report to [Report channel] and pause until security replies
+    </label>
+    <label class="aphish-action">
+      <input type="radio" name="action" value="escalate" />
+      Escalate to [Security owner] with the message + URL preserved
+    </label>
+  </fieldset>
+
+  <div class="aphish-controls">
+    <button type="button" class="aphish-submit" id="aphishSubmit">Check my decision</button>
+    <button type="button" class="aphish-reset" id="aphishReset">Reset</button>
+  </div>
+
+  <div class="aphish-debrief" id="aphishDebrief" hidden>
+    <h3 class="aphish-debrief-title">Debrief</h3>
+    <p id="aphishDebriefLead"></p>
+    <ul id="aphishDebriefList"></ul>
+    <p class="aphish-debrief-foot">
+      Pass on authentication ≠ pass on judgment. Compromised mailboxes, lookalikes, and abused
+      platforms all authenticate cleanly. For money or access: verify out of band, then report.
+    </p>
+  </div>
+</div>
+
+<script>
+  const fallback = document.getElementById('aphishFallback');
+  const root = document.getElementById('aphishDrillRoot');
+  const submit = document.getElementById('aphishSubmit');
+  const reset = document.getElementById('aphishReset');
+  const debrief = document.getElementById('aphishDebrief');
+  const lead = document.getElementById('aphishDebriefLead');
+  const list = document.getElementById('aphishDebriefList');
+
+  if (fallback && root) {
+    fallback.classList.add('is-hidden');
+    root.classList.add('is-live');
+  }
+
+  const flagLabels = {
+    urgency: 'urgency + money',
+    secrecy: 'secrecy (“don’t loop others”)',
+    offchannel: 'unfamiliar payment host',
+    tone: 'unusual ask pattern',
+  };
+  const goodFlags = new Set(Object.keys(flagLabels));
+  const trapFlag = 'auth-trust';
+
+  function selectedFlags() {
+    return [...document.querySelectorAll('input[name="flag"]:checked')].map((el) => el.value);
+  }
+
+  function selectedAction() {
+    const el = document.querySelector('input[name="action"]:checked');
+    return el ? el.value : null;
+  }
+
+  function renderDebrief() {
+    const flags = selectedFlags();
+    const action = selectedAction();
+    const notes = [];
+
+    if (!action) {
+      lead.textContent = 'Pick an action first — the drill is about the decision, not just spotting flags.';
+      list.innerHTML = '';
+      debrief.hidden = false;
+      return;
+    }
+
+    const caught = flags.filter((f) => goodFlags.has(f));
+    const missed = [...goodFlags].filter((f) => !flags.includes(f));
+    const trustedAuth = flags.includes(trapFlag);
+
+    if (action === 'click') {
+      lead.textContent =
+        'That action fails the drill. Clean authentication only proves domain alignment — not that Maya still controls the mailbox, or that the portal is yours.';
+    } else if (action === 'verify' || action === 'report' || action === 'escalate') {
+      lead.textContent =
+        'Strong decision. You treated authentication as necessary-but-not-sufficient and chose a path that stops the money move.';
+    }
+
+    if (caught.length) {
+      notes.push(`Flags you correctly marked: ${caught.length} of ${goodFlags.size} teachable signals.`);
+    }
+    if (missed.length) {
+      notes.push(`Still worth marking: ${missed.map((f) => flagLabels[f]).join('; ')}.`);
+    }
+    if (trustedAuth) {
+      notes.push(
+        'Trap flag: “clean SPF/DKIM/DMARC means safe” is false. Compromised real accounts pass all three.',
+      );
+    } else {
+      notes.push('You did not treat a clean auth trio as a safety certificate — that is the whole lesson.');
+    }
+
+    if (action === 'verify') {
+      notes.push('Out-of-band verify first when money or access is on the line, then report if the ask was fake.');
+    } else if (action === 'report') {
+      notes.push('Reporting pauses the blast radius for everyone else — keep the original message and URL intact.');
+    } else if (action === 'escalate') {
+      notes.push('Escalation is right when you are unsure or the ask is high-impact. Preserve headers and the link.');
+    }
+
+    list.innerHTML = notes.map((n) => `<li>${n}</li>`).join('');
+    debrief.hidden = false;
+  }
+
+  submit?.addEventListener('click', renderDebrief);
+  reset?.addEventListener('click', () => {
+    document.querySelectorAll('input[name="flag"]').forEach((el) => {
+      el.checked = false;
+    });
+    document.querySelectorAll('input[name="action"]').forEach((el) => {
+      el.checked = false;
+    });
+    if (debrief) debrief.hidden = true;
+  });
+</script>
+
+<style>
+  .aphish-fallback.is-hidden {
+    display: none;
+  }
+
+  .aphish-drill {
+    display: none;
+  }
+
+  .aphish-drill.is-live {
+    display: block;
+  }
+
+  .aphish-fallback-card,
+  .aphish-drill.is-live {
+    margin: 1.25rem 0 1.75rem;
+    max-width: 44rem;
+    padding: 1.1rem 1.15rem 1.25rem;
+    border: 1px solid var(--lift-hot);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-soft);
+    background: color-mix(in srgb, var(--bone) 94%, white);
+  }
+
+  .aphish-fallback-kicker,
+  .aphish-name {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--plate);
+  }
+
+  .aphish-model {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+  }
+
+  .aphish-intro,
+  .aphish-fallback-note,
+  .aphish-context,
+  .aphish-debrief-foot {
+    font-size: 0.92rem;
+    color: var(--ink-muted);
+    line-height: 1.45;
+  }
+
+  .aphish-message {
+    margin: 1rem 0;
+    border: 1px solid color-mix(in srgb, var(--rule-strong, #b8c0ba) 80%, transparent);
+    border-radius: var(--radius-soft-inner);
+    background: white;
+    overflow: hidden;
+  }
+
+  .aphish-msg-head {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--rule-strong, #b8c0ba) 70%, transparent);
+    background: color-mix(in srgb, var(--lift) 70%, white);
+  }
+
+  .aphish-msg-head p {
+    margin: 0.2rem 0;
+    font-size: 0.9rem;
+    color: var(--plate);
+  }
+
+  .aphish-label {
+    display: inline-block;
+    min-width: 4.2rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+  }
+
+  .aphish-auth {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.55rem !important;
+  }
+
+  .aphish-auth-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, #5f7d5a 18%, white);
+    color: #2f4a2c;
+  }
+
+  .aphish-msg-body {
+    padding: 1rem;
+    color: var(--plate);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .aphish-url {
+    display: inline-block;
+    margin-top: 0.15rem;
+    word-break: break-all;
+    color: #8a4b1a;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+  }
+
+  .aphish-context {
+    margin: 0;
+    padding: 0.75rem 1rem 0.9rem;
+    border-top: 1px dashed color-mix(in srgb, var(--rule-strong, #b8c0ba) 80%, transparent);
+    background: color-mix(in srgb, var(--bone) 88%, white);
+  }
+
+  .aphish-flags,
+  .aphish-actions {
+    margin: 1rem 0 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .aphish-flags legend,
+  .aphish-actions legend {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+    color: var(--plate);
+  }
+
+  .aphish-flag,
+  .aphish-action {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    margin: 0.35rem 0;
+    font-size: 0.92rem;
+    color: var(--plate);
+    cursor: pointer;
+  }
+
+  .aphish-flag input,
+  .aphish-action input {
+    margin-top: 0.2rem;
+    accent-color: var(--accent);
+  }
+
+  .aphish-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1rem;
+  }
+
+  .aphish-submit,
+  .aphish-reset {
+    font: inherit;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: var(--radius-soft-inner);
+    cursor: pointer;
+  }
+
+  .aphish-submit {
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, #8a4b1a);
+    background: color-mix(in srgb, var(--accent) 22%, white);
+    color: var(--plate);
+  }
+
+  .aphish-reset {
+    border: 1px solid var(--lift-hot);
+    background: transparent;
+    color: var(--ink-muted);
+  }
+
+  .aphish-debrief {
+    margin-top: 1.1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--lift-hot);
+    border-radius: var(--radius-soft-inner);
+    background: color-mix(in srgb, var(--lift) 55%, white);
+  }
+
+  .aphish-debrief-title {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+  }
+
+  .aphish-debrief ul {
+    margin: 0.5rem 0 0.75rem;
+    padding-left: 1.15rem;
+  }
+
+  .aphish-debrief li {
+    margin: 0.3rem 0;
+    font-size: 0.92rem;
+    color: var(--plate);
+  }
+</style>

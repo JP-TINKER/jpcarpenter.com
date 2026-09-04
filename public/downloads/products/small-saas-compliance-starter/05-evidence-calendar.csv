@@ -1,0 +1,6 @@
+month,control_id,artifact,cadence,owner,period_start,period_end,link,status
+2026-01,CTRL-001,IdP MFA enrollment export,Monthly,Name,2026-01-01,2026-01-31,,Open
+2026-01,CTRL-002,Q1 access review sign-off,Quarterly,Name,2026-01-01,2026-03-31,,Open
+2026-02,CTRL-001,IdP MFA enrollment export,Monthly,Name,2026-02-01,2026-02-28,,Open
+,,,,,,,,
+,,,,,,,,

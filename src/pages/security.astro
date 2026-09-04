@@ -1,23 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MarginNote from '../components/MarginNote.astro';
+import { formatLastReviewed } from '../lib/site-meta';
 ---
 
 <BaseLayout
   title="Security"
-  description="How this site is protected, in plain language, with sources. Static-first, strict browser rules, AI crawl policy, no CAPTCHA theater."
+  view="Security"
+  bluf="No login, no forms, no database, no third-party tracking. Site posture in plain language."
+  description="How jpcarpenter.com is protected — JP Carpenter. Static-first, strict browser rules, AI crawl policy."
 >
-  <section class="band sheet">
-    <MarginNote index="S" stamp="Security" note="Teach · then verify" state="verified" />
-    <div>
-      <h1 class="band-heading">Security</h1>
-      <p class="band-lede">
-        This website has nothing to log into. No accounts, no forms, no database, and no
-        third-party tracking scripts. Below is how it is protected, written so a hiring manager
-        can follow it, with sources if you want the lesson behind each choice.
-      </p>
-    </div>
-  </section>
 
   <section class="band sheet">
     <MarginNote stamp="Read" note="Skim first" />
@@ -36,7 +28,7 @@ import MarginNote from '../components/MarginNote.astro';
   </section>
 
   <section class="band sheet">
-    <MarginNote stamp="In force" note="Live today" state="verified" />
+    <MarginNote stamp="In force" note={`Reviewed ${formatLastReviewed()}`} state="verified" />
     <div class="prose security-teach">
       <h2>Controls in force</h2>
       <p>
@@ -205,13 +197,17 @@ import MarginNote from '../components/MarginNote.astro';
             <p>
               <strong>How:</strong> rules live in <a href="/robots.txt">/robots.txt</a>. That file
               is a request polite operators honor, not a hard lock against rude scrapers (see
-              "Next" for rate limits).
+              "Next" for rate limits). Training bots such as <code>GPTBot</code> and
+              <code>ClaudeBot</code> are Disallow. Live citation / user-fetch tokens such as
+              <code>OAI-SearchBot</code>, <code>ChatGPT-User</code>, <code>Claude-SearchBot</code>,
+              and <code>Claude-User</code> are Allow so a recruiter asking an assistant about this
+              site can still get a live fetch.
             </p>
             <p><strong>Sources</strong></p>
             <ul>
               <li>
                 <a href="https://developers.openai.com/api/docs/bots">OpenAI: Overview of crawlers</a>
-                (GPTBot vs OAI-SearchBot)
+                (GPTBot vs OAI-SearchBot vs ChatGPT-User)
               </li>
               <li>
                 <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler">Anthropic: Claude crawlers and robots.txt</a>
@@ -225,7 +221,76 @@ import MarginNote from '../components/MarginNote.astro';
         </details>
 
         <details class="expand-item">
-          <summary class="expand-term">Same facts for machines, denser format</summary>
+          <summary class="expand-term">Markdown identity card (same facts, no cloaking)</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong> there is a plain Markdown card at
+              <a href="/about.md">/about.md</a> with the same biography, credentials, and contact
+              facts as the HTML About page. Browsers keep the HTML page. Agents that prefer
+              <code>text/markdown</code> can take the card.
+            </p>
+            <p>
+              <strong>Why it matters here:</strong> this is how you "only show them what you want"
+              without lying. Same facts, denser format. Different facts for bots would be cloaking
+              and would burn trust with search engines.
+            </p>
+            <p>
+              <strong>How:</strong> <code>/about.md</code> ships with the static site today.
+              Optional nginx Accept negotiation (serve Markdown when
+              <code>Accept: text/markdown</code>) is documented for Njalla and not yet applied on
+              the origin. <a href="/llms.txt">/llms.txt</a> remains the denser whole-site summary.
+            </p>
+            <p><strong>Limits</strong></p>
+            <ul>
+              <li>Anyone can fetch <code>/about.md</code> directly. It is not a secret channel.</li>
+              <li>Without edge bot verification, a scraper can still take the HTML.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="expand-item">
+          <summary class="expand-term">Identity stitching (sameAs)</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong> the About page marks up a Person with LinkedIn and
+              GitHub links as <code>sameAs</code>, so crawlers can treat the site, LinkedIn, and
+              GitHub as one person instead of three strangers.
+            </p>
+            <p>
+              <strong>Why it matters here:</strong> recruiter tools lean on LinkedIn and GitHub.
+              The personal site is the identity hub. <code>sameAs</code> is the cheap stitch.
+              Microdata is used instead of JSON-LD because this site's CSP forbids inline script
+              and a static host cannot rotate nonces.
+            </p>
+            <p>
+              <strong>How:</strong> schema.org Person microdata on <a href="/about">/about</a>,
+              mirrored in <a href="/about.md">/about.md</a>.
+            </p>
+          </div>
+        </details>
+
+        <details class="expand-item">
+          <summary class="expand-term">Terms against training scrapes</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong> <a href="/terms.txt">/terms.txt</a> says automated
+              bulk collection for model training is not allowed without written consent, while
+              ordinary reading, linking, hiring review, and robots-respecting search/citation stay
+              welcome.
+            </p>
+            <p>
+              <strong>Why it matters here:</strong> a clear permission statement gives a hook for
+              takedown or dispute letters. It does not stop a rude bot by itself.
+            </p>
+            <p>
+              <strong>How:</strong> public terms file plus the robots split above. Weekly access-log
+              review for AI user-agents remains an ops habit, not a page feature.
+            </p>
+          </div>
+        </details>
+
+        <details class="expand-item">
+          <summary class="expand-term">Same facts for machines, denser format (llms.txt)</summary>
           <div class="expand-body">
             <p>
               <strong>In plain terms:</strong> there is a plain-text summary at
@@ -239,8 +304,9 @@ import MarginNote from '../components/MarginNote.astro';
             </p>
             <p>
               <strong>How:</strong> <code>llms.txt</code> is a public file. It is not in the
-              primary navigation (Home · Labs · Projects · Writing · About) so humans are not
-              pushed through it. Anyone who opens the URL sees the same text a bot would.
+              primary navigation so humans are not pushed through it. Anyone who opens the URL
+              sees the same text a bot would. Evidence that <code>llms.txt</code> moves rankings
+              on personal sites is weak; keep it as housekeeping, not a growth lever.
             </p>
             <p><strong>Sources</strong></p>
             <ul>
@@ -268,7 +334,7 @@ import MarginNote from '../components/MarginNote.astro';
             <p>
               <strong>How:</strong>
               <a href="/.well-known/security.txt">/.well-known/security.txt</a> points to
-              <a href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a> and links back here.
+              <a href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a> and links back here.
             </p>
             <p><strong>Sources</strong></p>
             <ul>
@@ -420,6 +486,46 @@ import MarginNote from '../components/MarginNote.astro';
                , common server-side rate limiting
               </li>
             </ul>
+          </div>
+        </details>
+
+        <details class="expand-item">
+          <summary class="expand-term">Accept negotiation for /about (Njalla nginx)</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong> today <a href="/about.md">/about.md</a> is a
+              separate URL. The upgrade is: if a client asks for Markdown, the server can return
+              that card for <code>/about</code> with a <code>Vary: Accept</code> header, while
+              browsers still get HTML.
+            </p>
+            <p>
+              <strong>How we will do it:</strong> nginx map on <code>$http_accept</code>. Snippet
+              lives in Bench <code>brand-ops/nginx-accept-about-2026-08-31.md</code>. Same facts
+              only. Not applied on the origin yet.
+            </p>
+            <p>
+              <strong>Limit:</strong> this is format routing, not a bot fence.
+            </p>
+          </div>
+        </details>
+
+        <details class="expand-item">
+          <summary class="expand-term">Cloudflare edge (real bot gate)</summary>
+          <div class="expand-body">
+            <p>
+              <strong>In plain terms:</strong> robots.txt asks nicely. A CDN can refuse training
+              bots by IP and behavior, enable Web Bot Auth, and run Accept negotiation in a
+              Worker. That is the first real gate.
+            </p>
+            <p>
+              <strong>How we will do it:</strong> only if Joe chooses Cloudflare Pages over staying
+              origin-only on Njalla. Presets: Training = Block, Search = Allow. Strategy decision
+              D2 in the 2026-08-31 crawler handoff.
+            </p>
+            <p>
+              <strong>Limit:</strong> without that move, origin + robots + terms + logs is the
+              honest ceiling.
+            </p>
           </div>
         </details>
 

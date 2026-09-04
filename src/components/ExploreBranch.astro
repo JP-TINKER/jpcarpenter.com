@@ -1,0 +1,96 @@
+---
+/**
+ * Section link + orange hinge (hinge opens the nest; label goes to the section).
+ */
+interface NestItem {
+  href: string;
+  label: string;
+  /** Client hash sync owns aria-current when set (Projects categories). */
+  hash?: string;
+  current?: boolean;
+}
+
+interface Props {
+  id: string;
+  label: string;
+  open: boolean;
+  sectionCurrent: boolean;
+  nestLabel: string;
+  items: NestItem[];
+  allHref: string;
+  allLabel?: string;
+  allCurrent?: boolean;
+}
+
+const {
+  id,
+  label,
+  open,
+  sectionCurrent,
+  nestLabel,
+  items,
+  allHref,
+  allLabel = 'All',
+  allCurrent = false,
+} = Astro.props;
+
+const shellId = `explore-${id}-nest`;
+const usesHash = items.some((i) => i.hash !== undefined);
+---
+
+<li class:list={['explore-branch', open && 'is-open']} data-explore-branch>
+  <div class="explore-head-row">
+    <a
+      class="explore-row explore-branch-link"
+      href={allHref}
+      aria-current={sectionCurrent ? 'page' : undefined}
+    >
+      <span class="explore-pip" aria-hidden="true" />
+      <span class="explore-label">{label}</span>
+    </a>
+    <button
+      type="button"
+      class="explore-hinge-btn"
+      aria-expanded={open ? 'true' : 'false'}
+      aria-controls={shellId}
+      aria-label={`${label} sections`}
+    >
+      <span class="explore-hinge" aria-hidden="true" />
+    </button>
+  </div>
+  <div
+    class="explore-nest-shell"
+    id={shellId}
+    aria-hidden={open ? 'false' : 'true'}
+    inert={!open ? true : undefined}
+  >
+    <ul class="explore-nest" aria-label={nestLabel}>
+      <li>
+        <a
+          class="explore-sub"
+          href={allHref}
+          data-explore-hash={usesHash ? '' : undefined}
+          aria-current={allCurrent ? 'page' : undefined}
+        >
+          <span class="explore-pip" aria-hidden="true" />
+          <span class="explore-label">{allLabel}</span>
+        </a>
+      </li>
+      {
+        items.map((item) => (
+          <li>
+            <a
+              class="explore-sub"
+              href={item.href}
+              data-explore-hash={item.hash}
+              aria-current={item.current ? 'page' : undefined}
+            >
+              <span class="explore-pip" aria-hidden="true" />
+              <span class="explore-label">{item.label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</li>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <!-- G · Wireframe: construction from stroke only — still reads JP -->
+  <path stroke="currentColor" stroke-width="3.2" stroke-linecap="square" stroke-linejoin="miter" d="M24 12v32c0 5-3 8-8 8H10"/>
+  <path stroke="currentColor" stroke-width="3.2" stroke-linecap="square" stroke-linejoin="miter" d="M24 12h10c8 0 14 5 14 13s-6 13-14 13H24"/>
+</svg>

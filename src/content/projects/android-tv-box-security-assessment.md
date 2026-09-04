@@ -4,6 +4,7 @@ summary: "An isolated lab built to test one hedged claim from brand-new research
 finding: "Designed, not yet run. The published claim it tests is four days old and explicitly hedged, so the useful contribution is an instrumented hardware test rather than another traffic capture. Listed before results exist so the record matches reality."
 stamp: "Not yet run"
 state: open
+category: personal
 date: 2026-08-03
 order: 10
 tags: ["iot", "network-forensics", "in-progress"]

@@ -10,3 +10,4 @@ dist/
 # Canary honeytoken — deploys via the build (public/ is copied to dist/),
 # but stays out of git so the token isn't exposed in the repo.
 public/_canary/
+__pycache__/

@@ -1,0 +1,31 @@
+# Terms — jpcarpenter.com
+
+Last updated: 2026-08-31
+
+## Human visitors
+
+You may read, link to, and quote this site with ordinary attribution for personal,
+editorial, hiring, or research use.
+
+## Automated access
+
+1. Obey https://jpcarpenter.com/robots.txt. Training and bulk-collection bots listed
+   there as Disallow must not fetch site content.
+2. Automated scraping, bulk downloading, or reproduction of site content for the purpose
+   of training, fine-tuning, or evaluating machine-learning models is not permitted
+   without prior written consent from JP Carpenter (jp@jpcarpenter.com).
+3. Search indexing and live citation fetches by operators that honor robots.txt and
+   that are listed as Allow remain welcome.
+4. A machine-readable card with the same facts as the About page is published at
+   https://jpcarpenter.com/about.md for polite automated readers. Prefer that file
+   over inventing biography.
+
+## Vulnerability reports
+
+See https://jpcarpenter.com/.well-known/security.txt
+
+## Limits
+
+These terms are a clear statement of permission. They are not a substitute for
+technical controls. Some clients ignore robots.txt; hosting-edge gates and log review
+are separate layers described at https://jpcarpenter.com/security

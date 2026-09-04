@@ -1,0 +1,6 @@
+control_id,title,owner,csf_function,tsc_tag,cadence,evidence_artifact,status,notes
+CTRL-001,Example: MFA enforced on IdP,Name,Protect,CC6,Continuous,IdP MFA enrollment export,Open,Replace examples with your controls
+CTRL-002,Example: Quarterly user access review,Name,Protect,CC6,Quarterly,Signed UAR sheet + removals log,Open,
+CTRL-003,Example: Change ticket sample,Name,Protect,CC8,Per release,PR + approve + deploy proof,Open,
+,,,,,,, ,
+,,,,,,, ,

@@ -1,0 +1,15 @@
+field,value,notes
+company_legal_name,,
+product_name,,
+primary_cloud,,AWS / GCP / Azure / other
+customer_data_classes,,"e.g. auth logs, PII, payments metadata — no card data unless true"
+in_scope_systems,,"comma-separated: IdP, prod app, DB, CI, support tooling"
+out_of_scope_systems,,"and why — be honest"
+trust_services_in_letter,,"Security only / + Availability / + Confidentiality / + Processing Integrity / + Privacy"
+customer_asked_for,,"SOC 2 Type 1 / Type 2 / ISO / questionnaire only / none yet"
+target_report_window_start,YYYY-MM-DD,
+target_report_window_end,YYYY-MM-DD,Type 2 observation window if applicable
+spine_this_quarter,,"CSF hygiene / SOC 2 Type 1 / SOC 2 Type 2 / 42001 lite / other"
+owner_name,,
+last_reviewed,YYYY-MM-DD,
+status,Not started,Not started | In progress | Done

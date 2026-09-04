@@ -4,10 +4,6 @@ import { fileURLToPath } from 'node:url';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MarginNote from '../components/MarginNote.astro';
 
-// Headshot slot: reserved, not required. Drop a file at public/about/headshot.{webp,jpg,jpeg,png}
-// and rebuild - it appears framed below, plain, no code change needed. Absent, this renders
-// nothing; there is no broken-image state either way. See src/content/README.md and the root
-// README's "Adding content" section for the convention.
 const headshotExts = ['webp', 'jpg', 'jpeg', 'png'];
 const headshotExt = headshotExts.find((ext) =>
   existsSync(fileURLToPath(new URL(`../../public/about/headshot.${ext}`, import.meta.url))),
@@ -17,124 +13,116 @@ const headshotSrc = headshotExt ? `/about/headshot.${headshotExt}` : null;
 
 <BaseLayout
   title="About"
-  description="Security and compliance analyst. PCI DSS, SOC 2, ISO 27001: closing the gap between what a control says and what the system does."
+  view="About"
+  bluf="Security and Compliance Analyst. I close gaps between signed controls and running systems."
+  description="JP Carpenter — Security and Compliance Analyst. PCI DSS, SOC 2, ISO 27001. Path, work, credentials."
 >
   <div itemscope itemtype="https://schema.org/Person">
-    <!-- Microdata, not JSON-LD: the site's CSP forbids inline <script> without a hash, so
-         entity facts for Google/AI crawlers live as itemprop attributes on real HTML
-         instead of a script block. Values mirror the visible text, not invented ones. -->
-    <meta itemprop="name" content="Joe Carpenter" />
-    <meta itemprop="alternateName" content="JP Carpenter" />
-    <meta itemprop="jobTitle" content="Security and Compliance Analyst" />
-    <meta itemprop="email" content="joe@jpcarpenter.com" />
+    <meta itemprop="name" content="JP Carpenter" />
+    <meta itemprop="jobTitle" content="Security Analyst" />
+    <meta itemprop="email" content="jp@jpcarpenter.com" />
     <meta itemprop="url" content="https://jpcarpenter.com/about" />
-  <section class="band sheet">
-    <MarginNote index="04" stamp="About" note="Work first · then path" />
-    <div>
-      <h1 class="band-heading">About</h1>
-      {
-        headshotSrc && (
-          <figure class="about-photo">
-            <img src={headshotSrc} alt="Joe Carpenter" width="220" height="220" loading="eager" />
-          </figure>
-        )
-      }
-      <p class="band-lede">
-        Security and compliance analyst for teams that need controls, evidence, and audit
-        readiness to match what the systems actually do.
-      </p>
-    </div>
-  </section>
+    <link itemprop="sameAs" href="https://www.linkedin.com/in/joseph-carpenter-597487271" />
+    <link itemprop="sameAs" href="https://github.com/JP-TINKER" />
 
-  <section class="band sheet">
-    <MarginNote stamp="Now" note="briskData · since Feb 2026" state="verified" />
-    <div class="prose">
-      <h2>What the work looks like</h2>
-      <p>
-        At briskData I work as a contractor under the title Compliance Manager. Recent work
-        includes:
-      </p>
-      <ul class="proof-list">
-        <li>
-          Leading PCI DSS (Payment Card Industry Data Security Standard) certification work
-          through evidence, control mapping, and audit readiness.
-        </li>
-        <li>
-          Migrating the compliance program from Vanta to Scrut while keeping control and evidence
-          continuity.
-        </li>
-        <li>
-          Driving SOC 2 and ISO 27001 readiness, and supporting early ISO 42001 scoping.
-        </li>
-        <li>
-          Authoring security policy material and building the security training used in onboarding.
-        </li>
-      </ul>
-      <p>
-        I read the control, the vendor answer, and the configuration until they agree, or I write
-        down where they don't. <a href="/labs">Labs</a> carries the technical evidence behind that
-        habit, with honest labels when something is still in progress.
-      </p>
-    </div>
-  </section>
-
-  <section class="band sheet">
-    <MarginNote stamp="Before" note="shelter · education · 2025" />
-    <div class="prose">
-      <h2>How I got here</h2>
-      <p>
-        I started as a case manager at a homeless shelter, where case documentation had to match
-        what had actually happened for the people we were serving. Then thirteen years as an
-        educator in Taiwan: teaching and school life, not IT. Informal tech help during COVID, but
-        I was not running the network. What carried forward was institutional discipline: records,
-        process, and being answerable when something was wrong.
-      </p>
-      <p>
-        In 2025 I built a self-directed security and compliance portfolio on this site, then took
-        the current role in February 2026.
-      </p>
-    </div>
-  </section>
-
-  <section class="band sheet">
-    <MarginNote stamp="Credentials" note="After the work, not before" />
-    <div class="prose">
-      <h2>Certifications</h2>
-      <p>
-        CompTIA Security+, Network+, A+, CSIS (Secure Infrastructure Specialist), and CIOS (IT
-        Operations Specialist).
-      </p>
-      <p>
-        In progress, and labeled that way until they are not: BTL1 (Blue Team Level 1) and AWS
-        Cloud Practitioner.
-      </p>
-      <p>Bachelor of Arts, History and Chinese Language (United States).</p>
-    </div>
-  </section>
-
-  <section class="closing">
-    <div class="sheet closing-inner">
-      <MarginNote stamp="Open" state="open" note="Plain email · no form" />
+    <section class="band sheet">
+      <MarginNote index="01" stamp="Role" note="Who to hire" />
       <div>
-        <h2>Reach me</h2>
-        <p>
-          Plain email is best: <a href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>. Send
-          a policy, a vendor questionnaire, or a control you are not sure is doing anything, and I
-          will tell you what I would check first. No form, no funnel.
+        {
+          headshotSrc && (
+            <figure class="about-photo">
+              <img src={headshotSrc} alt="JP Carpenter" width="220" height="220" loading="eager" />
+            </figure>
+          )
+        }
+        <p class="band-lede">
+          Hire me when policy, questionnaires, and dashboards need to match what the systems
+          actually do — with evidence a reviewer can check.
         </p>
-        <div class="desk-actions">
-          <a class="btn-primary" href="mailto:joe@jpcarpenter.com">joe@jpcarpenter.com</a>
-          <a class="btn-quiet" href="/labs">Read the evidence</a>
+        <p class="band-meta">
+          Machine-readable card (same facts): <a href="/about.md">/about.md</a>
+          · <a href="/terms.txt">Terms</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="band sheet">
+      <MarginNote stamp="Now" note="briskData · since Feb 2026" state="verified" />
+      <div class="prose">
+        <h2>Current work</h2>
+        <p>Full-time Security Analyst at briskData. Recent outcomes:</p>
+        <ul class="proof-list">
+          <li>
+            Led PCI DSS certification work: control mapping, evidence packs, and audit readiness.
+          </li>
+          <li>
+            Migrated the compliance program from Vanta to Scrut with control and evidence continuity.
+          </li>
+          <li>Drove SOC 2 and ISO 27001 readiness; supported early ISO 42001 scoping.</li>
+          <li>
+            Authored security policy material and built the security training used in onboarding.
+          </li>
+        </ul>
+        <p>
+          Habit on every engagement: read the control, the vendor answer, and the configuration
+          until they agree — or write the exception with proof. Technical checks live in
+          <a href="/labs">Labs</a>, stamped Verified or Open.
+        </p>
+      </div>
+    </section>
+
+    <section class="band sheet">
+      <MarginNote stamp="Path" note="Shelter · education · GRC" />
+      <div class="prose">
+        <h2>Path</h2>
+        <p>
+          Case management in a homeless shelter taught me that documentation must match what
+          actually happened. Thirteen years as an educator in Taiwan (teaching and school life —
+          not IT). Institutional discipline carried forward: records, process, and answerability
+          when something is wrong.
+        </p>
+        <p>
+          In 2025 I built a self-directed security and compliance portfolio on this site. In
+          February 2026 I joined briskData; the role is now full-time Security Analyst.
+        </p>
+      </div>
+    </section>
+
+    <section class="band sheet">
+      <MarginNote stamp="Credentials" note="After the work" />
+      <div class="prose">
+        <h2>Credentials</h2>
+        <p>
+          CompTIA Security+, Network+, A+, CSIS (Secure Infrastructure Specialist), CIOS (IT
+          Operations Specialist).
+        </p>
+        <p>
+          In progress (labeled until done): BTL1 (Blue Team Level 1), AWS Cloud Practitioner.
+        </p>
+        <p>B.A., History and Chinese Language (United States).</p>
+      </div>
+    </section>
+
+    <section class="closing">
+      <div class="sheet closing-inner">
+        <MarginNote stamp="Contact" state="open" note="Plain email" />
+        <div>
+          <h2>Contact</h2>
+          <p>
+            <a href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a> — send a role, a policy, or
+            a control you do not trust. I will say what I would check first. No form.
+          </p>
+          <div class="desk-actions">
+            <a class="btn-primary" href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a>
+            <a class="btn-quiet" href="/labs">Evidence labs</a>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   </div>
 </BaseLayout>
 
 <style>
-  /* Plain frame, no circle, no glow ring - same hairline treatment as the Labs evidence
-     figures (global.css .lab-detail-body figure), not a portrait-hero look. */
   .about-photo {
     border: 1px solid var(--rule);
     max-width: 12rem;
@@ -145,6 +133,17 @@ const headshotSrc = headshotExt ? `/about/headshot.${headshotExt}` : null;
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  .band-meta {
+    margin-top: 0.85rem;
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    max-width: 38rem;
+  }
+
+  .band-meta a {
+    font-weight: 700;
   }
 
   .prose {
@@ -161,17 +160,12 @@ const headshotSrc = headshotExt ? `/about/headshot.${headshotExt}` : null;
     margin-bottom: 1rem;
   }
 
-  .prose em {
-    font-style: normal;
-    color: var(--accent-soft);
-  }
-
-  /* Rows, not cards: proof as a numbered list that can be skimmed (Evoke/Harvard). */
   .proof-list {
     list-style: none;
     padding: 0;
     margin: 0 0 1.25rem;
     color: var(--ink-body);
+    counter-reset: proof;
   }
 
   .proof-list li {
@@ -196,7 +190,38 @@ const headshotSrc = headshotExt ? `/about/headshot.${headshotExt}` : null;
     counter-increment: proof;
   }
 
-  .proof-list {
-    counter-reset: proof;
+  .closing {
+    margin-top: 2rem;
+  }
+
+  .closing-inner {
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    gap: var(--gutter);
+    align-items: start;
+  }
+
+  .closing h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .closing p {
+    color: var(--ink-body);
+    margin-bottom: 1rem;
+    max-width: 38rem;
+  }
+
+  .desk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.25rem;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    .closing-inner {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

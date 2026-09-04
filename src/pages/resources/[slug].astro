@@ -1,0 +1,170 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BrandStamp from '../../components/BrandStamp.astro';
+import ResourceDownloadChooser from '../../components/ResourceDownloadChooser.astro';
+import ResourceTemplatePreview from '../../components/ResourceTemplatePreview.astro';
+import { brandedDescription } from '../../lib/brand';
+import { catalogById, primaryDownloads, RESOURCE_KIND_LABEL } from '../../lib/resource-catalog';
+import { TRAINING_CAMPAIGNS } from '../../lib/training-campaigns';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('resources');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const meta = catalogById(entry.id);
+const kind = RESOURCE_KIND_LABEL[entry.data.kind] ?? 'Document';
+const downloads = meta ? primaryDownloads(meta) : [];
+const hasTemplatePreview = Boolean(meta?.preview);
+const campaign = TRAINING_CAMPAIGNS.find((c) => c.kitId === entry.id);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  view={entry.data.title}
+  bluf={entry.data.summary}
+  description={brandedDescription(`${entry.data.title}. Downloadable GRC document`)}
+>
+  <p class="resource-back">
+    <a href="/resources">All resources</a>
+  </p>
+
+  <div class="resource-actions">
+    <ResourceDownloadChooser
+      label={hasTemplatePreview ? 'Use this template' : `Download ${kind.toLowerCase()}`}
+      options={downloads}
+    />
+    <a
+      class="btn-quiet"
+      href="mailto:jp@jpcarpenter.com?subject=Resource%20fill%20%E2%86%92%20PDF"
+    >
+      Ask for another format
+    </a>
+  </div>
+
+  {
+    meta?.preview && (
+      <ResourceTemplatePreview title={entry.data.title} kind={kind} preview={meta.preview} />
+    )
+  }
+
+  <article class="prose resource-doc">
+    <Content />
+  </article>
+
+  {
+    meta?.preview && (
+      <aside class="resource-roadmap" aria-label="Formats">
+        <h2 class="resource-roadmap-title">Human formats</h2>
+        <p>
+          The page itself is the live working copy. Use the chooser above to fill on the page,
+          or take the same sheet as DOCX or PDF.
+        </p>
+      </aside>
+    )
+  }
+
+  {
+    campaign && (
+      <aside class="resource-roadmap" aria-label="Companion lesson">
+        <h2 class="resource-roadmap-title">Companion lesson</h2>
+        <p>
+          Interactive public lesson:{' '}
+          <a href={campaign.lessonHref}>{campaign.title}</a>. Fill company placeholders before
+          you run the kit with staff.
+        </p>
+      </aside>
+    )
+  }
+
+  {!hasTemplatePreview && <BrandStamp compact />}
+
+  <p class="resource-foot">
+    Working template only. Not legal advice, not an audit opinion. Have Legal review
+    policies before you adopt them. Questions →
+    <a href="mailto:jp@jpcarpenter.com">jp@jpcarpenter.com</a>
+  </p>
+</BaseLayout>
+
+<style>
+  .resource-back {
+    margin: 0 0 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .resource-back a {
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid var(--lift-hot);
+  }
+
+  .resource-back a:hover {
+    border-bottom-color: var(--accent);
+  }
+
+  .resource-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem 1.35rem;
+    margin: 0 0 1.75rem;
+  }
+
+  .resource-doc {
+    margin-top: 2rem;
+    max-width: 44rem;
+  }
+
+  .resource-roadmap {
+    margin-top: 2rem;
+    max-width: 44rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--lift-hot);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-soft-inner);
+    background: var(--lift);
+  }
+
+  .resource-roadmap-title {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bone);
+  }
+
+  .resource-roadmap p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--ink-body);
+    line-height: 1.45;
+  }
+
+  .resource-foot {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.875rem;
+    color: var(--ink-body);
+    max-width: 44rem;
+  }
+
+  @media print {
+    .resource-back,
+    .resource-actions,
+    .resource-roadmap,
+    .resource-foot {
+      display: none;
+    }
+
+    .resource-doc {
+      margin-top: 1rem;
+      max-width: none;
+    }
+  }
+</style>
